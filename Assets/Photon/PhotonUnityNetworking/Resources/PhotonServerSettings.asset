@@ -103,6 +103,9 @@ MonoBehaviour:
   - WaitFunction
   - ChangeResource
   - ChangeScout
+  - CompletedTurn
+  - ReceiveDeckCards
+  - ReceivePlayerDiscard
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

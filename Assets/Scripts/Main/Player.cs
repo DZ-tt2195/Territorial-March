@@ -57,7 +57,8 @@ public class Player : PhotonCompatible
 
     [Foldout("Cards", true)]
     public List<Card> cardsInHand = new();
-    [SerializeField] Transform deck;
+    [SerializeField] Transform privateDeck;
+    [SerializeField] Transform privateDiscard;
 
     [Foldout("UI", true)]
     [SerializeField] TMP_Text resourceText;
@@ -111,7 +112,7 @@ public class Player : PhotonCompatible
             */
         }
     }
-
+    /*
     [PunRPC]
     void AddCard(int position, int ID, string cardName)
     {
@@ -121,7 +122,7 @@ public class Player : PhotonCompatible
         card.transform.SetSiblingIndex(position);
         card.transform.localPosition = new(0, -10000);
     }
-
+    */
     [PunRPC]
     void SendName(string username)
     {
@@ -139,6 +140,21 @@ public class Player : PhotonCompatible
         if (PhotonNetwork.IsConnected)
             realTimePlayer = PhotonNetwork.PlayerList[pv.OwnerActorNr - 1];
 
+        /*
+        myButton = Instantiate(CarryVariables.inst.playerButtonPrefab);
+        myButton.transform.SetParent(Manager.inst.canvas.transform);
+        myButton.transform.localScale = Vector3.one;
+        myButton.transform.localPosition = new(-1100, 425 - (100 * playerPosition));
+        myButton.transform.GetChild(0).GetComponent<TMP_Text>().text = this.name;
+        myButton.onClick.AddListener(MoveScreen);
+        */
+        resourceDict = new()
+        {
+            { Resource.Coin, 0 },
+            { Resource.Play, 0 },
+        };
+        UpdateResourceText();
+
         if (InControl())
         {
             if (this.myType == PlayerType.Human)
@@ -148,7 +164,7 @@ public class Player : PhotonCompatible
                 pv.Owner.NickName = this.name;
             }
 
-            Manager.inst.DoFunction(() => Manager.inst.PlayerDone());
+            //Manager.inst.DoFunction(() => Manager.inst.PlayerDone());
         }
     }
 
@@ -156,11 +172,21 @@ public class Player : PhotonCompatible
 
 #region Cards
 
+    [PunRPC]
+    internal void ReceiveDeckCards(int[] cardIDs)
+    {
+        foreach (int nextNum in cardIDs)
+        {
+            GameObject obj = PhotonView.Find(nextNum).gameObject;
+            obj.transform.parent.SetParent(privateDeck);
+        }
+    }
+
     public void DrawCardRPC(int cardAmount, int logged, string source = "")
     {
         for (int i = 0; i < cardAmount; i++)
         {
-            Card card = deck.GetChild(0).GetComponent<Card>();
+            Card card = privateDeck.GetChild(0).GetComponent<Card>();
             Log.inst.RememberStep(this, StepType.Revert, () => DrawFromDeck(false, card.pv.ViewID, logged, source));
         }
     }
@@ -174,7 +200,7 @@ public class Player : PhotonCompatible
         if (undo)
         {
             cardsInHand.Remove(card);
-            card.transform.SetParent(deck.transform);
+            card.transform.SetParent(privateDeck.transform);
             card.transform.SetAsFirstSibling();
             StartCoroutine(card.MoveCard(new(0, -10000), 0.25f, Vector3.one));
         }
@@ -243,7 +269,7 @@ public class Player : PhotonCompatible
         else
         {
             cardsInHand.Remove(card);
-            card.transform.SetParent(null);
+            card.transform.SetParent(privateDiscard);
             Log.inst.AddTextRPC($"{this.name} discards {card.name}.", LogAdd.Personal, logged);
             StartCoroutine(card.MoveCard(new(0, -10000), 0.25f, Vector3.one));
         }
@@ -703,4 +729,15 @@ public class Player : PhotonCompatible
 
     #endregion
 
+    void GiveToManager()
+    {
+        List<int> cardList = new();
+        foreach (Transform next in privateDiscard)
+            cardList.Add(next.GetComponent<PhotonView>().ViewID);
+        Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
+            (cardList.ToArray(), this.playerPosition, 12 - this.privateDeck.childCount));
+    }
+
 }
+
+

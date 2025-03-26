@@ -25,6 +25,12 @@ public class Manager : PhotonCompatible
     public int turnNumber { get; private set; }
     List<Action> actionStack = new();
     int currentStep = -1;
+    int waitingOnPlayers = 0;
+
+    [Foldout("Master deck", true)]
+    [SerializeField] Transform masterDeck;
+    [SerializeField] Transform masterDiscard;
+    int[] cardRequestArray;
 
     [Foldout("UI and Animation", true)]
     [SerializeField] TMP_Text instructions;
@@ -112,9 +118,17 @@ public class Manager : PhotonCompatible
             ReadySetup();
     }
 
+    #endregion
+
+#region Master Cards
+
     void ReadySetup()
     {
         storePlayers.Shuffle();
+
+        cardRequestArray = new int[storePlayers.childCount];
+        for (int i = 0; i < storePlayers.childCount; i++)
+            cardRequestArray[i] = 12;
 
         for (int i = 0; i < storePlayers.childCount; i++)
         {
@@ -133,21 +147,40 @@ public class Manager : PhotonCompatible
         nextPlayer.AssignInfo(position, (PlayerType)playerType);
     }
 
-    int waiting = 2;
-    [PunRPC]
-    internal void PlayerDone()
+    void SendOutCards()
     {
-        waiting--;
-        if (waiting == 0 && PhotonNetwork.IsMasterClient)
+        for (int i = 0; i < cardRequestArray.Length; i++)
         {
-            Log.inst.AddTextRPC($"{playersInOrder[0].name} vs. {playersInOrder[1].name}.", LogAdd.Remember, 0);
-            foreach (Player player in playersInOrder)
-                player.DrawCardRPC(4, -1);
-            Log.inst.ShareSteps();
+            List<int> cardList = new();
+            for (int j = 0; j < cardRequestArray[i]; j++)
+            {
+                if (masterDeck.childCount == 0)
+                {
+                    Debug.Log("shuffled discard pile");
+                    masterDiscard.Shuffle();
+                    while (masterDiscard.childCount > 0)
+                        masterDiscard.GetChild(0).transform.SetParent(masterDeck);
+                }
+                GameObject next = masterDeck.GetChild(0).gameObject;
+                next.transform.SetParent(null);
+                cardList.Add(next.GetComponent<PhotonView>().ViewID);
+            }
+            playersInOrder[i].DoFunction(() => playersInOrder[i].ReceiveDeckCards(cardList.ToArray()));
         }
     }
 
-    #endregion
+    [PunRPC]
+    internal void ReceivePlayerDiscard(int[] cardIDs, int playerPosition, int cardRequest)
+    {
+        foreach (int nextNum in cardIDs)
+        {
+            GameObject obj = PhotonView.Find(nextNum).gameObject;
+            obj.transform.parent.SetParent(masterDiscard);
+        }
+        cardRequestArray[playerPosition] = cardRequest;
+    }
+
+#endregion
 
 #region Gameplay Loop
 
@@ -220,6 +253,26 @@ public class Manager : PhotonCompatible
                 Continue();
             else
                 DoFunction(() => DisplayEnding(-1), RpcTarget.All);
+        }
+    }
+
+    [PunRPC]
+    internal void CompletedTurn()
+    {
+        if (!PhotonNetwork.IsConnected)
+        {
+            Continue();
+        }
+        else
+        {
+            waitingOnPlayers--;
+            /*
+            if (waitingOnPlayers == 0)
+            {
+                foreach (Player player in playersInOrder)
+                    player.pv.RPC(nameof(player.ShareSteps), player.realTimePlayer);
+                Continue();
+            }*/
         }
     }
 

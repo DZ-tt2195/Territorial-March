@@ -313,11 +313,11 @@ public class Log : PhotonCompatible
             {
                 foreach (NextStep step in historyStack)
                 {
-                    if (step.stepType == StepType.UndoPoint || step.stepType == StepType.Wait)
+                    if (step.stepType == StepType.Wait)
                     {
                         yield return new WaitForSeconds(waitTime);
                     }
-                    else
+                    else if (step.stepType == StepType.Revert)
                     {
                         (string instruction, object[] parameters) = step.source.TranslateFunction(step.action);
                         DoFunction(() => StepForOthers(step.source.pv.ViewID, instruction, parameters), RpcTarget.Others);
