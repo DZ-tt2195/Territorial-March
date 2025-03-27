@@ -7,6 +7,31 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System;
 using UnityEngine.UI;
+using System.Collections;
+using System.Reflection;
+using UnityEngine.Networking;
+
+[Serializable]
+public class CardData
+{
+    public string cardName;
+    public string textBox;
+    public string cardInstructions;
+    public bool useSheets;
+    public int cardAmount;
+    public int coinAmount;
+    public int playAmount;
+    public int scoutAmount;
+    public int troopAmount;
+    public int miscAmount;
+    public string artCredit;
+}
+
+[Serializable]
+public class PlayerCardData : CardData
+{
+    public int coinBonus;
+}
 
 public class CarryVariables : MonoBehaviour
 {
@@ -17,7 +42,8 @@ public class CarryVariables : MonoBehaviour
 
     [Foldout("Prefabs", true)]
     public Player playerPrefab;
-    public CardLayout cardPrefab;
+    public CardLayout playerCardPrefab;
+    public CardLayout areaCardPrefab;
     public Popup textPopup;
     public Popup cardPopup;
     public SliderChoice sliderPopup;
@@ -30,6 +56,13 @@ public class CarryVariables : MonoBehaviour
     [SerializeField] TMP_Text rightClickText;
     [SerializeField] TMP_Text artistText;
 
+    [Foldout("Card data", true)]
+    public List<PlayerCardData> playerCardFiles { get; private set; }
+    public List<CardData> areaCardFiles { get; private set; }
+    string sheetURL = "1s-H-hVKvhJ0QTbhY4WxC1iS3xV4rTrs2iAJTl_Fy1yY";
+    string apiKey = "AIzaSyCl_GqHd1-WROqf7i2YddE3zH6vSv3sNTA";
+    string baseUrl = "https://sheets.googleapis.com/v4/spreadsheets/";
+
     [Foldout("Misc", true)]
     [SerializeField] Transform permanentCanvas;
     public Sprite faceDownSprite;
@@ -41,7 +74,7 @@ public class CarryVariables : MonoBehaviour
         {
             inst = this;
             Application.targetFrameRate = 60;
-            GetScripts();
+            StartCoroutine(GetScripts());
             DontDestroyOnLoad(this.gameObject);
         }
         else
@@ -60,10 +93,10 @@ public class CarryVariables : MonoBehaviour
             rightClickBackground.gameObject.SetActive(false);
     }
 
-    public void RightClickDisplay(Card card, float alpha)
+    public void RightClickDisplay(CardData data, float alpha)
     {
         rightClickBackground.gameObject.SetActive(true);
-        rightClickCard.FillInCards(card);
+        rightClickCard.FillInCards(data);
 
         if (alpha == 0)
         {
@@ -73,94 +106,135 @@ public class CarryVariables : MonoBehaviour
         else
         {
             rightClickCard.cg.alpha = 1;
-            artistText.transform.parent.gameObject.SetActive(!card.artistText.IsNullOrEmpty());
-            artistText.text = card.artistText;
+            artistText.transform.parent.gameObject.SetActive(!data.artCredit.IsNullOrEmpty());
+            artistText.text = data.artCredit;
         }
     }
 
     #endregion
 
-#region Find Cards
+#region Download
 
-    void GetScripts()
+    IEnumerator Download(string range)
     {
         if (Application.isEditor)
         {
-            string filePath = $"Assets/Resources/AvailableScripts.txt";
-            List<string[]> allStrings = new() { ScriptsInRange("Cards") };
-            File.WriteAllText(filePath, Format(allStrings));
-        }
+            string url = $"{baseUrl}{sheetURL}/values/{range}?key={apiKey}";
+            using UnityWebRequest www = UnityWebRequest.Get(url);
+            yield return www.SendWebRequest();
 
-        string[] ScriptsInRange(string range)
-        {
-            string[] list = Directory.GetFiles($"Assets/Scripts/{range}", "*.cs", SearchOption.TopDirectoryOnly);
-            string[] answer = new string[list.Length];
-            for (int i = 0; i < list.Length; i++)
-                answer[i] = Path.GetFileNameWithoutExtension(list[i]);
-
-            return answer;
-        }
-
-        string Format(List<string[]> allStrings)
-        {
-            string content = "{\n";
-            for (int i = 0; i < allStrings.Count; i++)
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
-                content += "  [\n";
-                for (int j = 0; j < allStrings[i].Length; j++)
-                {
-                    content += $"    \"{allStrings[i][j]}\"";
-                    if (j < allStrings[i].Length - 1)
-                        content += ",";
-                    content += "\n";
-                }
-                content += "  ]";
-                if (i < allStrings.Count - 1)
-                    content += ",";
-                content += "\n";
+                Debug.LogError($"Download failed: {www.error}");
             }
-            content += "}\n";
-            return content;
+            else
+            {
+                string filePath = $"Assets/Resources/{range}.txt";
+                File.WriteAllText($"{filePath}", www.downloadHandler.text);
+
+                string[] allLines = File.ReadAllLines($"{filePath}");
+                List<string> modifiedLines = allLines.ToList();
+                modifiedLines.RemoveRange(1, 3);
+                File.WriteAllLines($"{filePath}", modifiedLines.ToArray());
+                Debug.Log($"downloaded {range}");
+            }
         }
+    }
 
-        var data = ReadFile("AvailableScripts");
-        for (int i = 0; i < data[1].Length; i++)
-            data[1][i].Trim().Replace("\"", "");
+    IEnumerator GetScripts()
+    {
+        CoroutineGroup group = new(this);
+        group.StartCoroutine(Download("Player Cards"));
+        group.StartCoroutine(Download("Area Cards"));
+        while (group.AnyProcessing)
+            yield return null;
 
-        string[] nextArray = new string[data[1].Length];
+        playerCardFiles = GetDataFiles<PlayerCardData>(ReadFile("Player Cards"));
+        areaCardFiles = GetDataFiles<CardData>(ReadFile("Area Cards"));
 
-        for (int j = 0; j < data[1].Length; j++)
+        string[][] ReadFile(string range)
         {
-            string nextObject = data[1][j].Replace("\"", "").Replace("\\", "").Replace("]", "").Trim();
-            nextArray[j] = nextObject;
+            TextAsset data = Resources.Load($"{range}") as TextAsset;
+
+            string editData = data.text;
+            editData = editData.Replace("],", "").Replace("{", "").Replace("}", "");
+
+            string[] numLines = editData.Split("[");
+            string[][] list = new string[numLines.Length][];
+
+            for (int i = 0; i < numLines.Length; i++)
+            {
+                list[i] = numLines[i].Split("\",");
+            }
+            return list;
+        }
+    }
+
+    List<T> GetDataFiles<T>(string[][] data) where T : new()
+    {
+        Dictionary<string, int> columnIndex = new();
+        List<T> toReturn = new();
+
+        for (int i = 0; i < data[1].Length; i++)
+        {
+            string nextLine = data[1][i].Trim().Replace("\"", "");
+            if (!columnIndex.ContainsKey(nextLine))
+                columnIndex.Add(nextLine, i);
         }
 
-        cardScripts = nextArray.ToList();
+        for (int i = 2; i < data.Length; i++)
+        {
+            for (int j = 0; j < data[i].Length; j++)
+                data[i][j] = data[i][j].Trim().Replace("\"", "").Replace("\\", "").Replace("]", "");
+
+            if (data[i][0].IsNullOrEmpty())
+                continue;
+
+            T nextData = new();
+            toReturn.Add(nextData);
+
+            foreach (FieldInfo field in typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (columnIndex.TryGetValue(field.Name, out int index))
+                {
+                    string sheetValue = data[i][index];
+
+                    if (field.FieldType == typeof(int))
+                    {
+                        field.SetValue(nextData, StringToInt(sheetValue));
+                    }
+                    else if (field.FieldType == typeof(bool))
+                    {
+                        field.SetValue(nextData, StringToBool(sheetValue));
+                    }
+                    else if (field.FieldType == typeof(string))
+                    {
+                        field.SetValue(nextData, sheetValue);
+                    }
+                }
+            }
+        }
+
+        return toReturn;
     }
 
-    string[][] ReadFile(string range)
+    int StringToInt(string line)
     {
-        TextAsset data = Resources.Load($"{range}") as TextAsset;
-        string editData = data.text;
-        editData = editData.Replace("],", "").Replace("{", "").Replace("}", "");
-
-        string[] numLines = editData.Split("[");
-        string[][] list = new string[numLines.Length][];
-
-        for (int i = 0; i < numLines.Length; i++)
-            list[i] = numLines[i].Split("\",");
-        return list;
+        line = line.Trim();
+        try
+        {
+            return (line.Equals("")) ? -1 : int.Parse(line);
+        }
+        catch (FormatException)
+        {
+            return -1;
+        }
     }
 
-    public Card AddCardComponent(GameObject obj, string cardName)
+    bool StringToBool(string line)
     {
-        Type type = Type.GetType(cardName);
-        obj.AddComponent(type);
-        obj.name = Regex.Replace(cardName, "(?<=[a-z])(?=[A-Z])", " ");
-
-        Card card = obj.GetComponent<Card>();
-        card.layout.FillInCards(card);
-        return card;
+        line = line.Trim();
+        return line == "TRUE";
     }
 
     #endregion

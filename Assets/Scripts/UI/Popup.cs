@@ -56,7 +56,7 @@ public class Popup : MonoBehaviour
     {
         Button nextButton = Instantiate(cardButton, this.transform.GetChild(1));
         CardLayout layout = nextButton.GetComponent<CardLayout>();
-        layout.FillInCards(card);
+        layout.FillInCards(card.GetFile());
         layout.cg.alpha = alpha;
 
         nextButton.interactable = true;

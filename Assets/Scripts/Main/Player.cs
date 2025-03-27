@@ -170,6 +170,13 @@ public class Player : PhotonCompatible
         }
     }
 
+    [PunRPC]
+    internal void InitialHand(int starting)
+    {
+        DrawCardRPC(starting, 0);
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => this.EndTurn());
+    }
+
     #endregion
 
 #region Cards
@@ -222,7 +229,7 @@ public class Player : PhotonCompatible
         cardsInHand.Add(card);
         card.transform.SetParent(keepHand);
         card.transform.localPosition = new Vector2(0, -1100);
-        card.layout.FillInCards(card);
+        card.layout.FillInCards(card.GetFile());
         card.layout.cg.alpha = 0;
     }
 
@@ -234,7 +241,6 @@ public class Player : PhotonCompatible
 
         float midPoint = (start + end) / 2;
         int maxFit = (int)((Mathf.Abs(start) + Mathf.Abs(end)) / gap);
-        cardsInHand = cardsInHand.OrderBy(card => card.coinCost).ToList();
         UpdateTexts();
 
         for (int i = 0; i < cardsInHand.Count; i++)
@@ -491,7 +497,7 @@ public class Player : PhotonCompatible
                 Log.inst.AddTextRPC($"{this.name} plays {toPlay.name}.", LogAdd.Remember, 0);
 
                 DiscardPlayerCard(toPlay, -1);
-                toPlay.OnPlayEffect(this, 0);
+                //toPlay.OnPlayEffect(this, 0);
             }
             else
             {
@@ -529,7 +535,7 @@ public class Player : PhotonCompatible
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
             Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
-                (cardList.ToArray(), this.playerPosition, 12 - this.privateDeck.childCount));
+                (cardList.ToArray(), this.playerPosition, 15 - this.privateDeck.childCount));
 
             DoFunction(() => ChangeButtonColor(true));
             Manager.inst.Instructions("Waiting on other players...");

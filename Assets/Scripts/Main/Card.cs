@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using MyBox;
 using System.Collections;
 using Photon.Pun;
+using System.Collections.Generic;
+using System.Linq;
 
 public class Card : PhotonCompatible
 {
@@ -13,9 +15,10 @@ public class Card : PhotonCompatible
     public Image border { get; private set; }
     public CardLayout layout { get; private set; }
 
-    public string extraText { get; protected set; }
-    public int coinCost { get; protected set; }
-    public string artistText { get; protected set; }
+    protected List<string> activationSteps = new();
+    protected int stepCounter;
+    protected int sideCounter;
+    bool mayStopEarly;
 
     protected override void Awake()
     {
@@ -32,6 +35,41 @@ public class Card : PhotonCompatible
     public virtual Color MyColor()
     {
         return Color.white;
+    }
+
+    internal virtual void AssignInfo(int fileNumber)
+    {
+    }
+
+    protected void GetInstructions(CardData dataFile)
+    {
+        if (dataFile.useSheets)
+        {
+            activationSteps = SpliceString(dataFile.cardInstructions);
+            foreach (string next in activationSteps)
+            {
+                if (FindMethod(next) == null)
+                    Debug.LogError($"{this.name} - {next} is wrong");
+            }
+        }
+
+        List<string> SpliceString(string text)
+        {
+            if (text.IsNullOrEmpty())
+            {
+                return new();
+            }
+            else
+            {
+                string divide = text.Replace(" ", "").Trim();
+                return divide.Split('/').ToList();
+            }
+        }
+    }
+
+    public virtual CardData GetFile()
+    {
+        return null;
     }
 
     #endregion
@@ -89,20 +127,6 @@ public class Card : PhotonCompatible
     private void FixedUpdate()
     {
         try { this.border.SetAlpha(Manager.inst.opacity); } catch { }
-    }
-
-    #endregion
-
-#region Gameplay
-
-    public virtual void OnPlayEffect(Player player, int logged)
-    {
-        player.PopStack();
-    }
-
-    public virtual void DonePlaying(Player player, int logged)
-    {
-        Log.inst.RememberStep(player, StepType.UndoPoint, () => player.MayPlayCard());
     }
 
     #endregion

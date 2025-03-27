@@ -1,0 +1,73 @@
+{
+    [
+      "cardName",
+      "textBox",
+      "coinBonus",
+      "useSheets",
+      "playInstructions",
+      "cardAmount",
+      "coinAmount",
+      "playAmount",
+      "troopAmount",
+      "scoutAmount",
+      "miscAmount",
+      "artCredit"
+    ],
+    [
+      "A",
+      "Switch your Troop and Scout in Areas 2 and 3.",
+      "6",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "\"\""
+    ],
+    [
+      "B",
+      "\"+2 Plays. At end of turn, -2 Plays.\"",
+      "6",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "\"\""
+    ],
+    [
+      "C",
+      "\"+1 Scout in an Area you control.\"",
+      "4",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "\"\""
+    ],
+    [
+      "D",
+      "\"+1 Card per Area you control.\"",
+      "3",
+      "TRUE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "\"\""
+    ]
+  ]
+}

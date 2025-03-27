@@ -26,6 +26,7 @@ public class Manager : PhotonCompatible
     List<Action> actionStack = new();
     int currentStep = -1;
     int waitingOnPlayers = 0;
+    public List<AreaCard> listOfAreas = new();
 
     [Foldout("Master deck", true)]
     [SerializeField] Transform masterDeck;
@@ -80,7 +81,89 @@ public class Manager : PhotonCompatible
         if (PhotonNetwork.CurrentRoom.MaxPlayers == 1)
             MakeObject(CarryVariables.inst.playerPrefab.gameObject);
         MakeObject(CarryVariables.inst.playerPrefab.gameObject);
+
+        if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
+        {
+            for (int j = 0; j < 60; j++)
+            {
+                for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
+                {
+                    GameObject next = MakeObject(CarryVariables.inst.playerCardPrefab.gameObject);
+                    DoFunction(() => AddPlayerCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
+                }
+            }
+
+            List<int> usedAreas = new() { 0, 1 };
+            int firstRandom = UnityEngine.Random.Range(2, CarryVariables.inst.areaCardFiles.Count);
+            usedAreas.Add(firstRandom);
+            int secondRandom;
+            do { secondRandom = UnityEngine.Random.Range(2, CarryVariables.inst.areaCardFiles.Count); }
+            while (secondRandom == firstRandom);
+
+            usedAreas = usedAreas.Shuffle();
+            for (int i = 0; i < usedAreas.Count; i++)
+            {
+                GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
+                DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, i, usedAreas[i]), RpcTarget.AllBuffered);
+            }
+        }
         StartCoroutine(Setup());
+    }
+
+    [PunRPC]
+    void AddPlayerCard(int ID, int fileNumber)
+    {
+        GameObject nextObject = PhotonView.Find(ID).gameObject;
+        PlayerCardData data = CarryVariables.inst.playerCardFiles[fileNumber];
+
+        nextObject.name = data.cardName;
+        nextObject.transform.SetParent(masterDeck);
+        nextObject.transform.localPosition = new(250 * masterDeck.childCount, 10000);
+
+        Type type = Type.GetType(data.cardName.Replace(" ", ""));
+        if (type != null)
+            nextObject.AddComponent(type);
+        else
+            nextObject.AddComponent(Type.GetType(nameof(PlayerCard)));
+
+        PlayerCard card = nextObject.GetComponent<PlayerCard>();
+        card.AssignInfo(fileNumber);
+    }
+
+    [PunRPC]
+    void AddAreaCard(int ID, int fileNumber, int areaNumber)
+    {
+        GameObject nextObject = PhotonView.Find(ID).gameObject;
+        CardData data = CarryVariables.inst.areaCardFiles[fileNumber];
+
+        nextObject.name = data.cardName;
+        nextObject.transform.SetParent(canvas.transform);
+        switch (areaNumber)
+        {
+            case 0:
+                nextObject.transform.localPosition = new(-800, 500);
+                return;
+            case 1:
+                nextObject.transform.localPosition = new(-400, 600);
+                return;
+            case 2:
+                nextObject.transform.localPosition = new(0, 400);
+                return;
+            case 3:
+                nextObject.transform.localPosition = new(400, 500);
+                return;
+        }
+
+        Type type = Type.GetType(data.cardName.Replace(" ", ""));
+        if (type != null)
+            nextObject.AddComponent(type);
+        else
+            nextObject.AddComponent(Type.GetType(nameof(AreaCard)));
+
+        AreaCard card = nextObject.GetComponent<AreaCard>();
+        card.AssignInfo(fileNumber);
+        card.AssignAreaNum(areaNumber);
+        listOfAreas.Insert(areaNumber, card);
     }
 
     IEnumerator Setup()
@@ -110,9 +193,7 @@ public class Manager : PhotonCompatible
         }
 
         while (group.AnyProcessing)
-        {
             yield return null;
-        }
 
         if (PhotonNetwork.IsMasterClient)
             ReadySetup();
@@ -125,16 +206,25 @@ public class Manager : PhotonCompatible
     void ReadySetup()
     {
         storePlayers.Shuffle();
+        masterDeck.Shuffle();
+        AddStep(FirstDraw);
 
         cardRequestArray = new int[storePlayers.childCount];
         for (int i = 0; i < storePlayers.childCount; i++)
-            cardRequestArray[i] = 12;
+            cardRequestArray[i] = 15;
 
+        waitingOnPlayers = storePlayers.childCount;
         for (int i = 0; i < storePlayers.childCount; i++)
         {
             GameObject nextPlayer = storePlayers.transform.GetChild(i).gameObject;
             DoFunction(() => AddPlayer(nextPlayer.GetComponent<PhotonView>().ViewID, i, nextPlayer.name.Equals("Bot") ? 1 : 0));
         }
+    }
+
+    void FirstDraw()
+    {
+        foreach (Player player in playersInOrder)
+            player.DoFunction(() => player.InitialHand(2), player.realTimePlayer);
     }
 
     [PunRPC]
@@ -212,9 +302,18 @@ public class Manager : PhotonCompatible
     {
         if (currentStep < actionStack.Count - 1)
         {
+            Log.inst.AddTextRPC("", LogAdd.Public);
+
             SendOutCards();
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
             DoFunction(() => UpdateAllDisplays());
+
+            if (playersInOrder != null)
+                waitingOnPlayers = playersInOrder.Count;
+            else if (PhotonNetwork.IsConnected)
+                waitingOnPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+            else
+                waitingOnPlayers = 1;
 
             currentStep++;
             actionStack[currentStep]();

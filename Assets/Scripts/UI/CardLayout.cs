@@ -6,36 +6,43 @@ using TMPro;
 public class CardLayout : MonoBehaviour, IPointerClickHandler
 {
     public CanvasGroup cg { get; private set; }
-    Image background;
     Image artBox;
 
     TMP_Text description;
     TMP_Text cardName;
-    Card myCard;
+    TMP_Text coinBonus;
+    CardData data;
 
     private void Awake()
     {
         cg = transform.Find("Canvas Group").GetComponent<CanvasGroup>();
-        background = cg.transform.Find("Background").GetComponent<Image>();
         cardName = cg.transform.Find("Card Name").GetComponent<TMP_Text>();
         description = cg.transform.Find("Card Description").GetComponent<TMP_Text>();
+        coinBonus = cg.transform.Find("Coin Bonus").GetComponent<TMP_Text>();
         artBox = cg.transform.Find("Art Box").GetComponent<Image>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            CarryVariables.inst.RightClickDisplay(this.myCard, cg.alpha);
-        }
+            CarryVariables.inst.RightClickDisplay(this.data, cg.alpha);
     }
 
-    public void FillInCards(Card card)
+    public void FillInCards(CardData data)
     {
-        myCard = card;
-        try {artBox.sprite = Resources.Load<Sprite>($"Card Art/{card.name}");} catch { Debug.LogError($"no art for {card.name}"); }
-        background.color = card.MyColor();
-        description.text = KeywordTooltip.instance.EditText(card.extraText);
-        cardName.text = card.name;
+        this.data = data;
+        try {artBox.sprite = Resources.Load<Sprite>($"Card Art/{data.cardName}");} catch { Debug.LogError($"no art for {data.cardName}"); }
+        description.text = KeywordTooltip.instance.EditText(data.textBox);
+        cardName.text = data.cardName;
+
+        if (data is PlayerCardData converted)
+        {
+            coinBonus.gameObject.SetActive(true);
+            coinBonus.text = $"{converted.coinBonus}";
+        }
+        else
+        {
+            coinBonus.gameObject.SetActive(false);
+        }
     }
 }

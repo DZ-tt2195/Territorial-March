@@ -25,9 +25,11 @@ public class CardGallery : MonoBehaviour
         typeDropdown.onValueChanged.AddListener(ChangeDropdown);
 
         foreach (string cardName in CarryVariables.inst.cardScripts)
-        { 
+        {
+            /*
             GameObject nextObject = Instantiate(CarryVariables.inst.cardPrefab.gameObject);
             allCards.Add(CarryVariables.inst.AddCardComponent(nextObject, cardName));
+            */
         }
 
         SearchCards();
@@ -62,6 +64,7 @@ public class CardGallery : MonoBehaviour
 
         foreach (Card card in allCards)
         {
+            /*
             bool stringMatch = (CompareStrings(searchInput.text, card.extraText) || CompareStrings(searchInput.text, card.name));
             bool costMatch = ((searchCost == -1) || card.coinCost == searchCost);
             bool typeMatch = typeDropdown.options[typeDropdown.value].text switch
@@ -78,6 +81,7 @@ public class CardGallery : MonoBehaviour
             {
                 card.transform.SetParent(null);
             }
+            */
         }
 
         storeCards.transform.localPosition = new Vector3(0, -1050, 0);
