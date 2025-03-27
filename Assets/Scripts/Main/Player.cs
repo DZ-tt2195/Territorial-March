@@ -51,9 +51,12 @@ public class Player : PhotonCompatible
     public int playerPosition { get; private set; }
     public PlayerType myType { get; private set; }
     public Photon.Realtime.Player realTimePlayer { get; private set; }
+
+    [Foldout("Resources", true)]
     public Dictionary<Resource, int> resourceDict = new();
-    public int[] troopArray = new int[4];
-    public int[] scoutArray = new int[4];
+    int[] troopArray = new int[4];
+    int[] scoutArray = new int[4];
+    public bool[] areasControlled = new bool[4];
 
     [Foldout("Cards", true)]
     public List<Card> cardsInHand = new();
@@ -62,8 +65,10 @@ public class Player : PhotonCompatible
 
     [Foldout("UI", true)]
     [SerializeField] TMP_Text resourceText;
+    Button myButton;
     Button resignButton;
     Transform keepHand;
+    public List<TroopDisplay> myDisplays { get; private set; }
 
     [Foldout("Choices", true)]
     public int choice { get; private set; }
@@ -92,6 +97,7 @@ public class Player : PhotonCompatible
 
     private void Start()
     {
+        troopArray[0] = 12;
         if (PhotonNetwork.IsConnected && pv.AmOwner)
         {
             if (PhotonNetwork.CurrentRoom.MaxPlayers == 1 && Manager.inst.storePlayers.childCount == 0)
@@ -112,17 +118,7 @@ public class Player : PhotonCompatible
             */
         }
     }
-    /*
-    [PunRPC]
-    void AddCard(int position, int ID, string cardName)
-    {
-        GameObject nextObject = PhotonView.Find(ID).gameObject;
-        Card card = CarryVariables.inst.AddCardComponent(nextObject, cardName);
-        card.transform.SetParent(deck);
-        card.transform.SetSiblingIndex(position);
-        card.transform.localPosition = new(0, -10000);
-    }
-    */
+
     [PunRPC]
     void SendName(string username)
     {
@@ -140,20 +136,28 @@ public class Player : PhotonCompatible
         if (PhotonNetwork.IsConnected)
             realTimePlayer = PhotonNetwork.PlayerList[pv.OwnerActorNr - 1];
 
-        /*
+        for (int i = 0; i<4; i++)
+        {
+            TroopDisplay display = Instantiate(CarryVariables.inst.troopDisplayPrefab);
+            myDisplays.Add(display);
+            display.transform.SetParent(Manager.inst.canvas.transform);
+            display.transform.localScale = Vector3.one;
+            display.transform.localPosition = new(-800 + i * 400, 225 + i * 125);
+        }
+
         myButton = Instantiate(CarryVariables.inst.playerButtonPrefab);
         myButton.transform.SetParent(Manager.inst.canvas.transform);
         myButton.transform.localScale = Vector3.one;
         myButton.transform.localPosition = new(-1100, 425 - (100 * playerPosition));
         myButton.transform.GetChild(0).GetComponent<TMP_Text>().text = this.name;
         myButton.onClick.AddListener(MoveScreen);
-        */
+
         resourceDict = new()
         {
             { Resource.Coin, 0 },
             { Resource.Play, 0 },
         };
-        UpdateResourceText();
+        UpdateTexts();
 
         if (InControl())
         {
@@ -163,8 +167,6 @@ public class Player : PhotonCompatible
                 Invoke(nameof(MoveScreen), 0.2f);
                 pv.Owner.NickName = this.name;
             }
-
-            //Manager.inst.DoFunction(() => Manager.inst.PlayerDone());
         }
     }
 
@@ -233,6 +235,7 @@ public class Player : PhotonCompatible
         float midPoint = (start + end) / 2;
         int maxFit = (int)((Mathf.Abs(start) + Mathf.Abs(end)) / gap);
         cardsInHand = cardsInHand.OrderBy(card => card.coinCost).ToList();
+        UpdateTexts();
 
         for (int i = 0; i < cardsInHand.Count; i++)
         {
@@ -304,6 +307,7 @@ public class Player : PhotonCompatible
             else if (amount < 0)
                 Log.inst.AddTextRPC($"{this.name} removes {Mathf.Abs(amount)} Scout from Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
         }
+        UpdateTexts();
     }
 
     public void MoveTroopRPC(int oldArea, int newArea, int logged, string source = "")
@@ -331,12 +335,25 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC($"{this.name} retreats 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
         }
+        UpdateTexts();
     }
 
-    void UpdateResourceText()
+    public (int, int) CalcTroopScout(int area)
     {
-        resourceText.text = KeywordTooltip.instance.EditText(
-            $"{resourceDict[Resource.Coin]} Coin, {cardsInHand.Count} Card");
+        return (troopArray[area], scoutArray[area]);
+    }
+
+    public void UpdateAreaControl(int area, bool control)
+    {
+        if (this.areasControlled[area] != control)
+        {
+            this.areasControlled[area] = control;
+            if (control)
+                Log.inst.AddTextRPC($"{this.name} gains control over Area {area + 1}.", LogAdd.Personal);
+            else
+                Log.inst.AddTextRPC($"{this.name} loses control over Area {area + 1}.", LogAdd.Personal);
+        }
+        UpdateTexts();
     }
 
     public void ResourceRPC(Resource resource, int amount, int logged, string source = "")
@@ -346,7 +363,6 @@ public class Player : PhotonCompatible
             actualAmount = -1 * resourceDict[resource];
 
         Log.inst.RememberStep(this, StepType.Revert, () => ChangeResource(false, (int)resource, actualAmount, logged, source));
-        UpdateResourceText();
     }
 
     [PunRPC]
@@ -365,6 +381,18 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC($"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
         }
+        UpdateTexts();
+    }
+
+    public void UpdateTexts()
+    {
+        resourceText.text = KeywordTooltip.instance.EditText($"{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Play]} Play");
+
+        foreach (TroopDisplay display in myDisplays)
+        {
+            (int troop, int scout) = CalcTroopScout(display.AreaPosition);
+            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout", areasControlled[display.AreaPosition] ? Color.yellow : Color.white);
+        }
     }
 
     #endregion
@@ -380,9 +408,6 @@ public class Player : PhotonCompatible
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
-
-        Manager.inst.DoFunction(() => Manager.inst.Instructions($"Waiting on {this.name}..."));
-        Manager.inst.DoFunction(() => Manager.inst.SetCurrentPlayer(this.playerPosition));
 
         Log.inst.AddTextRPC("", LogAdd.Public, 0);
         Log.inst.AddTextRPC($"{this.name}'s turn.", LogAdd.Public, 0);
@@ -484,40 +509,59 @@ public class Player : PhotonCompatible
         }
     }
 
+    #endregion
+
+#region End Turn
+
+    public void EndTurn()
+    {
+        if (Log.inst.undosInLog.Count >= 1)
+            ChooseButton(new() { "End Turn" }, Vector3.zero, "Last chance to undo anything.", Done);
+        else
+            Done();
+
+        void Done()
+        {
+            Log.inst.DisplayUndoBar(false);
+            Log.inst.undosInLog.Clear();
+
+            List<int> cardList = new();
+            foreach (Transform next in privateDiscard)
+                cardList.Add(next.GetComponent<PhotonView>().ViewID);
+            Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
+                (cardList.ToArray(), this.playerPosition, 12 - this.privateDeck.childCount));
+
+            DoFunction(() => ChangeButtonColor(true));
+            Manager.inst.Instructions("Waiting on other players...");
+            Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(), RpcTarget.MasterClient);
+        }
+    }
+
     void FinishChain()
     {
         currentChain.complete = true;
         chainsToResolve.Remove(currentChain);
         finishedChains.Add(currentChain);
 
-        currentChain.math = PlayerScore(this) - PlayerScore(Manager.inst.OpposingPlayer(this));
+        currentChain.math = PlayerScore(this);
         //Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
         currentChain = null;
 
         float PlayerScore(Player player)
         {
-            /*
-            int answer = player.myBase.myHealth + player.cardsInHand.Count * 3;
-
-            foreach ((Card card, Entity entity) in Manager.inst.GatherAbilities())
-                answer += card.CoinEffect(player, entity, -1);
-
-            if (player == this)
-                answer -= coins;
-
-            foreach (Row row in Manager.inst.allRows)
+            if (troopArray[3] == 12)
             {
-                MovingTroop troop = row.playerTroops[playerPosition];
-                if (troop != null && troop.calcHealth >= 1)
-                    answer += troop.calcPower + troop.calcHealth;
+                return Mathf.Infinity;
             }
-
-            if (player.myBase.myHealth <= 0)
-                return -Mathf.Infinity;
             else
+            {
+                int answer = cardsInHand.Count * 3 + resourceDict[Resource.Play] * 3 + resourceDict[Resource.Coin];
+                for (int i = 0; i < 4; i++)
+                    answer += scoutArray[i] * 2;
+                for (int i = 0; i < 4; i++)
+                    answer += troopArray[i] * i * 4;
                 return answer;
-            */
-            return 0;
+            }
         }
     }
 
@@ -727,16 +771,13 @@ public class Player : PhotonCompatible
         this.transform.localPosition = Vector3.zero;
     }
 
-    #endregion
-
-    void GiveToManager()
+    [PunRPC]
+    public void ChangeButtonColor(bool done)
     {
-        List<int> cardList = new();
-        foreach (Transform next in privateDiscard)
-            cardList.Add(next.GetComponent<PhotonView>().ViewID);
-        Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
-            (cardList.ToArray(), this.playerPosition, 12 - this.privateDeck.childCount));
+        myButton.image.color = (done) ? Color.yellow : Color.white;
     }
+
+    #endregion
 
 }
 

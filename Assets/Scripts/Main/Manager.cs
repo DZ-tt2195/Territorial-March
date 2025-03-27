@@ -212,6 +212,10 @@ public class Manager : PhotonCompatible
     {
         if (currentStep < actionStack.Count - 1)
         {
+            SendOutCards();
+            Log.inst.DoFunction(() => Log.inst.ResetHistory());
+            DoFunction(() => UpdateAllDisplays());
+
             currentStep++;
             actionStack[currentStep]();
         }
@@ -237,42 +241,25 @@ public class Manager : PhotonCompatible
         AddStep(TroopsAttack);
         AddStep(CheckDeadPlayers);
         */
-
-        void CheckDeadPlayers()
-        {
-            bool keepPlaying = true;
-            foreach (Player player in playersInOrder)
-            {
-                /*
-                if (player.myBase.myHealth <= 0)
-                    keepPlaying = false;
-                */
-            }
-
-            if (keepPlaying)
-                Continue();
-            else
-                DoFunction(() => DisplayEnding(-1), RpcTarget.All);
-        }
     }
 
     [PunRPC]
     internal void CompletedTurn()
     {
-        if (!PhotonNetwork.IsConnected)
-        {
-            Continue();
-        }
-        else
+        if (PhotonNetwork.IsConnected)
         {
             waitingOnPlayers--;
-            /*
+
             if (waitingOnPlayers == 0)
             {
                 foreach (Player player in playersInOrder)
-                    player.pv.RPC(nameof(player.ShareSteps), player.realTimePlayer);
+                    Log.inst.pv.RPC(nameof(Log.ShareSteps), player.realTimePlayer);
                 Continue();
-            }*/
+            }
+        }
+        else
+        {
+            Continue();
         }
     }
 
@@ -346,16 +333,6 @@ public class Manager : PhotonCompatible
 
 #region Misc
 
-    public Player OpposingPlayer(Player player)
-    {
-        return OpposingPlayer(player.playerPosition);
-    }
-
-    public Player OpposingPlayer(int position)
-    {
-        return (position == 0) ? playersInOrder[1] : playersInOrder[0];
-    }
-
     public Player FindThisPlayer()
     {
         foreach (Player player in playersInOrder)
@@ -367,9 +344,32 @@ public class Manager : PhotonCompatible
     }
 
     [PunRPC]
-    internal void SetCurrentPlayer(int playerPosition)
+    void UpdateAllDisplays()
     {
-        currentPlayer = playersInOrder[playerPosition];
+        for (int i = 0; i < 4; i++)
+        {
+            Player mostInArea = null;
+            int highestValue = int.MinValue;
+
+            foreach (Player player in playersInOrder)
+            {
+                (int troop, int scout) = player.CalcTroopScout(i);
+                int totalUnits = troop + scout;
+
+                if (totalUnits > highestValue)
+                {
+                    mostInArea = player;
+                    highestValue = totalUnits;
+                }
+                else if (totalUnits == highestValue)
+                {
+                    mostInArea = null;
+                }
+            }
+
+            foreach (Player player in playersInOrder)
+                player.UpdateAreaControl(i, player == mostInArea);
+        }
     }
 
     #endregion

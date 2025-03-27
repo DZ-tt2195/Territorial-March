@@ -56,7 +56,7 @@ public class Log : PhotonCompatible
         Vector2 startingPosition;
 
     [Foldout("Undos", true)]
-        List<LogText> undosInLog = new();
+        public List<LogText> undosInLog = new();
         public NextStep undoToThis;
         [SerializeField] Button undoButton;
         bool currentUndoState = false;
@@ -324,8 +324,6 @@ public class Log : PhotonCompatible
                     }
                 }
             }
-            DoFunction(() => ResetHistory());
-            Manager.inst.DoFunction(() => Manager.inst.Continue());
         }
     }
 
@@ -337,7 +335,7 @@ public class Log : PhotonCompatible
     }
 
     [PunRPC]
-    void ResetHistory()
+    internal void ResetHistory()
     {
         historyStack.Clear();
         undosInLog.Clear();
@@ -345,7 +343,7 @@ public class Log : PhotonCompatible
     }
 
     [PunRPC]
-    public void DecisionComplete(bool undo, int stepNumber)
+    internal void DecisionComplete(bool undo, int stepNumber)
     {
         NextStep step = historyStack[stepNumber];
         if (undo)

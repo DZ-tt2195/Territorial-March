@@ -914,6 +914,7 @@ MonoBehaviour:
   textPopup: {fileID: 7594585533340515175, guid: 0ce383b7ea8ca488c810cadf3b089e7e, type: 3}
   cardPopup: {fileID: 3183939439193871304, guid: 293c9a8a887c64616a8e499c379c4cd7, type: 3}
   sliderPopup: {fileID: 7815619922120165151, guid: 0ebd54c98e7064e6c9bda8ae56b32fd1, type: 3}
+  troopDisplayPopup: {fileID: 7671223618994159642, guid: f9c5161fffc7d47829a56e60c3042c5a, type: 3}
   rightClickBackground: {fileID: 1195550165}
   rightClickCard: {fileID: 486479094}
   rightClickText: {fileID: 938853688}

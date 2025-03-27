@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System;
+using UnityEngine.UI;
 
 public class CarryVariables : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class CarryVariables : MonoBehaviour
     public Popup textPopup;
     public Popup cardPopup;
     public SliderChoice sliderPopup;
+    public TroopDisplay troopDisplayPrefab;
+    public Button playerButtonPrefab;
 
     [Foldout("Right click", true)]
     [SerializeField] Transform rightClickBackground;

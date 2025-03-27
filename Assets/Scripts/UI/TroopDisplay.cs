@@ -8,6 +8,9 @@ public class TroopDisplay : PhotonCompatible
 {
     [SerializeField] private int playerPosition;
     public int PlayerPosition => playerPosition;
+    [SerializeField] private int areaPosition;
+    public int AreaPosition => areaPosition;
+
     TMP_Text myText;
     public Button button { get; private set; }
     public Image border { get; private set; }
@@ -20,7 +23,6 @@ public class TroopDisplay : PhotonCompatible
         border = this.transform.Find("Border").GetComponent<Image>();
         button = GetComponent<Button>();
         myText = this.transform.Find("Text").GetComponent<TMP_Text>();
-        this.transform.localScale = Vector3.Lerp(Vector3.one, Manager.inst.canvas.transform.localScale, 0.5f);
     }
 
     private void FixedUpdate()
@@ -30,7 +32,8 @@ public class TroopDisplay : PhotonCompatible
 
     public void UpdateText(string text, Color color)
     {
+        this.gameObject.SetActive(true);
+        myText.text = KeywordTooltip.instance.EditText(text);
         this.button.image.color = color;
-        myText.text = text;
     }
 }
