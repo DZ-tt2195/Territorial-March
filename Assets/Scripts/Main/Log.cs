@@ -227,7 +227,7 @@ public class Log : PhotonCompatible
             Destroy(RT.transform.GetChild(i - 1).gameObject);
             counter++;
         }
-        //Debug.Log($"deleted {counter} lines");
+
         ChangeScrolling();
         scroll.value = 0;
 
@@ -256,7 +256,6 @@ public class Log : PhotonCompatible
 
             if (next.stepType == StepType.Revert)
             {
-                //Debug.Log($"undo step {i}: {next.actionName}");
                 (string instruction, object[] parameters) = next.source.TranslateFunction(next.action);
 
                 object[] newParameters = new object[parameters.Length];
@@ -340,6 +339,7 @@ public class Log : PhotonCompatible
         historyStack.Clear();
         undosInLog.Clear();
         DisplayUndoBar(false);
+        currentDecisionInStack = -1;
     }
 
     [PunRPC]

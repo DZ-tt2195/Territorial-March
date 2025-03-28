@@ -403,25 +403,17 @@ public class Player : PhotonCompatible
 
     #endregion
 
-#region Turn
+#region AI Simulate
 
-    [PunRPC]
-    internal void YourTurn()
+    public void StartTurn(NextStep firstStep)
     {
-        Log.inst.historyStack.Clear();
-        Log.inst.currentDecisionInStack = -1;
-
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
 
-        Log.inst.AddTextRPC("", LogAdd.Public, 0);
-        Log.inst.AddTextRPC($"{this.name}'s turn.", LogAdd.Public, 0);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => MayPlayCard());
-
         if (myType == PlayerType.Bot)
         {
-            currentChain = new(Log.inst.historyStack[0]);
+            currentChain = new(firstStep);
             chainsToResolve.Add(currentChain);
             StartCoroutine(FindAIRoute());
         }
@@ -430,89 +422,65 @@ public class Player : PhotonCompatible
             simulating = false;
             PopStack();
         }
-    }
 
-    IEnumerator FindAIRoute()
-    {
-        yield return new WaitForSeconds(1f);
-        simulating = true;
-        PopStack();
-
-        while (chainsToResolve.Count > 0)
+        IEnumerator FindAIRoute()
         {
-            yield return null;
+            yield return new WaitForSeconds(1f);
+            simulating = true;
+            PopStack();
+
+            while (chainsToResolve.Count > 0)
+                yield return null;
+
+            finishedChains = finishedChains.Shuffle();
+            currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
+
+            string answer = $"Best chain: {currentChain.math} -> ";
+            foreach (int nextInt in currentChain.decisions)
+                answer += $"{nextInt} ";
+
+            finishedChains.Clear();
+            Log.inst.InvokeUndo(firstStep);
+
+            simulating = false;
+            chainTracker = -1;
+            PopStack();
         }
-
-        //Debug.Log($"{finishedChains.Count} chains finished");
-        finishedChains = finishedChains.Shuffle();
-        currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
-
-        string answer = $"Best chain: {currentChain.math} -> ";
-        foreach (int nextInt in currentChain.decisions)
-            answer += $"{nextInt} ";
-        //Debug.Log(answer);
-
-        finishedChains.Clear();
-        Log.inst.InvokeUndo(Log.inst.historyStack[0]);
-
-        simulating = false;
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => MayPlayCard());
-        chainTracker = -1;
-        PopStack();
     }
 
-    internal void MayPlayCard()
+    public void NewChains(List<int> decisionNumbers)
     {
-        List<string> actions = new() { $"End Turn" };
+        foreach (int next in decisionNumbers)
+            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentStep));
+        chainsToResolve.Remove(currentChain);
 
-        if (myType == PlayerType.Bot)
+        FindNewestChain();
+        currentStep.action.Compile().Invoke();
+    }
+
+    public void AIDecision(Action Next, List<int> possibleDecisions)
+    {
+        if (this.chainTracker < this.currentChain.decisions.Count)
         {
-            if (chainTracker < currentChain.decisions.Count)
-            {
-                int next = currentChain.decisions[chainTracker];
-                //Debug.Log($"resolved continue turn with choice {next}");
-                inReaction.Add(ActionResolution);
-                DecisionMade(next);
-            }
-            else
-            {
-                List<int> choices = new() { -1 };
-                for (int i = 0; i < cardsInHand.Count; i++)
-                    choices.Add(i + 100);
-                NewChains(choices);
-            }
+            int nextDecision = this.currentChain.decisions[this.chainTracker];
+            //Debug.Log($"resolved continue turn with choice {next}");
+            this.inReaction.Add(Next);
+            this.DecisionMade(nextDecision);
         }
         else
         {
-            ChooseButton(actions, Vector3.zero, (cardsInHand.Count) == 0 ? "Can't play cards." : "What to play?", ActionResolution);
-            ChooseCardOnScreen(cardsInHand, (cardsInHand.Count) == 0 ? "You can't play any cards." : "What to play?", null);
+            this.NewChains(possibleDecisions);
         }
+    }
 
-        void ActionResolution()
-        {
-            int convertedChoice = choice - 100;
-            if (convertedChoice < cardsInHand.Count && convertedChoice >= 0)
-            {
-                Card toPlay = cardsInHand[convertedChoice];
-                Log.inst.AddTextRPC($"{this.name} plays {toPlay.name}.", LogAdd.Remember, 0);
-
-                DiscardPlayerCard(toPlay, -1);
-                //toPlay.OnPlayEffect(this, 0);
-            }
-            else
-            {
-                if (myType == PlayerType.Bot && !currentChain.complete)
-                {
-                    FinishChain();
-                }
-                else
-                {
-                    Log.inst.AddTextRPC($"{this.name} ends their turn.", LogAdd.Remember);
-                    Manager.inst.DoFunction(() => Manager.inst.Instructions($""));
-                    Log.inst.ShareSteps();
-                }
-            }
-        }
+    public List<int> ConvertToCardNums(List<Card> allCards, bool optional)
+    {
+        List<int> newList = new();
+        if (optional)
+            newList.Add(-1);
+        for (int i = 0; i < allCards.Count; i++)
+            newList.Add(i + 100);
+        return newList;
     }
 
     #endregion
@@ -521,16 +489,28 @@ public class Player : PhotonCompatible
 
     public void EndTurn()
     {
-        if (Log.inst.undosInLog.Count >= 1)
-            ChooseButton(new() { "End Turn" }, Vector3.zero, "Last chance to undo anything.", Done);
+        if (myType == PlayerType.Bot)
+        {
+            if (currentChain.complete)
+                Done();
+            else
+                FinishChain();
+        }
         else
-            Done();
+        {
+            if (Log.inst.undosInLog.Count >= 1)
+                ChooseButton(new() { "End Turn" }, Vector3.zero, "Last chance to undo anything.", Done);
+            else
+                Done();
+        }
 
         void Done()
         {
-            Log.inst.DisplayUndoBar(false);
-            Log.inst.undosInLog.Clear();
-
+            if (myType == PlayerType.Human)
+            {
+                Log.inst.DisplayUndoBar(false);
+                Log.inst.undosInLog.Clear();
+            }
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
@@ -549,11 +529,11 @@ public class Player : PhotonCompatible
         chainsToResolve.Remove(currentChain);
         finishedChains.Add(currentChain);
 
-        currentChain.math = PlayerScore(this);
+        currentChain.math = PlayerScore();
         //Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
         currentChain = null;
 
-        float PlayerScore(Player player)
+        float PlayerScore()
         {
             if (troopArray[3] == 12)
             {
@@ -654,16 +634,6 @@ public class Player : PhotonCompatible
     #endregion
 
 #region Resolve
-
-    public void NewChains(List<int> decisionNumbers)
-    {
-        foreach (int next in decisionNumbers)
-            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentStep));
-        chainsToResolve.Remove(currentChain);
-
-        FindNewestChain();
-        currentStep.action.Compile().Invoke();
-    }
 
     void FindNewestChain()
     {

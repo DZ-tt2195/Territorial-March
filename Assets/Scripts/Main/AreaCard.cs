@@ -26,4 +26,16 @@ public class AreaCard : Card
     {
         return dataFile;
     }
+
+    protected void ControlThis(Player player, CardData dataFile, int logged)
+    {
+        if (player.areasControlled[areaNumber])
+            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+    }
+
+    protected void ControlThisNot(Player player, CardData dataFile, int logged)
+    {
+        if (!player.areasControlled[areaNumber])
+            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+    }
 }
