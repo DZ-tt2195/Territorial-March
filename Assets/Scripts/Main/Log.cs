@@ -99,24 +99,24 @@ public class Log : PhotonCompatible
         }
     }
 
-    public void AddTextRPC(string logText, LogAdd type, int indent = 0)
+    public void AddTextRPC(Player player, string logText, LogAdd type, int indent = 0)
     {
         switch (type)
         {
             case LogAdd.Personal:
-                AddText(false, logText, indent);
+                AddText(false, (player == null) ? -1 : player.playerPosition, logText, indent);
                 break;
             case LogAdd.Public:
-                DoFunction(() => AddText(false, logText, indent));
+                DoFunction(() => AddText(false, (player == null) ? -1 : player.playerPosition, logText, indent));
                 break;
             case LogAdd.Remember:
-                RememberStep(this, StepType.Revert, () => AddText(false, logText, indent));
+                RememberStep(this, StepType.Revert, () => AddText(false, (player == null) ? -1 : player.playerPosition, logText, indent));
                 break;
         }
     }
 
     [PunRPC]
-    void AddText(bool undo, string logText, int indent = 0)
+    void AddText(bool undo, int playerPosition, string logText, int indent = 0)
     {
         if (undo || indent < 0)
             return;
@@ -137,8 +137,9 @@ public class Log : PhotonCompatible
             if (undoToThis.action != null)
             {
                 newText.step = undoToThis;
-                //Debug.Log($"NEW UNDO IN LOG: {logText} - {undoToThis.action}");
                 undosInLog.Insert(0, newText);
+                if (playerPosition >= 0)
+                    newText.addedThis = Manager.inst.playersInOrder[playerPosition];
             }
             undoToThis = null;
         }
@@ -169,9 +170,6 @@ public class Log : PhotonCompatible
     {
         undosInLog.RemoveAll(item => item == null);
         undoButton.gameObject.SetActive(undosInLog.Count > 0);
-
-        if (Application.isEditor && Input.GetKeyDown(KeyCode.Space))
-            AddTextRPC($"test {RT.transform.childCount}", LogAdd.Personal);
     }
 
     /*
@@ -212,12 +210,12 @@ public class Log : PhotonCompatible
             {
                 next.undoBar.gameObject.SetActive(flash);
                 NextStep toThis = next.step;
-                next.button.onClick.AddListener(() => InvokeUndo(toThis));
+                next.button.onClick.AddListener(() => InvokeUndo(next.addedThis, toThis));
             }
         }
     }
 
-    public void InvokeUndo(NextStep toThisPoint)
+    public void InvokeUndo(Player player, NextStep toThisPoint)
     {
         LogText targetText = undosInLog.Find(line => line.step == toThisPoint);
 
@@ -268,15 +266,15 @@ public class Log : PhotonCompatible
             }
             else if (next.stepType == StepType.UndoPoint)
             {
-                Manager.inst.currentPlayer.chainTracker--;
+                player.chainTracker--;
 
                 if (next == toThisPoint || i == 0)
                 {
-                    if (Manager.inst.currentPlayer.myType == PlayerType.Human)
+                    if (player.myType == PlayerType.Human)
                     {
                         currentDecisionInStack = -1;
-                        Manager.inst.currentPlayer.inReaction.Clear();
-                        Manager.inst.currentPlayer.PopStack();
+                        player.inReaction.Clear();
+                        player.PopStack();
                     }
                     break;
                 }
@@ -302,7 +300,8 @@ public class Log : PhotonCompatible
             newStep.action.Compile().Invoke();
     }
 
-    public void ShareSteps()
+    [PunRPC]
+    internal void ShareSteps()
     {
         StartCoroutine(OnlineShare());
 

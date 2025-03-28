@@ -7,6 +7,7 @@ using MyBox;
 
 public class LogText : MonoBehaviour
 {
+    public Player addedThis;
     public TMP_Text textBox;
     public Image undoBar;
     public Button button;

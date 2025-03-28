@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class AreaCard : Card
@@ -20,6 +21,24 @@ public class AreaCard : Card
     {
         this.dataFile = CarryVariables.inst.areaCardFiles[fileNumber];
         GetInstructions(dataFile);
+    }
+
+    [PunRPC]
+    internal virtual void ResolveArea(int playerPosition, int logged)
+    {
+        Player player = Manager.inst.playersInOrder[playerPosition];
+        player.StartTurn(Begin);
+
+        void Begin()
+        {
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => player.EndTurn());
+            if (dataFile.useSheets)
+            {
+                stepCounter = -1;
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                player.PopStack();
+            }
+        }
     }
 
     public override CardData GetFile()

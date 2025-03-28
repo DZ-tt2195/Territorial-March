@@ -264,7 +264,7 @@ public class Card : PhotonCompatible
     {
         if (player.cardsInHand.Count == 0)
         {
-            Log.inst.AddTextRPC($"{player.name} can't play anything.", LogAdd.Personal, logged);
+            Log.inst.AddTextRPC(player, $"{player.name} can't play anything.", LogAdd.Personal, logged);
             Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
         }
         else
@@ -295,13 +295,13 @@ public class Card : PhotonCompatible
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
                 Card toPlay = player.cardsInHand[convertedChoice];
-                Log.inst.AddTextRPC($"{this.name} plays {toPlay.name}.", LogAdd.Remember, logged);
+                Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
                 player.DiscardPlayerCard(toPlay, -1);
                 //toPlay.OnPlayEffect(this, 0);
             }
             else
             {
-                Log.inst.AddTextRPC($"{player.name} doesn't play a card.", LogAdd.Remember, logged);
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Remember, logged);
             }
             Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
         }
@@ -380,7 +380,7 @@ public class Card : PhotonCompatible
             else
             {
                 if (optional)
-                    Log.inst.AddTextRPC($"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
+                    Log.inst.AddTextRPC(player, $"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
                 PostDiscarding(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
@@ -425,7 +425,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                Log.inst.AddTextRPC($"{player.name} doesn't use {this.name}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't use {this.name}.", LogAdd.Personal, logged);
             }
         }
     }

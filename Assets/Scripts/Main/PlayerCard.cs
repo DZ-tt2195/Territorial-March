@@ -20,10 +20,13 @@ public class PlayerCard : Card
     {
         return dataFile;
     }
-    /*
+
     public virtual void ActivateThis(Player player, int logged)
     {
-        stepCounter = -1;
-        player.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
-    }*/
+        if (dataFile.useSheets)
+        {
+            stepCounter = -1;
+            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        }
+    }
 }

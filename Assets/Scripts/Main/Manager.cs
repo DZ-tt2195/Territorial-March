@@ -19,7 +19,6 @@ public class Manager : PhotonCompatible
     [Foldout("Players", true)]
     public List<Player> playersInOrder;
     public Transform storePlayers { get; private set; }
-    public Player currentPlayer { get; private set; }
 
     [Foldout("Gameplay", true)]
     public int turnNumber { get; private set; }
@@ -331,7 +330,7 @@ public class Manager : PhotonCompatible
     {
         if (currentStep < actionStack.Count - 1)
         {
-            Log.inst.AddTextRPC("", LogAdd.Public);
+            Log.inst.AddTextRPC(null, "", LogAdd.Public);
 
             SendOutCards();
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
@@ -356,19 +355,16 @@ public class Manager : PhotonCompatible
 
     void AddBasicLoop()
     {
-        /*
-        AddStep(NewResources);
-        PlayerSteps(0);
-        PlayerSteps(1);
-        AddStep(TroopsAttack);
-        AddStep(CheckDeadPlayers);
+        foreach (AreaCard area in listOfAreas)
+        {
+            AddStep(() => EveryoneDoArea(area));
 
-        AddStep(NewResources);
-        PlayerSteps(1);
-        PlayerSteps(0);
-        AddStep(TroopsAttack);
-        AddStep(CheckDeadPlayers);
-        */
+            void EveryoneDoArea(AreaCard area)
+            {
+                foreach (Player player in playersInOrder)
+                    area.DoFunction(() => area.ResolveArea(player.playerPosition, 0), player.realTimePlayer);
+            }
+        }
     }
 
     [PunRPC]
@@ -381,7 +377,12 @@ public class Manager : PhotonCompatible
             if (waitingOnPlayers == 0)
             {
                 foreach (Player player in playersInOrder)
-                    Log.inst.pv.RPC(nameof(Log.ShareSteps), player.realTimePlayer);
+                {
+                    if (player.myType == PlayerType.Bot)
+                        player.DoBotTurn();
+                    else
+                        Log.inst.pv.RPC(nameof(Log.ShareSteps), player.realTimePlayer);
+                }
                 Continue();
             }
         }

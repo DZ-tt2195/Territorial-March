@@ -74,6 +74,7 @@ public class Player : PhotonCompatible
     public int choice { get; private set; }
     public List<Action> inReaction = new();
     public NextStep currentStep { get; private set; }
+    Action firstAction;
 
     [Foldout("AI", true)]
     public bool simulating { get; private set; }
@@ -105,18 +106,6 @@ public class Player : PhotonCompatible
                 DoFunction(() => SendName("Bot"), RpcTarget.AllBuffered);
             else
                 DoFunction(() => SendName(PlayerPrefs.GetString("Online Username")), RpcTarget.AllBuffered);
-            /*
-            List<string> newList = new();
-            newList.AddRange(CarryVariables.inst.cardScripts);
-            List<string> shuffledCards = newList.Shuffle();
-
-            for (int i = 0; i < shuffledCards.Count; i++)
-            {
-                int nextPosition = i;
-                GameObject next = Manager.inst.MakeObject(CarryVariables.inst.cardPrefab.gameObject);
-                DoFunction(() => AddCard(i, next.GetComponent<PhotonView>().ViewID, shuffledCards[i]), RpcTarget.AllBuffered);
-            }
-            */
         }
     }
 
@@ -152,6 +141,8 @@ public class Player : PhotonCompatible
         myButton.transform.localPosition = new(-1100, 425 - (100 * playerPosition));
         myButton.transform.GetChild(0).GetComponent<TMP_Text>().text = this.name;
         myButton.onClick.AddListener(MoveScreen);
+        if (!PhotonNetwork.IsConnected || PhotonNetwork.CurrentRoom.MaxPlayers == 1)
+            myButton.gameObject.SetActive(false);
 
         resourceDict = new()
         {
@@ -218,9 +209,9 @@ public class Player : PhotonCompatible
         {
             PutCardInHand(card);
             if (InControl() && myType == PlayerType.Human)
-                Log.inst.AddTextRPC($"{this.name} draws {card.name}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} draws {card.name}{parathentical}.", LogAdd.Personal, logged);
             else
-                Log.inst.AddTextRPC($"{this.name} draws 1 Card{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} draws 1 Card{parathentical}.", LogAdd.Personal, logged);
         }
         SortHand();
     }
@@ -279,7 +270,7 @@ public class Player : PhotonCompatible
         {
             cardsInHand.Remove(card);
             card.transform.SetParent(privateDiscard);
-            Log.inst.AddTextRPC($"{this.name} discards {card.name}.", LogAdd.Personal, logged);
+            Log.inst.AddTextRPC(this, $"{this.name} discards {card.name}.", LogAdd.Personal, logged);
             StartCoroutine(card.MoveCard(new(0, -10000), 0.25f, Vector3.one));
         }
         SortHand();
@@ -309,9 +300,9 @@ public class Player : PhotonCompatible
         {
             scoutArray[area] += amount;
             if (amount > 0)
-                Log.inst.AddTextRPC($"{this.name} adds {Mathf.Abs(amount)} Scout to Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} adds {Mathf.Abs(amount)} Scout to Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
             else if (amount < 0)
-                Log.inst.AddTextRPC($"{this.name} removes {Mathf.Abs(amount)} Scout from Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} removes {Mathf.Abs(amount)} Scout from Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
         }
         UpdateTexts();
     }
@@ -337,9 +328,9 @@ public class Player : PhotonCompatible
             troopArray[oldArea]--;
             troopArray[newArea]++;
             if (oldArea < newArea)
-                Log.inst.AddTextRPC($"{this.name} advances 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} advances 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
             else
-                Log.inst.AddTextRPC($"{this.name} retreats 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} retreats 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
         }
         UpdateTexts();
     }
@@ -355,9 +346,9 @@ public class Player : PhotonCompatible
         {
             this.areasControlled[area] = control;
             if (control)
-                Log.inst.AddTextRPC($"{this.name} gains control over Area {area + 1}.", LogAdd.Personal);
+                Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal);
             else
-                Log.inst.AddTextRPC($"{this.name} loses control over Area {area + 1}.", LogAdd.Personal);
+                Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal);
         }
         UpdateTexts();
     }
@@ -383,9 +374,9 @@ public class Player : PhotonCompatible
         {
             resourceDict[(Resource)resource] += amount;
             if (amount > 0)
-                Log.inst.AddTextRPC($"{this.name} gets +{Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} gets +{Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
             else
-                Log.inst.AddTextRPC($"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(this, $"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
         }
         UpdateTexts();
     }
@@ -405,11 +396,14 @@ public class Player : PhotonCompatible
 
 #region AI Simulate
 
-    public void StartTurn(NextStep firstStep)
+    public void StartTurn(Action action)
     {
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
+
+        firstAction = action;
+        action();
 
         for (int i = 0; i<4; i++)
         {
@@ -422,19 +416,24 @@ public class Player : PhotonCompatible
 
         if (myType == PlayerType.Bot)
         {
-            currentChain = new(firstStep);
+            currentChain = new(Log.inst.historyStack[0]);
             chainsToResolve.Add(currentChain);
             StartCoroutine(FindAIRoute());
         }
         else
         {
             simulating = false;
-            PopStack();
+            this.DoFunction(() => this.ChangeButtonColor(false));
+            StartCoroutine(Wait());
+            IEnumerator Wait()
+            {
+                yield return new WaitForSeconds(1f);
+                PopStack();
+            }
         }
 
         IEnumerator FindAIRoute()
         {
-            yield return new WaitForSeconds(1f);
             simulating = true;
             PopStack();
 
@@ -448,14 +447,10 @@ public class Player : PhotonCompatible
             foreach (int nextInt in currentChain.decisions)
                 answer += $"{nextInt} ";
 
-            /*
             finishedChains.Clear();
-            Log.inst.InvokeUndo(firstStep);
-
-            simulating = false;
+            Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
             chainTracker = -1;
-            PopStack();
-            */
+            simulating = false;
         }
     }
 
@@ -522,6 +517,7 @@ public class Player : PhotonCompatible
                 Log.inst.DisplayUndoBar(false);
                 Log.inst.undosInLog.Clear();
             }
+
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
@@ -568,6 +564,15 @@ public class Player : PhotonCompatible
 
                 return answer;
             }
+        }
+    }
+
+    public void DoBotTurn()
+    {
+        if (this.myType == PlayerType.Bot)
+        {
+            firstAction();
+            PopStack();
         }
     }
 
@@ -691,7 +696,7 @@ public class Player : PhotonCompatible
         if (needUndo)
         {
             //Debug.Log($"AI UNDO to {currentStep.actionName}");
-            Log.inst.InvokeUndo(currentStep);
+            Log.inst.InvokeUndo(this, currentStep);
         }
     }
 
@@ -762,7 +767,7 @@ public class Player : PhotonCompatible
     }
 
     [PunRPC]
-    public void ChangeButtonColor(bool done)
+    internal void ChangeButtonColor(bool done)
     {
         myButton.image.color = (done) ? Color.yellow : Color.white;
     }
