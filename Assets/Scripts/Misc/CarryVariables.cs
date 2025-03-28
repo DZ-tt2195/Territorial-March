@@ -55,6 +55,8 @@ public class CarryVariables : MonoBehaviour
     [SerializeField] CardLayout rightClickCard;
     [SerializeField] TMP_Text rightClickText;
     [SerializeField] TMP_Text artistText;
+    public Sprite faceDownPlayerCard;
+    public Sprite faceDownAreaCard;
 
     [Foldout("Card data", true)]
     public List<PlayerCardData> playerCardFiles { get; private set; }
@@ -96,16 +98,14 @@ public class CarryVariables : MonoBehaviour
     public void RightClickDisplay(CardData data, float alpha)
     {
         rightClickBackground.gameObject.SetActive(true);
-        rightClickCard.FillInCards(data);
+        rightClickCard.FillInCards(data, alpha);
 
         if (alpha == 0)
         {
-            rightClickCard.cg.alpha = 0;
             artistText.transform.parent.gameObject.SetActive(false);
         }
         else
         {
-            rightClickCard.cg.alpha = 1;
             artistText.transform.parent.gameObject.SetActive(!data.artCredit.IsNullOrEmpty());
             artistText.text = data.artCredit;
         }

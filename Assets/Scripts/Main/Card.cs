@@ -96,7 +96,7 @@ public class Card : PhotonCompatible
 
     public IEnumerator RevealCard(float totalTime)
     {
-        if (this.layout.cg.alpha == 1)
+        if (this.layout.GetAlpha() == 1f)
             yield break;
 
         transform.localEulerAngles = new Vector3(0, 0, 0);
@@ -112,7 +112,7 @@ public class Card : PhotonCompatible
             yield return null;
         }
 
-        this.layout.cg.alpha = 1;
+        this.layout.FillInCards(GetFile(), 1);
         elapsedTime = 0f;
 
         while (elapsedTime < totalTime)

@@ -46,7 +46,7 @@ public class Manager : PhotonCompatible
 
     #endregion
 
-#region Setup
+#region Setup 1
 
     protected override void Awake()
     {
@@ -92,22 +92,8 @@ public class Manager : PhotonCompatible
                     DoFunction(() => AddPlayerCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
                 }
             }
-
-            List<int> usedAreas = new() { 0, 1 };
-            int firstRandom = UnityEngine.Random.Range(2, CarryVariables.inst.areaCardFiles.Count);
-            usedAreas.Add(firstRandom);
-            int secondRandom;
-            do { secondRandom = UnityEngine.Random.Range(2, CarryVariables.inst.areaCardFiles.Count); }
-            while (secondRandom == firstRandom);
-
-            usedAreas = usedAreas.Shuffle();
-            for (int i = 0; i < usedAreas.Count; i++)
-            {
-                GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
-                DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, i, usedAreas[i]), RpcTarget.AllBuffered);
-            }
         }
-        StartCoroutine(Setup());
+        StartCoroutine(Waiting());
     }
 
     [PunRPC]
@@ -128,6 +114,110 @@ public class Manager : PhotonCompatible
 
         PlayerCard card = nextObject.GetComponent<PlayerCard>();
         card.AssignInfo(fileNumber);
+    }
+
+    IEnumerator Waiting()
+    {
+        CoroutineGroup group = new(this);
+        group.StartCoroutine(WaitForPlayers());
+        group.StartCoroutine(WaitForSinglePlayer());
+        group.StartCoroutine(WaitForCardForcer());
+
+        IEnumerator WaitForCardForcer()
+        {
+            while (ForceAreas.instance.gameObject.activeSelf)
+                yield return null;
+        }
+
+        IEnumerator WaitForSinglePlayer()
+        {
+            if (PhotonNetwork.CurrentRoom.MaxPlayers == 1)
+                yield return new WaitForSeconds(1f);
+        }
+
+        IEnumerator WaitForPlayers()
+        {
+            if (PhotonNetwork.IsConnected)
+            {
+                instructions.text = $"Waiting for more players ({storePlayers.childCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})";
+                while (storePlayers.childCount < PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    instructions.text = $"Waiting for more players ({storePlayers.childCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})";
+                    yield return null;
+                }
+                instructions.text = $"All players are in.";
+            }
+        }
+
+        while (group.AnyProcessing)
+            yield return null;
+
+        if (PhotonNetwork.IsMasterClient)
+            ReadySetup();
+    }
+
+    #endregion
+
+#region Setup 2
+
+    void ReadySetup()
+    {
+        List<int> usedAreas = ChooseCards(CarryVariables.inst.areaCardFiles, new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
+        usedAreas = usedAreas.Shuffle();
+        for (int i = 0; i < usedAreas.Count; i++)
+        {
+            GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
+            DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, i, usedAreas[i]), RpcTarget.AllBuffered);
+        }
+
+        storePlayers.Shuffle();
+        masterDeck.Shuffle();
+        AddStep(FirstDraw);
+
+        cardRequestArray = new int[storePlayers.childCount];
+        for (int i = 0; i < storePlayers.childCount; i++)
+            cardRequestArray[i] = 15;
+
+        waitingOnPlayers = storePlayers.childCount;
+        for (int i = 0; i < storePlayers.childCount; i++)
+        {
+            GameObject nextPlayer = storePlayers.transform.GetChild(i).gameObject;
+            DoFunction(() => AddPlayer(nextPlayer.GetComponent<PhotonView>().ViewID, i, nextPlayer.name.Equals("Bot") ? 1 : 0));
+        }
+    }
+
+    [PunRPC]
+    void AddPlayer(int PV, int position, int playerType)
+    {
+        Player nextPlayer = PhotonView.Find(PV).GetComponent<Player>();
+        playersInOrder ??= new();
+        playersInOrder.Insert(position, nextPlayer);
+        instructions.text = "";
+        nextPlayer.AssignInfo(position, (PlayerType)playerType);
+    }
+
+    List<int> ChooseCards(List<CardData> possibleCards, List<int> forcedCards, int totalCards)
+    {
+        List<int> chosenCards = new();
+        foreach (int nextForce in forcedCards)
+        {
+            if (nextForce != -1 && !chosenCards.Contains(nextForce))
+                chosenCards.Add(nextForce);
+        }
+
+        if (chosenCards.Count == totalCards)
+            return chosenCards;
+
+        foreach (int nextForce in forcedCards)
+            possibleCards.RemoveAll(card => chosenCards.Contains(nextForce));
+
+        while (chosenCards.Count < totalCards)
+        {
+            int randomNumber = UnityEngine.Random.Range(0, possibleCards.Count);
+            chosenCards.Add(randomNumber);
+            possibleCards.RemoveAt(randomNumber);
+        }
+        return chosenCards;
     }
 
     [PunRPC]
@@ -166,75 +256,14 @@ public class Manager : PhotonCompatible
         listOfAreas.Insert(areaNumber, card);
     }
 
-    IEnumerator Setup()
-    {
-        CoroutineGroup group = new(this);
-        group.StartCoroutine(WaitForPlayers());
-        group.StartCoroutine(SinglePlayerWait());
-
-        IEnumerator SinglePlayerWait()
-        {
-            if (PhotonNetwork.CurrentRoom.MaxPlayers == 1)
-                yield return new WaitForSeconds(1f);
-        }
-
-        IEnumerator WaitForPlayers()
-        {
-            if (PhotonNetwork.IsConnected)
-            {
-                instructions.text = $"Waiting for more players ({storePlayers.childCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})";
-                while (storePlayers.childCount < PhotonNetwork.CurrentRoom.MaxPlayers)
-                {
-                    instructions.text = $"Waiting for more players ({storePlayers.childCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})";
-                    yield return null;
-                }
-                instructions.text = $"All players are in.";
-            }
-        }
-
-        while (group.AnyProcessing)
-            yield return null;
-
-        if (PhotonNetwork.IsMasterClient)
-            ReadySetup();
-    }
-
     #endregion
 
-#region Master Cards
-
-    void ReadySetup()
-    {
-        storePlayers.Shuffle();
-        masterDeck.Shuffle();
-        AddStep(FirstDraw);
-
-        cardRequestArray = new int[storePlayers.childCount];
-        for (int i = 0; i < storePlayers.childCount; i++)
-            cardRequestArray[i] = 15;
-
-        waitingOnPlayers = storePlayers.childCount;
-        for (int i = 0; i < storePlayers.childCount; i++)
-        {
-            GameObject nextPlayer = storePlayers.transform.GetChild(i).gameObject;
-            DoFunction(() => AddPlayer(nextPlayer.GetComponent<PhotonView>().ViewID, i, nextPlayer.name.Equals("Bot") ? 1 : 0));
-        }
-    }
+#region Master Deck
 
     void FirstDraw()
     {
         foreach (Player player in playersInOrder)
             player.DoFunction(() => player.InitialHand(2), player.realTimePlayer);
-    }
-
-    [PunRPC]
-    void AddPlayer(int PV, int position, int playerType)
-    {
-        Player nextPlayer = PhotonView.Find(PV).GetComponent<Player>();
-        playersInOrder ??= new();
-        playersInOrder.Insert(position, nextPlayer);
-        instructions.text = "";
-        nextPlayer.AssignInfo(position, (PlayerType)playerType);
     }
 
     void SendOutCards()
@@ -442,32 +471,37 @@ public class Manager : PhotonCompatible
         return null;
     }
 
+    public (Player, int) CalculateControl(int area)
+    {
+        Player mostInArea = null;
+        int highestValue = int.MinValue;
+
+        foreach (Player player in playersInOrder)
+        {
+            (int troop, int scout) = player.CalcTroopScout(area);
+            int totalUnits = troop + scout;
+
+            if (totalUnits > highestValue)
+            {
+                mostInArea = player;
+                highestValue = totalUnits;
+            }
+            else if (totalUnits == highestValue)
+            {
+                mostInArea = null;
+            }
+        }
+        return (mostInArea, highestValue);
+    }
+
     [PunRPC]
     void UpdateAllDisplays()
     {
         for (int i = 0; i < 4; i++)
         {
-            Player mostInArea = null;
-            int highestValue = int.MinValue;
-
+            (Player controller, int highest) = CalculateControl(i);
             foreach (Player player in playersInOrder)
-            {
-                (int troop, int scout) = player.CalcTroopScout(i);
-                int totalUnits = troop + scout;
-
-                if (totalUnits > highestValue)
-                {
-                    mostInArea = player;
-                    highestValue = totalUnits;
-                }
-                else if (totalUnits == highestValue)
-                {
-                    mostInArea = null;
-                }
-            }
-
-            foreach (Player player in playersInOrder)
-                player.UpdateAreaControl(i, player == mostInArea);
+                player.UpdateAreaControl(i, player == controller);
         }
     }
 

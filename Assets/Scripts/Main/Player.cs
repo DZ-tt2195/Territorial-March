@@ -79,6 +79,7 @@ public class Player : PhotonCompatible
     public bool simulating { get; private set; }
     List<DecisionChain> chainsToResolve = new();
     List<DecisionChain> finishedChains = new();
+    int[] controlNumbers = new int[4];
     public DecisionChain currentChain { get; private set; }
     public int chainTracker;
 
@@ -229,8 +230,7 @@ public class Player : PhotonCompatible
         cardsInHand.Add(card);
         card.transform.SetParent(keepHand);
         card.transform.localPosition = new Vector2(0, -1100);
-        card.layout.FillInCards(card.GetFile());
-        card.layout.cg.alpha = 0;
+        card.layout.FillInCards(card.GetFile(), 0);
     }
 
     public void SortHand()
@@ -411,6 +411,15 @@ public class Player : PhotonCompatible
         finishedChains.Clear();
         chainTracker = -1;
 
+        for (int i = 0; i<4; i++)
+        {
+            (Player controller, int highest) = Manager.inst.CalculateControl(i);
+            if (controller == this)
+                controlNumbers[i] = highest - 1;
+            else
+                controlNumbers[i] = highest;
+        }
+
         if (myType == PlayerType.Bot)
         {
             currentChain = new(firstStep);
@@ -543,9 +552,18 @@ public class Player : PhotonCompatible
             {
                 int answer = cardsInHand.Count * 3 + resourceDict[Resource.Play] * 3 + resourceDict[Resource.Coin];
                 for (int i = 0; i < 4; i++)
+                {
                     answer += scoutArray[i] * 2;
-                for (int i = 0; i < 4; i++)
-                    answer += troopArray[i] * i * 4;
+
+                    if (i == 1 || i == 2)
+                        answer += troopArray[i] * i * 4;
+                    else if (i == 3)
+                        answer += troopArray[i] * i * 8;
+
+                    if (scoutArray[i] + troopArray[i] > controlNumbers[i])
+                        answer += 3;
+                }
+
                 return answer;
             }
         }
@@ -596,12 +614,8 @@ public class Player : PhotonCompatible
                 for (int j = 0; j < listOfCards.Count; j++)
                 {
                     Card nextCard = listOfCards[j];
-                    int buttonNumber = j + 100;
-
-                    nextCard.button.onClick.RemoveAllListeners();
-                    nextCard.button.interactable = true;
-                    nextCard.button.onClick.AddListener(() => DecisionMade(buttonNumber));
-                    nextCard.border.gameObject.SetActive(true);
+                    int number = j + 100;
+                    ButtonToggle(nextCard.button, nextCard.border.gameObject, true, number);
                 }
                 elapsedTime += Time.deltaTime;
                 yield return null;
@@ -611,13 +625,8 @@ public class Player : PhotonCompatible
         void Disable()
         {
             StopCoroutine(haveCardsEnabled);
-
             foreach (Card nextCard in listOfCards)
-            {
-                nextCard.button.onClick.RemoveAllListeners();
-                nextCard.button.interactable = false;
-                nextCard.border.gameObject.SetActive(false);
-            }
+                ButtonToggle(nextCard.button, nextCard.border.gameObject, false);
         }
     }
 
@@ -629,6 +638,15 @@ public class Player : PhotonCompatible
         inReaction.Add(() => Destroy(slider.gameObject));
         inReaction.Add(action);
         Manager.inst.Instructions(changeInstructions);
+    }
+
+    void ButtonToggle(Button button, GameObject border, bool enable, int newNumber = -1)
+    {
+        button.onClick.RemoveAllListeners();
+        button.interactable = enable;
+        border.SetActive(enable);
+        if (enable)
+            button.onClick.AddListener(() => DecisionMade(newNumber));
     }
 
     #endregion
@@ -756,5 +774,3 @@ public class Player : PhotonCompatible
     #endregion
 
 }
-
-

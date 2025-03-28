@@ -68,6 +68,18 @@
       "",
       "",
       "\"\""
+    ],
+    [
+      "E",
+      "\"+1 Scout in each Area you have 0 Troop in.\"",
+      "2",
+      "FALSE"
+    ],
+    [
+      "F",
+      "\"+1 Troop, -1 Troop. +1 Scout, -1 Scout.\"",
+      "6",
+      "TRUE"
     ]
   ]
 }

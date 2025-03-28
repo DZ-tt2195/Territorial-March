@@ -27,7 +27,7 @@
     ],
     [
       "Advance",
-      "\"Any amount of times: You may pay 4 Coin to advance 1 Troop.\"",
+      "\"Any amount of times: You may pay 4 Coin for +1 Troop.\"",
       "FALSE",
       "",
       "",
@@ -67,7 +67,7 @@
     [
       "3",
       "\"Discard your hand. +1 Card per Card discarded.\"",
-      "FALSE",
+      "TRUE",
       "",
       "",
       "",
@@ -79,7 +79,7 @@
     ],
     [
       "4",
-      "\"If you don't control this, retreat 1 Troop.\"",
+      "\"If you don't control this, -2 Coin.\"",
       "TRUE",
       "",
       "",
@@ -92,7 +92,7 @@
     ],
     [
       "5",
-      "\"You may spend 2 Plays to advance 1 Troop.\"",
+      "\"You may spend 2 Plays for +1 Troop.\"",
       "TRUE",
       "",
       "",
@@ -105,7 +105,7 @@
     ],
     [
       "6",
-      "Advance 1 Troop from Area 1.",
+      "\"+1 Troop from Area 1.",
       "TRUE",
       "",
       "",
