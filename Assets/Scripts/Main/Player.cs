@@ -448,12 +448,14 @@ public class Player : PhotonCompatible
             foreach (int nextInt in currentChain.decisions)
                 answer += $"{nextInt} ";
 
+            /*
             finishedChains.Clear();
             Log.inst.InvokeUndo(firstStep);
 
             simulating = false;
             chainTracker = -1;
             PopStack();
+            */
         }
     }
 
@@ -727,13 +729,7 @@ public class Player : PhotonCompatible
                     chainTracker++;
                 }
 
-                StartCoroutine(RunFunction());
-                IEnumerator RunFunction()
-                {
-                    if (!simulating && myType == PlayerType.Bot)
-                        yield return new WaitForSeconds(Log.inst.waitTime);
-                    step.action.Compile().Invoke();
-                }
+                step.action.Compile().Invoke();
                 break;
             }
         }

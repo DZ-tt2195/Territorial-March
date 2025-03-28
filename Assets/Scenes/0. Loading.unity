@@ -178,7 +178,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'by DZ
 
-    inspired by Plants vs Zombies Heroes'
+    inspired by Temporum'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8c64c47af7c1c4fb5b88d184433c6c44, type: 2}
   m_sharedMaterial: {fileID: -3852492252101762229, guid: 8c64c47af7c1c4fb5b88d184433c6c44, type: 2}
@@ -921,6 +921,8 @@ MonoBehaviour:
   rightClickCard: {fileID: 486479094}
   rightClickText: {fileID: 938853688}
   artistText: {fileID: 938853688}
+  faceDownPlayerCard: {fileID: 0}
+  faceDownAreaCard: {fileID: 0}
   permanentCanvas: {fileID: 2019941104}
   faceDownSprite: {fileID: 21300000, guid: c85382f08dc8e4d02b5cb721fd5a1c65, type: 3}
   cardScripts: []
