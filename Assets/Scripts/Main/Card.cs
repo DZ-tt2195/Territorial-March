@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Photon.Pun;
 
 public class Card : PhotonCompatible
 {
@@ -152,6 +153,7 @@ public class Card : PhotonCompatible
         }
     }
 
+    [PunRPC]
     protected void ChangeSideCount(bool undo, int change)
     {
         if (undo)
@@ -160,6 +162,7 @@ public class Card : PhotonCompatible
             sideCounter += change;
     }
 
+    [PunRPC]
     protected void SetSideCount(bool undo, int newNumber)
     {
         ChangeSideCount(undo, newNumber - sideCounter);
@@ -184,6 +187,18 @@ public class Card : PhotonCompatible
     protected void LoseCoin(Player player, CardData dataFile, int logged)
     {
         player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
+        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+    }
+
+    protected void AddPlay(Player player, CardData dataFile, int logged)
+    {
+        player.ResourceRPC(Resource.Play, dataFile.playAmount, logged);
+        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+    }
+
+    protected void LosePlay(Player player, CardData dataFile, int logged)
+    {
+        player.ResourceRPC(Resource.Play, -1 * dataFile.playAmount, logged);
         Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
     }
 
@@ -281,12 +296,9 @@ public class Card : PhotonCompatible
         }
         else
         {
-            player.ChooseButton(actions, Vector3.zero, (player.cardsInHand.Count) == 0 ? "Can't play cards." : "What to play?", Next);
-            player.ChooseCardOnScreen(player.cardsInHand, (player.cardsInHand.Count) == 0 ? "You can't play any cards." : "What to play?", null);
+            player.ChooseButton(actions, Vector3.zero, "What to play?", Next);
+            player.ChooseCardOnScreen(player.cardsInHand, "What to play?", null);
         }
-
-        player.ChooseButton(actions, new(0, 250), $"Choose a card to play with {this.name}.", Next);
-        player.ChooseCardOnScreen(player.cardsInHand, "", null);
 
         void Next()
         {
@@ -295,8 +307,10 @@ public class Card : PhotonCompatible
             {
                 Card toPlay = player.cardsInHand[convertedChoice];
                 Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
+                PostPlaying(player, (PlayerCard)toPlay, dataFile, logged);
+
                 player.DiscardPlayerCard(toPlay, -1);
-                //toPlay.OnPlayEffect(this, 0);
+                //toPlay.OnPlayEffect(this, logged+1);
             }
             else
             {
@@ -408,14 +422,26 @@ public class Card : PhotonCompatible
     protected void AdvanceTroop(Player player, CardData dataFile, int logged)
     {
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, false, logged));
     }
 
-    void ChooseAdvanceOne(Player player, CardData dataFile, int logged)
+    protected void AskAdvance(Player player, CardData dataFile, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, true, logged));
+    }
+
+    void ChooseAdvanceOne(Player player, CardData dataFile, bool optional, int logged)
     {
         string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter+1}/{dataFile.troopAmount})";
-
+        List<string> actions = new();
         List<int> canAdvance = new();
+        if (optional)
+        {
+            actions.Add("Don't Advance");
+            canAdvance.Add(-1);
+        }
+
         for (int i = 0; i<3; i++)
         {
             (int troop, int scout) = player.CalcTroopScout(i);
@@ -425,13 +451,21 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(canAdvance, false));
+            player.AIDecision(Next, player.ConvertToHundred(canAdvance, optional));
         }
         else
         {
-            if (canAdvance.Count == 1)
-                Log.inst.undoToThis = null;
-            player.ChooseTroopDisplay(canAdvance, $"Advance a troop with {this.name}{parathentical}.", Next);
+            if (optional)
+            {
+                player.ChooseButton(actions, new(0, 250), $"Advance a troop with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canAdvance, "", null);
+            }
+            else
+            {
+                if (canAdvance.Count <= 1)
+                    Log.inst.undoToThis = null;
+                player.ChooseTroopDisplay(canAdvance, $"Advance a troop with {this.name}{parathentical}.", Next);
+            }
         }
 
         void Next()
@@ -486,7 +520,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, false, logged));
             }
         }
     }
@@ -553,7 +587,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (player.cardsInHand.Count == 1)
+                if (canRetreat.Count <= 1)
                     Log.inst.undoToThis = null;
                 player.ChooseTroopDisplay(canRetreat, $"Retreat a troop with {this.name}{parathentical}.", Next);
             }
@@ -724,7 +758,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (player.cardsInHand.Count == 1)
+                if (canLose.Count <= 1)
                     Log.inst.undoToThis = null;
                 player.ChooseTroopDisplay(canLose, $"Lose a scout with {this.name}{parathentical}.", Next);
             }
@@ -772,11 +806,23 @@ public class Card : PhotonCompatible
         if (player.resourceDict[Resource.Coin] < dataFile.coinAmount)
             return;
 
-        Action action = () => AddCoin(player, dataFile, logged);
+        Action action = () => LoseCoin(player, dataFile, logged);
         if (dataFile.coinAmount == 0)
             action();
         else
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
+    }
+
+    protected void AskLosePlay(Player player, CardData dataFile, int logged)
+    {
+        if (player.resourceDict[Resource.Play] < dataFile.playAmount)
+            return;
+
+        Action action = () => LosePlay(player, dataFile, logged);
+        if (dataFile.playAmount == 0)
+            action();
+        else
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.playAmount} Play to {this.name}?", dataFile, logged));
     }
 
     void ChoosePay(Player player, Action ifDone, string text, CardData dataFile, int logged)

@@ -113,6 +113,8 @@ MonoBehaviour:
   - InitialHand
   - ShareSteps
   - ResolveArea
+  - ChangeSideCount
+  - SetSideCount
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

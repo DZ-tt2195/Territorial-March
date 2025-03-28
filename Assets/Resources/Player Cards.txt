@@ -60,6 +60,20 @@
       "\"+1 Card per Area you control.\"",
       "3",
       "TRUE",
+      "SetToControl/DrawCard",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "\"\""
+    ],
+    [
+      "E",
+      "\"+1 Scout in each Area you have 0 Troop in.\"",
+      "2",
+      "FALSE",
       "",
       "",
       "",
@@ -70,16 +84,18 @@
       "\"\""
     ],
     [
-      "E",
-      "\"+1 Scout in each Area you have 0 Troop in.\"",
-      "2",
-      "FALSE"
-    ],
-    [
       "F",
       "\"+1 Troop, -1 Troop. +1 Scout, -1 Scout.\"",
       "6",
-      "TRUE"
+      "TRUE",
+      "AdvanceTroop/RetreatTroop/AddScout/LoseScout",
+      "",
+      "",
+      "",
+      "1",
+      "1",
+      "",
+      "\"\""
     ]
   ]
 }
