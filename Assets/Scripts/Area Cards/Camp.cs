@@ -9,15 +9,12 @@ public class Camp : AreaCard
         this.bottomType = this.GetType();
     }
 
-    [PunRPC]
-    internal override void ResolveArea(int playerPosition, int logged)
+    protected override void AreaInstructions(Player player, int logged)
     {
-        base.ResolveArea(playerPosition, logged);
-        Player player = Manager.inst.playersInOrder[playerPosition];
-
+        base.AreaInstructions(player, logged);
         player.DrawCardRPC(dataFile.cardAmount, logged);
         player.ResourceRPC(Resource.Play, dataFile.playAmount, logged);
-        MyInstructions(player, logged);
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
     }
 
     protected override void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
@@ -25,13 +22,15 @@ public class Camp : AreaCard
         if (cardToPlay != null)
         {
             player.ResourceRPC(Resource.Play, -1, -1);
-            MyInstructions(player, logged);
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
         }
     }
 
-    void MyInstructions(Player player, int logged)
+    void Loop(Player player, int logged)
     {
+        Log.inst.undoToThis = null;
         if (player.resourceDict[Resource.Play] >= 1)
             PlayCard(player, GetFile(), logged);
+        player.PopStack();
     }
 }

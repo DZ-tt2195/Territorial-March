@@ -39,10 +39,10 @@
       "\"\""
     ],
     [
-      "1",
+      "Placeholder",
       "\"+2 Coin per Area you have 3 Troop or more in.\"",
       "FALSE",
-      "",
+      "AddCoin",
       "",
       "",
       "",

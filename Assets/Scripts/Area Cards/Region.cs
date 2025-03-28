@@ -9,11 +9,10 @@ public class Region : AreaCard
         this.bottomType = this.GetType();
     }
 
-    [PunRPC]
-    internal override void ResolveArea(int playerPosition, int logged)
+    protected override void AreaInstructions(Player player, int logged)
     {
-        base.ResolveArea(playerPosition, logged);
-        MyInstructions(Manager.inst.playersInOrder[playerPosition], logged);
+        base.AreaInstructions(player, logged);
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
     }
 
     protected override void PostAdvance(Player player, bool success, CardData dataFile, int logged)
@@ -21,13 +20,15 @@ public class Region : AreaCard
         if (success)
         {
             player.ResourceRPC(Resource.Coin, -dataFile.coinAmount, logged);
-            MyInstructions(player, logged);
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
         }
     }
 
-    void MyInstructions(Player player, int logged)
+    void Loop(Player player, int logged)
     {
+        Log.inst.undoToThis = null;
         if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
             AskAdvance(player, GetFile(), logged);
+        player.PopStack();
     }
 }

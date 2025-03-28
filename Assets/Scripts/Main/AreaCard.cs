@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 public class AreaCard : Card
@@ -24,20 +25,19 @@ public class AreaCard : Card
     }
 
     [PunRPC]
-    internal virtual void ResolveArea(int playerPosition, int logged)
+    internal void ResolveArea(int playerPosition, int logged)
     {
         Player player = Manager.inst.playersInOrder[playerPosition];
-        player.StartTurn(Begin);
+        player.StartTurn(() => AreaInstructions(player, logged));
+    }
 
-        void Begin()
+    protected virtual void AreaInstructions(Player player, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => player.EndTurn());
+        if (dataFile.useSheets)
         {
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => player.EndTurn());
-            if (dataFile.useSheets)
-            {
-                stepCounter = -1;
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
-                player.PopStack();
-            }
+            stepCounter = -1;
+            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
         }
     }
 
