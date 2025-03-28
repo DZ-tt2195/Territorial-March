@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using MyBox;
 using System.Collections;
-using Photon.Pun;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -278,7 +277,7 @@ public class Card : PhotonCompatible
         List<string> actions = new() { $"Don't Play" };
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToCardNums(player.cardsInHand, true));
+            player.AIDecision(Next, player.ConvertToHundred(player.cardsInHand, true));
         }
         else
         {
@@ -286,7 +285,7 @@ public class Card : PhotonCompatible
             player.ChooseCardOnScreen(player.cardsInHand, (player.cardsInHand.Count) == 0 ? "You can't play any cards." : "What to play?", null);
         }
 
-        player.ChooseButton(new() { "Decline" }, new(0, 250), $"Choose a card to play with {this.name}.", Next);
+        player.ChooseButton(actions, new(0, 250), $"Choose a card to play with {this.name}.", Next);
         player.ChooseCardOnScreen(player.cardsInHand, "", null);
 
         void Next()
@@ -317,18 +316,11 @@ public class Card : PhotonCompatible
 
     protected void DiscardCard(Player player, CardData dataFile, int logged)
     {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
         if (player.cardsInHand.Count <= dataFile.cardAmount)
             DiscardAll(player, dataFile, logged);
         else
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, false, logged));
-    }
-
-    void DiscardAll(Player player, CardData dataFile, int logged)
-    {
-        for (int i = 0; i < player.cardsInHand.Count; i++)
-            player.DiscardPlayerCard(player.cardsInHand[0], logged);
-        PostDiscarding(player, true, dataFile, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
     }
 
     protected void AskDiscard(Player player, CardData dataFile, int logged)
@@ -341,21 +333,37 @@ public class Card : PhotonCompatible
         Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, true, logged));
     }
 
+    void DiscardAll(Player player, CardData dataFile, int logged)
+    {
+        for (int i = 0; i < player.cardsInHand.Count; i++)
+            player.DiscardPlayerCard(player.cardsInHand[0], logged);
+        PostDiscarding(player, true, dataFile, logged);
+        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+    }
+
     void ChooseDiscard(Player player, CardData dataFile, bool optional, int logged)
     {
-        string parathentical = (dataFile.cardAmount == 1) ? "" : $" ({sideCounter}/{dataFile.cardAmount})";
+        string parathentical = (dataFile.cardAmount == 1) ? "" : $" ({sideCounter+1}/{dataFile.cardAmount})";
         List<string> actions = new();
-        if (optional) actions.Add("Don't Play");
+        if (optional) actions.Add("Don't Discard");
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToCardNums(player.cardsInHand, true));
+            player.AIDecision(Next, player.ConvertToHundred(player.cardsInHand, optional));
         }
         else
         {
             if (optional)
-                player.ChooseButton(new() { "Decline" }, new(0, 250), $"Discard a card to {this.name}{parathentical}.", Next);
-            player.ChooseCardOnScreen(player.cardsInHand, "", null);
+            {
+                player.ChooseButton(actions, new(0, 250), $"Discard a card to {this.name}{parathentical}.", Next);
+                player.ChooseCardOnScreen(player.cardsInHand, "", null);
+            }
+            else
+            {
+                if (player.cardsInHand.Count == 1)
+                    Log.inst.undoToThis = null;
+                player.ChooseCardOnScreen(player.cardsInHand, "", Next);
+            }
         }
 
         void Next()
@@ -365,6 +373,7 @@ public class Card : PhotonCompatible
             {
                 Card toPlay = player.cardsInHand[convertedChoice];
                 player.DiscardPlayerCard(toPlay, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
                 PostDiscarding(player, true, dataFile, logged);
 
                 if (sideCounter == dataFile.cardAmount)
@@ -379,8 +388,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (optional)
-                    Log.inst.AddTextRPC(player, $"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
                 PostDiscarding(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
@@ -390,6 +398,368 @@ public class Card : PhotonCompatible
     }
 
     protected virtual void PostDiscarding(Player player, bool success, CardData dataFile, int logged)
+    {
+    }
+
+    #endregion
+
+    #region Advance
+
+    protected void AdvanceTroop(Player player, CardData dataFile, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, logged));
+    }
+
+    void ChooseAdvanceOne(Player player, CardData dataFile, int logged)
+    {
+        string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter+1}/{dataFile.troopAmount})";
+
+        List<int> canAdvance = new();
+        for (int i = 0; i<3; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (troop > 0)
+                canAdvance.Add(i);
+        }
+
+        if (player.myType == PlayerType.Bot)
+        {
+            player.AIDecision(Next, player.ConvertToHundred(canAdvance, false));
+        }
+        else
+        {
+            if (canAdvance.Count == 1)
+                Log.inst.undoToThis = null;
+            player.ChooseTroopDisplay(canAdvance, $"Advance a troop with {this.name}{parathentical}.", Next);
+        }
+
+        void Next()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, dataFile, convertedChoice, logged));
+            }
+            else
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't advance any Troop with {this.name}.", LogAdd.Personal, logged);
+                PostAdvance(player, false, dataFile, logged);
+
+                if (!mayStopEarly)
+                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+        }
+    }
+
+    void ChooseAdvanceTwo(Player player, CardData dataFile, int chosenTroop, int logged)
+    {
+        List<int> newPositions = new();
+        if (chosenTroop == 0)
+        {
+            newPositions.Add(1);
+            newPositions.Add(2);
+        }
+        else
+        {
+            Log.inst.undoToThis = null;
+            newPositions.Add(3);
+        }
+
+        if (player.myType == PlayerType.Bot)
+            player.AIDecision(Resolve, player.ConvertToHundred(newPositions, false));
+        else
+            player.ChooseTroopDisplay(newPositions, "Where to advance this troop?", Resolve);
+
+        void Resolve()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+                player.MoveTroopRPC(chosenTroop, convertedChoice, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+
+            if (sideCounter == dataFile.troopAmount)
+            {
+                PostAdvance(player, true, dataFile, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+            else
+            {
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, logged));
+            }
+        }
+    }
+
+    protected virtual void PostAdvance(Player player, bool success, CardData dataFile, int logged)
+    {
+    }
+
+    #endregion
+
+    #region Retreat
+
+    protected void RetreatTroop(Player player, CardData dataFile, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+    }
+
+    protected void AskRetreat(Player player, CardData dataFile, int logged)
+    {
+        mayStopEarly = true;
+        int canRetreat = 0;
+        for (int i = 1; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            canRetreat += troop;
+        }
+
+        if (canRetreat < dataFile.troopAmount)
+            return;
+
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, true, logged));
+    }
+
+    void ChooseRetreatOne(Player player, CardData dataFile, bool optional, int logged)
+    {
+        string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.troopAmount})";
+        List<string> actions = new();
+        List<int> canRetreat = new();
+        if (optional)
+        {
+            actions.Add("Don't Retreat");
+            canRetreat.Add(-1);
+        }
+
+        for (int i = 1; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (troop > 0)
+                canRetreat.Add(i);
+        }
+
+        if (player.myType == PlayerType.Bot)
+        {
+            player.AIDecision(Next, player.ConvertToHundred(canRetreat, optional));
+        }
+        else
+        {
+            if (optional)
+            {
+                player.ChooseButton(actions, new(0, 250), $"Retreat a troop with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canRetreat, "", null);
+            }
+            else
+            {
+                if (player.cardsInHand.Count == 1)
+                    Log.inst.undoToThis = null;
+                player.ChooseTroopDisplay(canRetreat, $"Retreat a troop with {this.name}{parathentical}.", Next);
+            }
+        }
+
+        void Next()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, dataFile, convertedChoice, logged));
+            }
+            else
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't retreat any Troop with {this.name}.", LogAdd.Personal, logged);
+                PostRetreat(player, false, dataFile, logged);
+
+                if (!mayStopEarly)
+                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+        }
+    }
+
+    void ChooseRetreatTwo(Player player, CardData dataFile, int chosenTroop, int logged)
+    {
+        List<int> newPositions = new();
+        if (chosenTroop == 3)
+        {
+            newPositions.Add(1);
+            newPositions.Add(2);
+        }
+        else
+        {
+            newPositions.Add(0);
+        }
+
+        if (player.myType == PlayerType.Bot)
+        {
+            player.AIDecision(Resolve, newPositions);
+        }
+        else
+        {
+            if (newPositions.Count == 1)
+                Log.inst.undoToThis = null;
+            player.ChooseTroopDisplay(newPositions, "Where to retreat this troop?", Resolve);
+        }
+
+        void Resolve()
+        {
+            player.MoveTroopRPC(chosenTroop, player.choice, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+
+            if (sideCounter == dataFile.troopAmount)
+            {
+                PostRetreat(player, true, dataFile, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+            else
+            {
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+            }
+        }
+    }
+
+    protected virtual void PostRetreat(Player player, bool success, CardData dataFile, int logged)
+    {
+    }
+
+    #endregion
+
+    #region +Scout
+
+    protected void AddScout(Player player, CardData dataFile, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, logged));
+    }
+
+    void ChooseAddScout(Player player, CardData dataFile, int logged)
+    {
+        string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
+        List<int> canChoose = new() { 0, 1, 2, 3 };
+
+        if (player.myType == PlayerType.Bot)
+            player.AIDecision(Next, player.ConvertToHundred(canChoose, false));
+        else
+            player.ChooseTroopDisplay(canChoose, "Add a scout to an Area.", Next);
+
+        void Next()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+                player.ChangeScoutRPC(convertedChoice, 1, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+
+            if (sideCounter == dataFile.scoutAmount)
+            {
+                PostAddScout(player, dataFile, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+            else
+            {
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, logged));
+            }
+        }
+    }
+
+    protected virtual void PostAddScout(Player player, CardData dataFile, int logged)
+    {
+    }
+
+    #endregion
+
+    #region -Scout
+
+    protected void LoseScout(Player player, CardData dataFile, int logged)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+    }
+
+    protected void AskLoseScout(Player player, CardData dataFile, int logged)
+    {
+        mayStopEarly = true;
+        int canLose = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            canLose += scout;
+        }
+
+        if (canLose < dataFile.scoutAmount)
+            return;
+
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, true, logged));
+    }
+
+    void ChooseLoseScout(Player player, CardData dataFile, bool optional, int logged)
+    {
+        string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
+        List<string> actions = new();
+        List<int> canLose = new();
+        if (optional)
+        {
+            actions.Add("Don't Retreat");
+            canLose.Add(-1);
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (scout > 0)
+                canLose.Add(i);
+        }
+
+        if (player.myType == PlayerType.Bot)
+        {
+            player.AIDecision(Next, player.ConvertToHundred(canLose, optional));
+        }
+        else
+        {
+            if (optional)
+            {
+                player.ChooseButton(actions, new(0, 250), $"Lose a scout with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canLose, "", null);
+            }
+            else
+            {
+                if (player.cardsInHand.Count == 1)
+                    Log.inst.undoToThis = null;
+                player.ChooseTroopDisplay(canLose, $"Lose a scout with {this.name}{parathentical}.", Next);
+            }
+        }
+
+        void Next()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+            {
+                player.ChangeScoutRPC(convertedChoice, -1, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+
+                if (sideCounter == dataFile.scoutAmount)
+                {
+                    PostLoseScout(player, true, dataFile, logged);
+                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                }
+                else
+                {
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, false, logged));
+                }
+            }
+            else
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't lose any Scout with {this.name}.", LogAdd.Personal, logged);
+                PostLoseScout(player, false, dataFile, logged);
+
+                if (!mayStopEarly)
+                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            }
+        }
+    }
+
+    protected virtual void PostLoseScout(Player player, bool success, CardData dataFile, int logged)
     {
     }
 

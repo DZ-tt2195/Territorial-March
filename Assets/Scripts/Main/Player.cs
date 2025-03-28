@@ -479,13 +479,23 @@ public class Player : PhotonCompatible
         }
     }
 
-    public List<int> ConvertToCardNums(List<Card> allCards, bool optional)
+    public List<int> ConvertToHundred(List<Card> listOfCards, bool optional)
     {
         List<int> newList = new();
         if (optional)
             newList.Add(-1);
-        for (int i = 0; i < allCards.Count; i++)
+        for (int i = 0; i < listOfCards.Count; i++)
             newList.Add(i + 100);
+        return newList;
+    }
+
+    public List<int> ConvertToHundred(List<int> listOfInts, bool optional)
+    {
+        List<int> newList = new();
+        if (optional)
+            newList.Add(-1);
+        for (int i = 0; i < listOfInts.Count; i++)
+            newList.Add(listOfInts[i] + 100);
         return newList;
     }
 
@@ -645,6 +655,47 @@ public class Player : PhotonCompatible
         inReaction.Add(() => Destroy(slider.gameObject));
         inReaction.Add(action);
         Manager.inst.Instructions(changeInstructions);
+    }
+
+    public void ChooseTroopDisplay(List<int> possibleChoices, string changeInstructions, Action action)
+    {
+        IEnumerator haveButtonsEnabled = KeepCardsOn();
+        inReaction.Add(Disable);
+        if (action != null)
+        {
+            inReaction.Add(action);
+            Manager.inst.Instructions(changeInstructions);
+        }
+
+        if (possibleChoices.Count == 0 && action != null)
+            PopStack();
+        else if (possibleChoices.Count == 1 && action != null)
+            DecisionMade(possibleChoices[0]);
+        else
+            StartCoroutine(haveButtonsEnabled);
+
+        IEnumerator KeepCardsOn()
+        {
+            float elapsedTime = 0f;
+            while (elapsedTime < 0.3f)
+            {
+                for (int j = 0; j < possibleChoices.Count; j++)
+                {
+                    TroopDisplay nextDisplay = myDisplays[possibleChoices[j]];
+                    int number = nextDisplay.AreaPosition + 100;
+                    ButtonToggle(nextDisplay.button, nextDisplay.border.gameObject, true, number);
+                }
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        void Disable()
+        {
+            StopCoroutine(haveButtonsEnabled);
+            foreach (TroopDisplay nextDisplay in myDisplays)
+                ButtonToggle(nextDisplay.button, nextDisplay.border.gameObject, false);
+        }
     }
 
     void ButtonToggle(Button button, GameObject border, bool enable, int newNumber = -1)

@@ -361,6 +361,7 @@ public class Manager : PhotonCompatible
 
             void EveryoneDoArea(AreaCard area)
             {
+                Log.inst.AddTextRPC(null, $"Resolve Area {area.areaNumber} - {area.name}", LogAdd.Public);
                 foreach (Player player in playersInOrder)
                     area.DoFunction(() => area.ResolveArea(player.playerPosition, 0), player.realTimePlayer);
             }
