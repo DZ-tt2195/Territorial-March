@@ -42,16 +42,16 @@
       "\"\""
     ],
     [
-      "C",
-      "\"+1 Scout in an Area you control.\"",
-      "4",
+      "Secure",
+      "\"+2 Scout in an Area you control.\"",
+      "2",
       "FALSE",
       "AddScout",
       "",
       "",
       "",
       "",
-      "",
+      "2",
       "",
       "\"\""
     ],
@@ -70,7 +70,7 @@
       "\"\""
     ],
     [
-      "E",
+      "Explore",
       "\"+1 Scout in each Area you have 0 Troop in.\"",
       "2",
       "FALSE",
@@ -78,13 +78,13 @@
       "",
       "",
       "",
-      "",
-      "",
+      "0",
+      "1",
       "",
       "\"\""
     ],
     [
-      "F",
+      "Reposition",
       "\"+1 Troop, -1 Troop. +1 Scout, -1 Scout.\"",
       "6",
       "TRUE",

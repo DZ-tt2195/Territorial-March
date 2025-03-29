@@ -1146,24 +1146,16 @@ MonoBehaviour:
     description: 
     color: {r: 1, g: 1, b: 1, a: 0}
   - keywordVariations:
-    - Power
-    description: 
-    color: {r: 1, g: 1, b: 1, a: 0}
-  - keywordVariations:
-    - Health
-    description: 
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - keywordVariations:
     - Coin
     description: 
     color: {r: 0, g: 0, b: 0, a: 0}
   - keywordVariations:
-    - StunImage
-    description: Can't attack this turn.
+    - Troop
+    description: 
     color: {r: 0, g: 0, b: 0, a: 0}
   - keywordVariations:
-    - ShieldedImage
-    description: Can't lose Health or Power this turn.
+    - Scout
+    description: 
     color: {r: 0, g: 0, b: 0, a: 0}
   tooltipText: {fileID: 1424826929}
 --- !u!1 &938853686

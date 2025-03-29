@@ -37,7 +37,7 @@ public class AreaCard : Card
         if (dataFile.useSheets)
         {
             stepCounter = -1;
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         }
     }
 
@@ -49,12 +49,12 @@ public class AreaCard : Card
     protected void ControlThis(Player player, CardData dataFile, int logged)
     {
         if (player.areasControlled[areaNumber])
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void ControlThisNot(Player player, CardData dataFile, int logged)
     {
         if (!player.areasControlled[areaNumber])
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 }

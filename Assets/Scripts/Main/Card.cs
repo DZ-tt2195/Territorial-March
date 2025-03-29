@@ -136,7 +136,7 @@ public class Card : PhotonCompatible
 
     #region Misc
 
-    protected void Advance(bool undo, Player player, CardData dataFile, int logged)
+    protected void DoNextStep(bool undo, Player player, CardData dataFile, int logged)
     {
         if (dataFile.useSheets)
         {
@@ -175,31 +175,31 @@ public class Card : PhotonCompatible
     protected void DrawCard(Player player, CardData dataFile, int logged)
     {
         player.DrawCardRPC(dataFile.cardAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void AddCoin(Player player, CardData dataFile, int logged)
     {
         player.ResourceRPC(Resource.Coin, dataFile.coinAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void LoseCoin(Player player, CardData dataFile, int logged)
     {
         player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void AddPlay(Player player, CardData dataFile, int logged)
     {
         player.ResourceRPC(Resource.Play, dataFile.playAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void LosePlay(Player player, CardData dataFile, int logged)
     {
         player.ResourceRPC(Resource.Play, -1 * dataFile.playAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     #endregion
@@ -219,27 +219,27 @@ public class Card : PhotonCompatible
     protected void SetToHand(Player player, CardData dataFile, int logged)
     {
         SetAllStats(player.cardsInHand.Count, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void SetToCoin(Player player, CardData dataFile, int logged)
     {
         SetAllStats(player.resourceDict[Resource.Coin], dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void SetToControl(Player player, CardData dataFile, int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
         SetAllStats(areasControlled, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void SetToNotControl(Player player, CardData dataFile, int logged)
     {
         int areasNotControlled = player.areasControlled.Count(control => !control);
         SetAllStats(areasNotControlled, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     #endregion
@@ -249,25 +249,25 @@ public class Card : PhotonCompatible
     protected void HandOrMore(Player player, CardData dataFile, int logged)
     {
         if (player.cardsInHand.Count >= dataFile.miscAmount)
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void HandOrLess(Player player, CardData dataFile, int logged)
     {
         if (player.cardsInHand.Count <= dataFile.miscAmount)
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void CoinOrMore(Player player, CardData dataFile, int logged)
     {
         if (player.resourceDict[Resource.Coin] >= dataFile.miscAmount)
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     protected void CoinOrLess(Player player, CardData dataFile, int logged)
     {
         if (player.resourceDict[Resource.Coin] <= dataFile.miscAmount)
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     #endregion
@@ -279,7 +279,7 @@ public class Card : PhotonCompatible
         if (player.cardsInHand.Count == 0)
         {
             Log.inst.AddTextRPC(player, $"{player.name} can't play anything.", LogAdd.Personal, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         }
         else
         {
@@ -309,7 +309,7 @@ public class Card : PhotonCompatible
                 Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
 
                 PostPlaying(player, toPlay, dataFile, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
 
                 player.DiscardPlayerCard(toPlay, -1);
                 toPlay.ResolveCard(player, logged + 1);
@@ -317,7 +317,7 @@ public class Card : PhotonCompatible
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
         }
     }
@@ -354,7 +354,7 @@ public class Card : PhotonCompatible
         for (int i = 0; i < player.cardsInHand.Count; i++)
             player.DiscardPlayerCard(player.cardsInHand[0], logged);
         PostDiscarding(player, true, dataFile, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     void ChooseDiscard(Player player, CardData dataFile, bool optional, int logged)
@@ -395,7 +395,7 @@ public class Card : PhotonCompatible
                 if (sideCounter == dataFile.cardAmount)
                 {
                     PostDiscarding(player, true, dataFile, logged);
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
                 }
                 else
                 {
@@ -408,7 +408,7 @@ public class Card : PhotonCompatible
                 PostDiscarding(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
         }
     }
@@ -497,7 +497,7 @@ public class Card : PhotonCompatible
                 PostAdvance(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
         }
     }
@@ -531,7 +531,7 @@ public class Card : PhotonCompatible
             if (sideCounter == dataFile.troopAmount)
             {
                 PostAdvance(player, true, dataFile, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
             else
             {
@@ -625,7 +625,7 @@ public class Card : PhotonCompatible
                 PostRetreat(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
         }
     }
@@ -662,7 +662,7 @@ public class Card : PhotonCompatible
             if (sideCounter == dataFile.troopAmount)
             {
                 PostRetreat(player, true, dataFile, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
             else
             {
@@ -680,7 +680,7 @@ public class Card : PhotonCompatible
 
     #region +Scout
 
-    protected List<int> CanAdd(Player player)
+    protected virtual List<int> CanAdd(Player player)
     {
         return new() { 0, 1, 2, 3};
     }
@@ -711,7 +711,7 @@ public class Card : PhotonCompatible
             if (sideCounter == dataFile.scoutAmount)
             {
                 PostAddScout(player, dataFile, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
             else
             {
@@ -729,7 +729,7 @@ public class Card : PhotonCompatible
 
     #region -Scout
 
-    protected (int, List<int>) CanLose(Player player)
+    protected virtual (int, List<int>) CanLose(Player player)
     {
         int total = 0;
         List<int> canLose = new();
@@ -802,7 +802,7 @@ public class Card : PhotonCompatible
                 if (sideCounter == dataFile.scoutAmount)
                 {
                     PostLoseScout(player, true, dataFile, logged);
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
                 }
                 else
                 {
@@ -816,7 +816,7 @@ public class Card : PhotonCompatible
                 PostLoseScout(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
-                    Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                    Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
         }
     }
@@ -865,7 +865,7 @@ public class Card : PhotonCompatible
             if (player.choice == 0)
             {
                 ifDone();
-                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
             }
             else
             {

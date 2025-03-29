@@ -44,10 +44,10 @@
       "FALSE",
       "AddCoin",
       "",
+      "2",
       "",
       "",
-      "",
-      "",
+      "3",
       "",
       "\"\""
     ],
@@ -104,7 +104,7 @@
       "\"\""
     ],
     [
-      "6",
+      "Progress",
       "\"+1 Troop from Area 1.",
       "FALSE",
       "AdvanceTroop",
