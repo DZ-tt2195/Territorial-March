@@ -659,7 +659,7 @@ public class Player : PhotonCompatible
 
     public void ChooseTroopDisplay(List<int> possibleChoices, string changeInstructions, Action action)
     {
-        IEnumerator haveButtonsEnabled = KeepCardsOn();
+        IEnumerator haveButtonsEnabled = KeepDisplaysOn();
         inReaction.Add(Disable);
         if (action != null)
         {
@@ -674,16 +674,19 @@ public class Player : PhotonCompatible
         else
             StartCoroutine(haveButtonsEnabled);
 
-        IEnumerator KeepCardsOn()
+        IEnumerator KeepDisplaysOn()
         {
             float elapsedTime = 0f;
             while (elapsedTime < 0.3f)
             {
                 for (int j = 0; j < possibleChoices.Count; j++)
                 {
-                    TroopDisplay nextDisplay = myDisplays[possibleChoices[j]];
-                    int number = nextDisplay.AreaPosition + 100;
-                    ButtonToggle(nextDisplay.button, nextDisplay.border.gameObject, true, number);
+                    if (possibleChoices[j] >= 0)
+                    {
+                        TroopDisplay nextDisplay = myDisplays[possibleChoices[j]];
+                        int number = nextDisplay.AreaPosition + 100;
+                        ButtonToggle(nextDisplay.button, nextDisplay.border.gameObject, true, number);
+                    }
                 }
                 elapsedTime += Time.deltaTime;
                 yield return null;

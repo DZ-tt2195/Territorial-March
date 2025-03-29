@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerCard : Card
 {
-    public CardData dataFile { get; private set; }
+    public PlayerCardData dataFile { get; private set; }
 
     protected override void Awake()
     {
@@ -21,8 +21,9 @@ public class PlayerCard : Card
         return dataFile;
     }
 
-    public virtual void ActivateThis(Player player, int logged)
+    public virtual void ResolveCard(Player player, int logged)
     {
+        player.ResourceRPC(Resource.Coin, this.dataFile.coinBonus, logged);
         if (dataFile.useSheets)
         {
             stepCounter = -1;

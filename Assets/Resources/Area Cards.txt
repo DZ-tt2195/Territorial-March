@@ -107,7 +107,7 @@
       "6",
       "\"+1 Troop from Area 1.",
       "FALSE",
-      "",
+      "AdvanceTroop",
       "",
       "",
       "",

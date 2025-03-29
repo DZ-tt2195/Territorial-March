@@ -305,18 +305,20 @@ public class Card : PhotonCompatible
             int convertedChoice = player.choice - 100;
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
-                Card toPlay = player.cardsInHand[convertedChoice];
+                PlayerCard toPlay = (PlayerCard) player.cardsInHand[convertedChoice];
                 Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
-                PostPlaying(player, (PlayerCard)toPlay, dataFile, logged);
+
+                PostPlaying(player, toPlay, dataFile, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
 
                 player.DiscardPlayerCard(toPlay, -1);
-                //toPlay.OnPlayEffect(this, logged+1);
+                toPlay.ResolveCard(player, logged + 1);
             }
             else
             {
-                Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Remember, logged);
+                Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
             }
-            Log.inst.RememberStep(this, StepType.Revert, () => Advance(false, player, dataFile, logged));
         }
     }
 
@@ -419,34 +421,47 @@ public class Card : PhotonCompatible
 
     #region Advance
 
+    protected virtual (int, List<int>) CanAdvance(Player player)
+    {
+        int total = 0;
+        List<int> canAdvance = new();
+        for (int i = 0; i < 3; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (troop > 0)
+            {
+                total += troop;
+                canAdvance.Add(i);
+            }
+        }
+        return (total, canAdvance);
+    }
+
     protected void AdvanceTroop(Player player, CardData dataFile, int logged)
     {
+        (int total, List<int> canAdvance) = CanAdvance(player);
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, false, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
     }
 
     protected void AskAdvance(Player player, CardData dataFile, int logged)
     {
+        mayStopEarly = true;
+        (int total, List<int> canAdvance) = CanAdvance(player);
+        if (total < dataFile.troopAmount)
+            return;
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, true, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, true, logged));
     }
 
-    void ChooseAdvanceOne(Player player, CardData dataFile, bool optional, int logged)
+    void ChooseAdvanceOne(Player player, CardData dataFile, List<int> canAdvance, bool optional, int logged)
     {
         string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter+1}/{dataFile.troopAmount})";
         List<string> actions = new();
-        List<int> canAdvance = new();
         if (optional)
         {
             actions.Add("Don't Advance");
-            canAdvance.Add(-1);
-        }
-
-        for (int i = 0; i<3; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (troop > 0)
-                canAdvance.Add(i);
+            canAdvance.Insert(0, -1);
         }
 
         if (player.myType == PlayerType.Bot)
@@ -520,7 +535,8 @@ public class Card : PhotonCompatible
             }
             else
             {
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, false, logged));
+                (int total, List<int> canAdvance) = CanAdvance(player);
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
             }
         }
     }
@@ -533,45 +549,47 @@ public class Card : PhotonCompatible
 
     #region Retreat
 
+    protected virtual (int, List<int>) CanRetreat(Player player)
+    {
+        int total = 0;
+        List<int> canRetreat = new();
+        for (int i = 1; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (troop > 0)
+            {
+                total += troop;
+                canRetreat.Add(i);
+            }
+        }
+        return (total, canRetreat);
+    }
+
     protected void RetreatTroop(Player player, CardData dataFile, int logged)
     {
+        (int total, List<int> canRetreat) = CanRetreat(player);
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
     }
 
     protected void AskRetreat(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        int canRetreat = 0;
-        for (int i = 1; i < 4; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            canRetreat += troop;
-        }
-
-        if (canRetreat < dataFile.troopAmount)
+        (int total, List<int> canRetreat) = CanRetreat(player);
+        if (total < dataFile.troopAmount)
             return;
-
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, true, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, true, logged));
     }
 
-    void ChooseRetreatOne(Player player, CardData dataFile, bool optional, int logged)
+    void ChooseRetreatOne(Player player, CardData dataFile, List<int> canRetreat, bool optional, int logged)
     {
         string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.troopAmount})";
         List<string> actions = new();
-        List<int> canRetreat = new();
         if (optional)
         {
             actions.Add("Don't Retreat");
-            canRetreat.Add(-1);
-        }
-
-        for (int i = 1; i < 4; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (troop > 0)
-                canRetreat.Add(i);
+            canRetreat.Insert(0, -1);
         }
 
         if (player.myType == PlayerType.Bot)
@@ -648,7 +666,8 @@ public class Card : PhotonCompatible
             }
             else
             {
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+                (int total, List<int> canRetreat) = CanRetreat(player);
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
             }
         }
     }
@@ -661,21 +680,26 @@ public class Card : PhotonCompatible
 
     #region +Scout
 
-    protected void AddScout(Player player, CardData dataFile, int logged)
+    protected List<int> CanAdd(Player player)
     {
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, logged));
+        return new() { 0, 1, 2, 3};
     }
 
-    void ChooseAddScout(Player player, CardData dataFile, int logged)
+    protected void AddScout(Player player, CardData dataFile, int logged)
+    {
+        List<int> canAdd = CanAdd(player);
+        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
+    }
+
+    void ChooseAddScout(Player player, CardData dataFile, List<int> canAdd, int logged)
     {
         string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
-        List<int> canChoose = new() { 0, 1, 2, 3 };
 
         if (player.myType == PlayerType.Bot)
-            player.AIDecision(Next, player.ConvertToHundred(canChoose, false));
+            player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
         else
-            player.ChooseTroopDisplay(canChoose, "Add a scout to an Area.", Next);
+            player.ChooseTroopDisplay(canAdd, "Add a scout to an Area.", Next);
 
         void Next()
         {
@@ -691,7 +715,8 @@ public class Card : PhotonCompatible
             }
             else
             {
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, logged));
+                List<int> canAdd = CanAdd(player);
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
             }
         }
     }
@@ -704,45 +729,47 @@ public class Card : PhotonCompatible
 
     #region -Scout
 
+    protected (int, List<int>) CanLose(Player player)
+    {
+        int total = 0;
+        List<int> canLose = new();
+        for (int i = 0; i < 4; i++)
+        {
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (scout > 0)
+            {
+                total += scout;
+                canLose.Add(i);
+            }
+        }
+        return (total, canLose);
+    }
+
     protected void LoseScout(Player player, CardData dataFile, int logged)
     {
+        (int total, List<int> canLose) = CanLose(player);
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, false, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
     }
 
     protected void AskLoseScout(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        int canLose = 0;
-        for (int i = 0; i < 4; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            canLose += scout;
-        }
-
-        if (canLose < dataFile.scoutAmount)
+        (int total, List<int> canLose) = CanLose(player);
+        if (total < dataFile.scoutAmount)
             return;
-
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, true, logged));
+        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, true, logged));
     }
 
-    void ChooseLoseScout(Player player, CardData dataFile, bool optional, int logged)
+    void ChooseLoseScout(Player player, CardData dataFile, List<int> canLose, bool optional, int logged)
     {
         string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
         List<string> actions = new();
-        List<int> canLose = new();
         if (optional)
         {
-            actions.Add("Don't Retreat");
-            canLose.Add(-1);
-        }
-
-        for (int i = 0; i < 4; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (scout > 0)
-                canLose.Add(i);
+            actions.Add("Don't Lose");
+            canLose.Insert(0, -1);
         }
 
         if (player.myType == PlayerType.Bot)
@@ -779,7 +806,8 @@ public class Card : PhotonCompatible
                 }
                 else
                 {
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, false, logged));
+                    (int total, List<int> canLose) = CanLose(player);
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
                 }
             }
             else
