@@ -40,7 +40,7 @@ using System;
 }
 
 public enum PlayerType { Human, Bot }
-public enum Resource { Coin, Play }
+public enum Resource { Coin, Action }
 
 public class Player : PhotonCompatible
 {
@@ -147,7 +147,7 @@ public class Player : PhotonCompatible
         resourceDict = new()
         {
             { Resource.Coin, 0 },
-            { Resource.Play, 0 },
+            { Resource.Action, 0 },
         };
         UpdateTexts();
 
@@ -340,15 +340,15 @@ public class Player : PhotonCompatible
         return (troopArray[area], scoutArray[area]);
     }
 
-    public void UpdateAreaControl(int area, bool control)
+    public void UpdateAreaControl(int area, bool control, int logged)
     {
         if (this.areasControlled[area] != control)
         {
             this.areasControlled[area] = control;
             if (control)
-                Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal);
+                Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
-                Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal);
+                Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
         }
         UpdateTexts();
     }
@@ -383,7 +383,7 @@ public class Player : PhotonCompatible
 
     public void UpdateTexts()
     {
-        resourceText.text = KeywordTooltip.instance.EditText($"{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Play]} Play");
+        resourceText.text = KeywordTooltip.instance.EditText($"{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Action]} Play");
 
         foreach (TroopDisplay display in myDisplays)
         {
@@ -558,7 +558,7 @@ public class Player : PhotonCompatible
             }
             else
             {
-                int answer = cardsInHand.Count * 3 + resourceDict[Resource.Play] * 3 + resourceDict[Resource.Coin];
+                int answer = cardsInHand.Count * 3 + resourceDict[Resource.Action] * 3 + resourceDict[Resource.Coin];
                 for (int i = 0; i < 4; i++)
                 {
                     answer += scoutArray[i] * 2;

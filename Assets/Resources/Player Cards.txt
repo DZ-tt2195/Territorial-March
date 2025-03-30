@@ -7,43 +7,15 @@
       "playInstructions",
       "cardAmount",
       "coinAmount",
-      "playAmount",
+      "actionAmount",
       "troopAmount",
       "scoutAmount",
       "miscAmount",
       "artCredit"
     ],
     [
-      "Switcheroo",
-      "Switch your Troop and Scout in Areas 2 and 3.",
-      "6",
-      "FALSE",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "\"\""
-    ],
-    [
-      "B",
-      "\"+2 Plays. At end of turn, -2 Plays.\"",
-      "6",
-      "FALSE",
-      "AddPlay/LosePlay",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "\"\""
-    ],
-    [
       "Secure",
-      "\"+2 Scout in an Area you control.\"",
+      "\"+2 Scout, both in one Area you control.\"",
       "2",
       "FALSE",
       "AddScout",
@@ -53,21 +25,7 @@
       "",
       "2",
       "",
-      "\"\""
-    ],
-    [
-      "D",
-      "\"+1 Card per Area you control.\"",
-      "3",
-      "TRUE",
-      "SetToControl/DrawCard",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "1",
-      "\"\""
+      "B"
     ],
     [
       "Explore",
@@ -81,7 +39,49 @@
       "0",
       "1",
       "",
-      "\"\""
+      "B"
+    ],
+    [
+      "D",
+      "\"+1 Card per Area you control.\"",
+      "3",
+      "TRUE",
+      "SetToControl/DrawCard",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "B"
+    ],
+    [
+      "E",
+      "\"+1 Action per Area you control.\"",
+      "3",
+      "TRUE",
+      "SetToControl/AddAction",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "B"
+    ],
+    [
+      "Switcheroo",
+      "Switch your Troop and Scout in Areas 2 and 3.",
+      "6",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "B"
     ],
     [
       "Reposition",
@@ -95,7 +95,21 @@
       "1",
       "1",
       "",
-      "\"\""
+      "B"
+    ],
+    [
+      "Occupy",
+      "For the rest of this turn, you gain control over one Area.",
+      "6",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "B"
     ]
   ]
 }

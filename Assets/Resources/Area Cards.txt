@@ -6,7 +6,7 @@
       "playInstructions",
       "cardAmount",
       "coinAmount",
-      "playAmount",
+      "actionAmount",
       "troopAmount",
       "scoutAmount",
       "miscAmount",
@@ -14,7 +14,7 @@
     ],
     [
       "Camp",
-      "\"+2 Cards, +2 Plays. You may spend Actions to play cards.\"",
+      "\"+2 Card, +2 Action. Then, repeat as desired: You may spend 1 Action to play 1 Card.\"",
       "FALSE",
       "",
       "2",
@@ -23,11 +23,11 @@
       "",
       "",
       "",
-      "\"\""
+      "A"
     ],
     [
       "Region",
-      "\"Any amount of times: You may pay 4 Coin for +1 Troop.\"",
+      "\"Repeat as desired: You may pay 4 Coin for +1 Troop.\"",
       "FALSE",
       "",
       "",
@@ -36,7 +36,7 @@
       "1",
       "",
       "",
-      "\"\""
+      "A"
     ],
     [
       "Placeholder",
@@ -46,10 +46,10 @@
       "",
       "2",
       "",
-      "",
       "3",
       "",
-      "\"\""
+      "",
+      "A"
     ],
     [
       "2",
@@ -62,7 +62,7 @@
       "",
       "",
       "-2",
-      "\"\""
+      "A"
     ],
     [
       "3",
@@ -75,7 +75,7 @@
       "",
       "",
       "1",
-      "\"\""
+      "A"
     ],
     [
       "4",
@@ -83,25 +83,25 @@
       "TRUE",
       "ControlThisNot/LoseCoin",
       "",
-      "-2",
+      "2",
       "",
       "",
       "",
       "",
-      "\"\""
+      "A"
     ],
     [
       "5",
-      "\"You may spend 2 Plays for +2 Troop.\"",
+      "\"You may spend 2 Action for +2 Troop.\"",
       "TRUE",
-      "AskLosePlay/AdvanceTroop",
+      "AskLoseAction/AdvanceTroop",
       "",
       "",
       "2",
       "2",
       "",
       "",
-      "\"\""
+      "A"
     ],
     [
       "Progress",
@@ -111,10 +111,10 @@
       "",
       "",
       "",
-      "",
-      "",
       "1",
-      "\"\""
+      "",
+      "",
+      "A"
     ]
   ]
 }

@@ -503,7 +503,7 @@ public class Manager : PhotonCompatible
         {
             (Player controller, int highest) = CalculateControl(i);
             foreach (Player player in playersInOrder)
-                player.UpdateAreaControl(i, player == controller);
+                player.UpdateAreaControl(i, player == controller, 0);
         }
     }
 

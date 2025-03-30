@@ -20,7 +20,7 @@ public class CardData
     public bool useSheets;
     public int cardAmount;
     public int coinAmount;
-    public int playAmount;
+    public int actionAmount;
     public int scoutAmount;
     public int troopAmount;
     public int miscAmount;
@@ -197,19 +197,19 @@ public class CarryVariables : MonoBehaviour
             {
                 if (columnIndex.TryGetValue(field.Name, out int index))
                 {
-                    string sheetValue = data[i][index];
-
-                    if (field.FieldType == typeof(int))
+                    try
                     {
-                        field.SetValue(nextData, StringToInt(sheetValue));
+                        string sheetValue = data[i][index];
+                        if (field.FieldType == typeof(int))
+                            field.SetValue(nextData, StringToInt(sheetValue));
+                        else if (field.FieldType == typeof(bool))
+                            field.SetValue(nextData, StringToBool(sheetValue));
+                        else if (field.FieldType == typeof(string))
+                            field.SetValue(nextData, sheetValue);
                     }
-                    else if (field.FieldType == typeof(bool))
+                    catch
                     {
-                        field.SetValue(nextData, StringToBool(sheetValue));
-                    }
-                    else if (field.FieldType == typeof(string))
-                    {
-                        field.SetValue(nextData, sheetValue);
+                        Debug.LogError($"{field.Name}, {index}");
                     }
                 }
             }

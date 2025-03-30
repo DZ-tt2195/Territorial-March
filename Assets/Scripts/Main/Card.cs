@@ -29,6 +29,7 @@ public class Card : PhotonCompatible
         border = this.transform.Find("Border").GetComponent<Image>();
         button = GetComponent<Button>();
         layout = GetComponent<CardLayout>();
+
         Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
         this.transform.localScale = Vector3.Lerp(Vector3.one, canvas.transform.localScale, 0.5f);
     }
@@ -44,6 +45,7 @@ public class Card : PhotonCompatible
 
     protected void GetInstructions(CardData dataFile)
     {
+        this.name = dataFile.cardName;
         if (dataFile.useSheets)
         {
             activationSteps = SpliceString(dataFile.cardInstructions);
@@ -190,15 +192,15 @@ public class Card : PhotonCompatible
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
-    protected void AddPlay(Player player, CardData dataFile, int logged)
+    protected void AddAction(Player player, CardData dataFile, int logged)
     {
-        player.ResourceRPC(Resource.Play, dataFile.playAmount, logged);
+        player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
-    protected void LosePlay(Player player, CardData dataFile, int logged)
+    protected void LoseAction(Player player, CardData dataFile, int logged)
     {
-        player.ResourceRPC(Resource.Play, -1 * dataFile.playAmount, logged);
+        player.ResourceRPC(Resource.Action, -1 * dataFile.actionAmount, logged);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
@@ -208,12 +210,23 @@ public class Card : PhotonCompatible
 
     protected void SetAllStats(int number, CardData dataFile)
     {
-        float multiplier = (dataFile.miscAmount > 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
-        dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.playAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
+        if (dataFile.miscAmount == 0)
+        {
+            dataFile.cardAmount = 0;
+            dataFile.coinAmount = 0;
+            dataFile.scoutAmount = 0;
+            dataFile.actionAmount = 0;
+            dataFile.troopAmount = 0;
+        }
+        else
+        {
+            float multiplier = (dataFile.miscAmount > 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
+            dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
+            dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
+            dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
+            dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
+            dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
+        }
     }
 
     protected void SetToHand(Player player, CardData dataFile, int logged)
@@ -225,6 +238,12 @@ public class Card : PhotonCompatible
     protected void SetToCoin(Player player, CardData dataFile, int logged)
     {
         SetAllStats(player.resourceDict[Resource.Coin], dataFile);
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+    }
+
+    protected void SetToAction(Player player, CardData dataFile, int logged)
+    {
+        SetAllStats(player.resourceDict[Resource.Action], dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
@@ -267,6 +286,18 @@ public class Card : PhotonCompatible
     protected void CoinOrLess(Player player, CardData dataFile, int logged)
     {
         if (player.resourceDict[Resource.Coin] <= dataFile.miscAmount)
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+    }
+
+    protected void ActionOrMore(Player player, CardData dataFile, int logged)
+    {
+        if (player.resourceDict[Resource.Action] >= dataFile.miscAmount)
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+    }
+
+    protected void ActionOrLess(Player player, CardData dataFile, int logged)
+    {
+        if (player.resourceDict[Resource.Action] <= dataFile.miscAmount)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
@@ -841,19 +872,19 @@ public class Card : PhotonCompatible
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
     }
 
-    protected void AskLosePlay(Player player, CardData dataFile, int logged)
+    protected void AskLoseAction(Player player, CardData dataFile, int logged)
     {
-        if (player.resourceDict[Resource.Play] < dataFile.playAmount)
+        if (player.resourceDict[Resource.Action] < dataFile.actionAmount)
             return;
 
-        Action action = () => LosePlay(player, dataFile, logged);
-        if (dataFile.playAmount == 0)
+        Action action = () => LoseAction(player, dataFile, logged);
+        if (dataFile.actionAmount == 0)
             action();
         else
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.playAmount} Play to {this.name}?", dataFile, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Play to {this.name}?", dataFile, logged));
     }
 
-    void ChoosePay(Player player, Action ifDone, string text, CardData dataFile, int logged)
+    protected void ChoosePay(Player player, Action ifDone, string text, CardData dataFile, int logged)
     {
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, new List<int> { 0, 1 });
@@ -863,14 +894,9 @@ public class Card : PhotonCompatible
         void Next()
         {
             if (player.choice == 0)
-            {
                 ifDone();
-                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-            }
             else
-            {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't use {this.name}.", LogAdd.Personal, logged);
-            }
         }
     }
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Secure : PlayerCard
+public class Occupy : PlayerCard
 {
     protected override void Awake()
     {
@@ -21,24 +21,24 @@ public class Secure : PlayerCard
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
         else
-            player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area you control.", Next);
+            player.ChooseTroopDisplay(canAdd, $"Choose an Area to control.", Next);
 
         void Next()
         {
             int convertedChoice = player.choice - 100;
             if (convertedChoice >= 0)
-                player.ChangeScoutRPC(convertedChoice, dataFile.scoutAmount, logged);
+                player.UpdateAreaControl(convertedChoice, true, logged);
         }
     }
 
     protected override List<int> CanAdd(Player player)
     {
-        List<int> controlThis = new();
+        List<int> notControlThis = new();
         for (int i = 0; i < 4; i++)
         {
-            if (player.areasControlled[i])
-                controlThis.Add(i);
+            if (!player.areasControlled[i])
+                notControlThis.Add(i);
         }
-        return controlThis;
+        return notControlThis;
     }
 }

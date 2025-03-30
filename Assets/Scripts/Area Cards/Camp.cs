@@ -13,7 +13,7 @@ public class Camp : AreaCard
     {
         base.AreaInstructions(player, logged);
         player.DrawCardRPC(dataFile.cardAmount, logged);
-        player.ResourceRPC(Resource.Play, dataFile.playAmount, logged);
+        player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
         Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
     }
 
@@ -21,7 +21,7 @@ public class Camp : AreaCard
     {
         if (cardToPlay != null)
         {
-            player.ResourceRPC(Resource.Play, -1, -1);
+            player.ResourceRPC(Resource.Action, -1, -1);
             Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
         }
     }
@@ -29,7 +29,7 @@ public class Camp : AreaCard
     void Loop(Player player, int logged)
     {
         Log.inst.undoToThis = null;
-        if (player.resourceDict[Resource.Play] >= 1)
+        if (player.resourceDict[Resource.Action] >= 1)
             PlayCard(player, GetFile(), logged);
         player.PopStack();
     }

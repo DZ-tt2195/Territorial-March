@@ -1157,6 +1157,10 @@ MonoBehaviour:
     - Scout
     description: 
     color: {r: 0, g: 0, b: 0, a: 0}
+  - keywordVariations:
+    - Action
+    description: 
+    color: {r: 0, g: 0, b: 0, a: 0}
   tooltipText: {fileID: 1424826929}
 --- !u!1 &938853686
 GameObject:
