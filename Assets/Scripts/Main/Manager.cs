@@ -161,12 +161,12 @@ public class Manager : PhotonCompatible
 
     void ReadySetup()
     {
-        List<int> usedAreas = ChooseCards(CarryVariables.inst.areaCardFiles, new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
+        List<int> usedAreas = ChooseAreas(new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
         usedAreas = usedAreas.Shuffle();
         for (int i = 0; i < usedAreas.Count; i++)
         {
             GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
-            DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, i, usedAreas[i]), RpcTarget.AllBuffered);
+            DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, usedAreas[i], i), RpcTarget.AllBuffered);
         }
 
         storePlayers.Shuffle();
@@ -195,8 +195,12 @@ public class Manager : PhotonCompatible
         nextPlayer.AssignInfo(position, (PlayerType)playerType);
     }
 
-    List<int> ChooseCards(List<CardData> possibleCards, List<int> forcedCards, int totalCards)
+    List<int> ChooseAreas(List<int> forcedCards, int totalCards)
     {
+        List<CardData> listOfData = new();
+        foreach (CardData data in CarryVariables.inst.areaCardFiles)
+            listOfData.Add(data);
+
         List<int> chosenCards = new();
         foreach (int nextForce in forcedCards)
         {
@@ -204,17 +208,11 @@ public class Manager : PhotonCompatible
                 chosenCards.Add(nextForce);
         }
 
-        if (chosenCards.Count == totalCards)
-            return chosenCards;
-
-        foreach (int nextForce in forcedCards)
-            possibleCards.RemoveAll(card => chosenCards.Contains(nextForce));
-
         while (chosenCards.Count < totalCards)
         {
-            int randomNumber = UnityEngine.Random.Range(0, possibleCards.Count);
-            chosenCards.Add(randomNumber);
-            possibleCards.RemoveAt(randomNumber);
+            int randomNumber = UnityEngine.Random.Range(0, listOfData.Count);
+            if (!chosenCards.Contains(randomNumber))
+                chosenCards.Add(randomNumber);
         }
         return chosenCards;
     }
@@ -224,23 +222,25 @@ public class Manager : PhotonCompatible
     {
         GameObject nextObject = PhotonView.Find(ID).gameObject;
         CardData data = CarryVariables.inst.areaCardFiles[fileNumber];
+        Log.inst.AddTextRPC(null, $"Area {areaNumber + 1}: {data.cardName}", LogAdd.Personal, 0);
 
         nextObject.name = data.cardName;
         nextObject.transform.SetParent(canvas.transform);
+
         switch (areaNumber)
         {
             case 0:
                 nextObject.transform.localPosition = new(-800, 500);
-                return;
+                break;
             case 1:
                 nextObject.transform.localPosition = new(-400, 600);
-                return;
+                break;
             case 2:
                 nextObject.transform.localPosition = new(0, 400);
-                return;
+                break;
             case 3:
                 nextObject.transform.localPosition = new(400, 500);
-                return;
+                break;
         }
 
         Type type = Type.GetType(data.cardName.Replace(" ", ""));
@@ -255,15 +255,28 @@ public class Manager : PhotonCompatible
         listOfAreas.Insert(areaNumber, card);
     }
 
-    #endregion
-
-#region Master Deck
-
     void FirstDraw()
     {
         foreach (Player player in playersInOrder)
-            player.DoFunction(() => player.InitialHand(2), player.realTimePlayer);
+            DoFunction(() => InitialHand(player.playerPosition, 2), player.realTimePlayer);
     }
+
+    [PunRPC]
+    void InitialHand(int playerPosition, int cards)
+    {
+        Player player = playersInOrder[playerPosition];
+        player.StartTurn(() => ThisFunction());
+
+        void ThisFunction()
+        {
+            Log.inst.RememberStep(player, StepType.UndoPoint, () => player.EndTurn());
+            player.DrawCardRPC(cards, 0);
+        }
+    }
+
+    #endregion
+
+#region Master Deck
 
     void SendOutCards()
     {
@@ -361,7 +374,7 @@ public class Manager : PhotonCompatible
 
             void EveryoneDoArea(AreaCard area)
             {
-                Log.inst.AddTextRPC(null, $"Resolve Area {area.areaNumber} - {area.name}", LogAdd.Public);
+                Log.inst.AddTextRPC(null, $"Resolve Area {area.areaNumber+1} - {area.name}", LogAdd.Public);
                 foreach (Player player in playersInOrder)
                     area.DoFunction(() => area.ResolveArea(player.playerPosition, 0), player.realTimePlayer);
             }
@@ -369,10 +382,11 @@ public class Manager : PhotonCompatible
     }
 
     [PunRPC]
-    internal void CompletedTurn()
+    internal void CompletedTurn(int playerPosition)
     {
         if (PhotonNetwork.IsConnected)
         {
+            Debug.Log($"step {currentStep}: {playersInOrder[playerPosition].name} is done");
             waitingOnPlayers--;
 
             if (waitingOnPlayers == 0)

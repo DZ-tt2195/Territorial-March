@@ -32,7 +32,7 @@ public class NextStep
         if (this.stepType == StepType.UndoPoint && stepType != StepType.UndoPoint)
         {
             Log.inst.undoToThis = null;
-            Debug.Log("undopoint canceled");
+            //Debug.Log("undopoint canceled");
         }
 
         this.stepType = stepType;
@@ -101,6 +101,9 @@ public class Log : PhotonCompatible
 
     public void AddTextRPC(Player player, string logText, LogAdd type, int indent = 0)
     {
+        if (player != null && player.myType == PlayerType.Bot && player.simulating)
+            return;
+
         switch (type)
         {
             case LogAdd.Personal:
@@ -218,14 +221,11 @@ public class Log : PhotonCompatible
     public void InvokeUndo(Player player, NextStep toThisPoint)
     {
         LogText targetText = undosInLog.Find(line => line.step == toThisPoint);
-
-        int counter = 0;
-        for (int i = RT.transform.childCount; i > targetText.transform.GetSiblingIndex(); i--)
+        if (targetText != null)
         {
-            Destroy(RT.transform.GetChild(i - 1).gameObject);
-            counter++;
+            for (int i = RT.transform.childCount; i > targetText.transform.GetSiblingIndex(); i--)
+                Destroy(RT.transform.GetChild(i - 1).gameObject);
         }
-
         ChangeScrolling();
         scroll.value = 0;
 

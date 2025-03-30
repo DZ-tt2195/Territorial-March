@@ -18,8 +18,6 @@ public class ForceAreas : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        PlayerPrefs.SetInt("Area 1", -1);
-        PlayerPrefs.SetInt("Area 2", -1);
     }
 
     private void Start()
@@ -52,7 +50,7 @@ public class ForceAreas : MonoBehaviour
             blankImages.Clear();
             Transform blankCards = transform.GetChild(0).Find("Blanks");
 
-            for (int i = 0; i<blankCards.childCount; i++)
+            for (int i = 0; i < blankCards.childCount; i++)
             {
                 Button nextButton = blankCards.GetChild(i).gameObject.GetComponent<Button>();
                 try
@@ -64,10 +62,11 @@ public class ForceAreas : MonoBehaviour
                     nextButton.onClick.RemoveAllListeners();
                     nextButton.onClick.AddListener(() => SendName(data));
                 }
-                finally
+                catch
                 {
-                    nextButton.gameObject.SetActive(false);
+
                 }
+                nextButton.gameObject.SetActive(false);
             }
         }
         else

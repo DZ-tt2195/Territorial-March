@@ -21,7 +21,7 @@ public class Camp : AreaCard
     {
         if (cardToPlay != null)
         {
-            player.ResourceRPC(Resource.Action, -1, -1);
+            player.ResourceRPC(Resource.Action, -1, logged);
             Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
         }
     }

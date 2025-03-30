@@ -152,8 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d20f735eb5c8c4fa2ae33af5f817b27a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  troopArray: 00000000000000000000000000000000
-  scoutArray: 00000000000000000000000000000000
+  areasControlled: 00000000
   cardsInHand: []
   privateDeck: {fileID: 1788577225800641295}
   privateDiscard: {fileID: 6166565596222799526}

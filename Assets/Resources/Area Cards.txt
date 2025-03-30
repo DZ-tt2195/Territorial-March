@@ -14,7 +14,7 @@
     ],
     [
       "Camp",
-      "\"+2 Card, +2 Action. Then, repeat as desired: You may spend 1 Action to play 1 Card.\"",
+      "\"+2 Card, +2 Action. Then, repeat as desired: Spend 1 Action to play 1 Card.\"",
       "FALSE",
       "",
       "2",
@@ -27,7 +27,7 @@
     ],
     [
       "Region",
-      "\"Repeat as desired: You may pay 4 Coin for +1 Troop.\"",
+      "\"Repeat as desired: Pay 4 Coin for +1 Troop.\"",
       "FALSE",
       "",
       "",
@@ -49,6 +49,19 @@
       "3",
       "",
       "",
+      "A"
+    ],
+    [
+      "1",
+      "\"If you have 0 Card in hand, +2 Card, otherwise +1 Card.\"",
+      "TRUE",
+      "DrawCard/HandOrLess/DrawCard",
+      "1",
+      "",
+      "",
+      "",
+      "",
+      "1",
       "A"
     ],
     [

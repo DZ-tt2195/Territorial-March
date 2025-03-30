@@ -26,6 +26,7 @@ public class AreaCard : Card
     {
         this.dataFile = CarryVariables.inst.areaCardFiles[fileNumber];
         GetInstructions(dataFile);
+        layout.FillInCards(dataFile, 1);
     }
 
     [PunRPC]
@@ -47,7 +48,7 @@ public class AreaCard : Card
 
     protected virtual void AreaInstructions(Player player, int logged)
     {
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => player.EndTurn());
+        Log.inst.RememberStep(player, StepType.UndoPoint, () => player.EndTurn());
         if (dataFile.useSheets)
         {
             stepCounter = -1;

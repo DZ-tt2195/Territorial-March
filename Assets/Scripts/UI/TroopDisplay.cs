@@ -6,10 +6,8 @@ using TMPro;
 
 public class TroopDisplay : PhotonCompatible
 {
-    [SerializeField] private int playerPosition;
-    public int PlayerPosition => playerPosition;
-    [SerializeField] private int areaPosition;
-    public int AreaPosition => areaPosition;
+    public int playerPositon { get; private set; }
+    public int areaPosition { get; private set; }
 
     TMP_Text myText;
     public Button button { get; private set; }
@@ -28,6 +26,12 @@ public class TroopDisplay : PhotonCompatible
     private void FixedUpdate()
     {
         try { this.border.SetAlpha(Manager.inst.opacity); } catch { }
+    }
+
+    public void AssignInfo(int playerPosition, int areaPosition)
+    {
+        this.playerPositon = playerPositon;
+        this.areaPosition = areaPosition;
     }
 
     public void UpdateText(string text, Color color)

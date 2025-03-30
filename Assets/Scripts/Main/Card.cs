@@ -407,9 +407,7 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (player.cardsInHand.Count == 1)
-                    Log.inst.undoToThis = null;
-                player.ChooseCardOnScreen(player.cardsInHand, "", Next);
+                player.ChooseCardOnScreen(player.cardsInHand, $"Discard a card to {this.name}{parathentical}.", Next);
             }
         }
 
@@ -508,8 +506,6 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (canAdvance.Count <= 1)
-                    Log.inst.undoToThis = null;
                 player.ChooseTroopDisplay(canAdvance, $"Advance a troop with {this.name}{parathentical}.", Next);
             }
         }
@@ -543,7 +539,6 @@ public class Card : PhotonCompatible
         }
         else
         {
-            Log.inst.undoToThis = null;
             newPositions.Add(3);
         }
 
@@ -636,8 +631,6 @@ public class Card : PhotonCompatible
             }
             else
             {
-                if (canRetreat.Count <= 1)
-                    Log.inst.undoToThis = null;
                 player.ChooseTroopDisplay(canRetreat, $"Retreat a troop with {this.name}{parathentical}.", Next);
             }
         }
@@ -680,8 +673,6 @@ public class Card : PhotonCompatible
         }
         else
         {
-            if (newPositions.Count == 1)
-                Log.inst.undoToThis = null;
             player.ChooseTroopDisplay(newPositions, "Where to retreat this troop?", Resolve);
         }
 

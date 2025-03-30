@@ -20,8 +20,11 @@ public class CardSelect : MonoBehaviour
 
         chooseButton = transform.Find("Choose").GetComponent<Button>();
         chooseButton.onClick.AddListener(() => ForceAreas.instance.ChooseFromImages(this));
+    }
 
-        if (PlayerPrefs.HasKey(this.name))
+    private void Start()
+    {
+        if (PlayerPrefs.HasKey(this.name) && PlayerPrefs.GetInt(this.name) >= 0)
             SetCardImage(CarryVariables.inst.areaCardFiles[PlayerPrefs.GetInt(this.name)]);
         else
             SetCardImage(null);
@@ -29,7 +32,8 @@ public class CardSelect : MonoBehaviour
 
     public void SetCardImage(CardData data)
     {
-        PlayerPrefs.SetInt(this.name, CarryVariables.inst.areaCardFiles.IndexOf(data));
-        layout.FillInCards(data, data == null ? 0 : 1);
+        int number = CarryVariables.inst.areaCardFiles.IndexOf(data);
+        PlayerPrefs.SetInt(this.name, number);
+        layout.FillInCards(data, number == -1 ? 0 : 1);
     }
 }

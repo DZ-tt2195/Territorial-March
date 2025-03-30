@@ -77,7 +77,12 @@ public class Player : PhotonCompatible
     Action firstAction;
 
     [Foldout("AI", true)]
-    public bool simulating { get; private set; }
+    private bool _simulating;
+    public bool simulating
+    {
+        get { return _simulating; }
+        private set { Debug.Log($"{this.name} simulating - {value}"); _simulating = value; }
+    }
     List<DecisionChain> chainsToResolve = new();
     List<DecisionChain> finishedChains = new();
     int[] controlNumbers = new int[4];
@@ -126,13 +131,16 @@ public class Player : PhotonCompatible
         if (PhotonNetwork.IsConnected)
             realTimePlayer = PhotonNetwork.PlayerList[pv.OwnerActorNr - 1];
 
+        myDisplays = new();
         for (int i = 0; i<4; i++)
         {
             TroopDisplay display = Instantiate(CarryVariables.inst.troopDisplayPrefab);
             myDisplays.Add(display);
+            display.AssignInfo(this.playerPosition, i);
+
             display.transform.SetParent(Manager.inst.canvas.transform);
             display.transform.localScale = Vector3.one;
-            display.transform.localPosition = new(-800 + i * 400, 225 + i * 125);
+            display.transform.localPosition = new(-800 + (i * 400), 225 - (playerPosition * 125));
         }
 
         myButton = Instantiate(CarryVariables.inst.playerButtonPrefab);
@@ -159,10 +167,10 @@ public class Player : PhotonCompatible
                 Invoke(nameof(MoveScreen), 0.2f);
                 pv.Owner.NickName = this.name;
             }
+            Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
         }
     }
 
-    [PunRPC]
     internal void InitialHand(int starting)
     {
         DrawCardRPC(starting, 0);
@@ -179,7 +187,7 @@ public class Player : PhotonCompatible
         foreach (int nextNum in cardIDs)
         {
             GameObject obj = PhotonView.Find(nextNum).gameObject;
-            obj.transform.parent.SetParent(privateDeck);
+            obj.transform.SetParent(privateDeck);
         }
     }
 
@@ -387,8 +395,8 @@ public class Player : PhotonCompatible
 
         foreach (TroopDisplay display in myDisplays)
         {
-            (int troop, int scout) = CalcTroopScout(display.AreaPosition);
-            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout", areasControlled[display.AreaPosition] ? Color.yellow : Color.white);
+            (int troop, int scout) = CalcTroopScout(display.areaPosition);
+            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout", areasControlled[display.areaPosition] ? Color.yellow : Color.white);
         }
     }
 
@@ -398,12 +406,11 @@ public class Player : PhotonCompatible
 
     public void StartTurn(Action action)
     {
+        currentChain = null;
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
-
-        firstAction = action;
-        action();
+        this.DoFunction(() => this.ChangeButtonColor(false));
 
         for (int i = 0; i<4; i++)
         {
@@ -416,27 +423,34 @@ public class Player : PhotonCompatible
 
         if (myType == PlayerType.Bot)
         {
+            simulating = true;
+            firstAction = action;
+            action();
+
             currentChain = new(Log.inst.historyStack[0]);
             chainsToResolve.Add(currentChain);
+
             StartCoroutine(FindAIRoute());
+            PopStack();
         }
         else
         {
             simulating = false;
-            this.DoFunction(() => this.ChangeButtonColor(false));
             StartCoroutine(Wait());
+
             IEnumerator Wait()
             {
-                yield return new WaitForSeconds(1f);
+                if (!PhotonNetwork.IsConnected || PhotonNetwork.CurrentRoom.MaxPlayers == 1)
+                    yield return new WaitForSeconds(1);
+
+                firstAction = action;
+                action();
                 PopStack();
             }
         }
 
         IEnumerator FindAIRoute()
         {
-            simulating = true;
-            PopStack();
-
             while (chainsToResolve.Count > 0)
                 yield return null;
 
@@ -446,11 +460,15 @@ public class Player : PhotonCompatible
             string answer = $"Best chain: {currentChain.math} -> ";
             foreach (int nextInt in currentChain.decisions)
                 answer += $"{nextInt} ";
+            Debug.Log(answer);
 
             finishedChains.Clear();
-            Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
             chainTracker = -1;
             simulating = false;
+
+            Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
+            DoFunction(() => ChangeButtonColor(true));
+            Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
         }
     }
 
@@ -514,7 +532,7 @@ public class Player : PhotonCompatible
         }
         else
         {
-            if (Log.inst.undosInLog.Count >= 1)
+            if (Log.inst.undosInLog.Count >= 2)
                 ChooseButton(new() { "End Turn" }, Vector3.zero, "Last chance to undo anything.", Done);
             else
                 Done();
@@ -522,12 +540,6 @@ public class Player : PhotonCompatible
 
         void Done()
         {
-            if (myType == PlayerType.Human)
-            {
-                Log.inst.DisplayUndoBar(false);
-                Log.inst.undosInLog.Clear();
-            }
-
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
@@ -536,12 +548,19 @@ public class Player : PhotonCompatible
 
             DoFunction(() => ChangeButtonColor(true));
             Manager.inst.Instructions("Waiting on other players...");
-            Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(), RpcTarget.MasterClient);
+
+            if (myType == PlayerType.Human)
+            {
+                Log.inst.DisplayUndoBar(false);
+                Log.inst.undosInLog.Clear();
+                Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
+            }
         }
     }
 
     void FinishChain()
     {
+        Log.inst.AddTextRPC(this, "end chain", LogAdd.Personal, 0);
         currentChain.complete = true;
         chainsToResolve.Remove(currentChain);
         finishedChains.Add(currentChain);
@@ -579,7 +598,7 @@ public class Player : PhotonCompatible
 
     public void DoBotTurn()
     {
-        if (this.myType == PlayerType.Bot)
+        if (this.myType == PlayerType.Bot && firstAction != null)
         {
             firstAction();
             PopStack();
@@ -617,11 +636,19 @@ public class Player : PhotonCompatible
         }
 
         if (listOfCards.Count == 0 && action != null)
+        {
+            Log.inst.undoToThis = null;
             PopStack();
+        }
         else if (listOfCards.Count == 1 && action != null)
+        {
+            Log.inst.undoToThis = null;
             DecisionMade(0);
+        }
         else
+        {
             StartCoroutine(haveCardsEnabled);
+        }
 
         IEnumerator KeepCardsOn()
         {
@@ -668,12 +695,19 @@ public class Player : PhotonCompatible
         }
 
         if (possibleChoices.Count == 0 && action != null)
+        {
+            Log.inst.undoToThis = null;
             PopStack();
+        }
         else if (possibleChoices.Count == 1 && action != null)
+        {
+            Log.inst.undoToThis = null;
             DecisionMade(possibleChoices[0]);
+        }
         else
+        {
             StartCoroutine(haveButtonsEnabled);
-
+        }
         IEnumerator KeepDisplaysOn()
         {
             float elapsedTime = 0f;
@@ -684,7 +718,7 @@ public class Player : PhotonCompatible
                     if (possibleChoices[j] >= 0)
                     {
                         TroopDisplay nextDisplay = myDisplays[possibleChoices[j]];
-                        int number = nextDisplay.AreaPosition + 100;
+                        int number = nextDisplay.areaPosition + 100;
                         ButtonToggle(nextDisplay.button, nextDisplay.border.gameObject, true, number);
                     }
                 }
