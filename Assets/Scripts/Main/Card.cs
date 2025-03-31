@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Photon.Pun;
+using System.Reflection;
 
 public class Card : PhotonCompatible
 {
@@ -19,7 +20,7 @@ public class Card : PhotonCompatible
     protected List<string> activationSteps = new();
     protected int stepCounter;
     protected int sideCounter;
-    bool mayStopEarly;
+    protected bool mayStopEarly;
 
     protected override void Awake()
     {
@@ -73,6 +74,11 @@ public class Card : PhotonCompatible
     public virtual CardData GetFile()
     {
         return null;
+    }
+
+    public virtual int DoMath(Player player)
+    {
+        return 0;
     }
 
     #endregion
@@ -138,9 +144,10 @@ public class Card : PhotonCompatible
 
     #region Misc
 
+    [PunRPC]
     protected void DoNextStep(bool undo, Player player, CardData dataFile, int logged)
     {
-        if (dataFile.useSheets)
+        if (dataFile.useSheets && logged >= 0)
         {
             if (undo)
             {
@@ -174,41 +181,61 @@ public class Card : PhotonCompatible
 
     #region +/- Resources
 
-    protected void DrawCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) DrawCard(Player player, CardData dataFile, int logged)
     {
-        player.DrawCardRPC(dataFile.cardAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.DrawCardRPC(dataFile.cardAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.cardAmount*3);
     }
 
-    protected void AddCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddCoin(Player player, CardData dataFile, int logged)
     {
-        player.ResourceRPC(Resource.Coin, dataFile.coinAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ResourceRPC(Resource.Coin, dataFile.coinAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.coinAmount);
     }
 
-    protected void LoseCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseCoin(Player player, CardData dataFile, int logged)
     {
-        player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, -1 * dataFile.coinAmount);
     }
 
-    protected void AddAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddAction(Player player, CardData dataFile,  int logged)
     {
-        player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.actionAmount * 3);
     }
 
-    protected void LoseAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseAction(Player player, CardData dataFile,  int logged)
     {
-        player.ResourceRPC(Resource.Action, -1 * dataFile.actionAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ResourceRPC(Resource.Action, -1 * dataFile.actionAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.actionAmount*-3);
     }
 
     #endregion
 
     #region Setters
 
-    protected void SetAllStats(int number, CardData dataFile)
+    protected int SetAllStats(int number, CardData dataFile)
     {
         if (dataFile.miscAmount == 0)
         {
@@ -217,6 +244,7 @@ public class Card : PhotonCompatible
             dataFile.scoutAmount = 0;
             dataFile.actionAmount = 0;
             dataFile.troopAmount = 0;
+            return 0;
         }
         else
         {
@@ -226,96 +254,122 @@ public class Card : PhotonCompatible
             dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
+            return (int)Mathf.Floor(number * multiplier);
         }
     }
 
-    protected void SetToHand(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToHand(Player player, CardData dataFile,  int logged)
     {
         SetAllStats(player.cardsInHand.Count, dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
-    protected void SetToCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToCoin(Player player, CardData dataFile,  int logged)
     {
         SetAllStats(player.resourceDict[Resource.Coin], dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
-    protected void SetToAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToAction(Player player, CardData dataFile,  int logged)
     {
         SetAllStats(player.resourceDict[Resource.Action], dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
-    protected void SetToControl(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToControl(Player player, CardData dataFile,  int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
         SetAllStats(areasControlled, dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
-    protected void SetToNotControl(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToNotControl(Player player, CardData dataFile,  int logged)
     {
         int areasNotControlled = player.areasControlled.Count(control => !control);
         SetAllStats(areasNotControlled, dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
     #endregion
 
     #region Booleans
 
-    protected void HandOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) HandOrMore(Player player, CardData dataFile,  int logged)
     {
-        if (player.cardsInHand.Count >= dataFile.miscAmount)
+        bool answer = player.cardsInHand.Count >= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void HandOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) HandOrLess(Player player, CardData dataFile,  int logged)
     {
-        if (player.cardsInHand.Count <= dataFile.miscAmount)
+        bool answer = player.cardsInHand.Count <= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void CoinOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) CoinOrMore(Player player, CardData dataFile,  int logged)
     {
-        if (player.resourceDict[Resource.Coin] >= dataFile.miscAmount)
+        bool answer = player.resourceDict[Resource.Coin] >= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void CoinOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) CoinOrLess(Player player, CardData dataFile,  int logged)
     {
-        if (player.resourceDict[Resource.Coin] <= dataFile.miscAmount)
+        bool answer = player.resourceDict[Resource.Coin] <= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void ActionOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) ActionOrMore(Player player, CardData dataFile,  int logged)
     {
-        if (player.resourceDict[Resource.Action] >= dataFile.miscAmount)
+        bool answer = player.resourceDict[Resource.Action] >= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void ActionOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) ActionOrLess(Player player, CardData dataFile,  int logged)
     {
-        if (player.resourceDict[Resource.Action] <= dataFile.miscAmount)
+        bool answer = player.resourceDict[Resource.Action] <= dataFile.miscAmount;
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
     #endregion
 
     #region Play
 
-    protected void PlayCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) PlayCard(Player player, CardData dataFile, int logged)
     {
         if (player.cardsInHand.Count == 0)
         {
-            Log.inst.AddTextRPC(player, $"{player.name} can't play anything.", LogAdd.Personal, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            if (logged >= 0)
+            {
+                Log.inst.AddTextRPC(player, $"{player.name} can't play anything.", LogAdd.Personal, logged);
+                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            }
+            return (true, 0);
         }
         else
         {
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, logged));
+            if (logged >= 0)
+            {
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, logged));
+            }
         }
+        //return (true, 0);
     }
 
     void ChoosePlay(Player player, CardData dataFile, int logged)
@@ -361,23 +415,31 @@ public class Card : PhotonCompatible
 
     #region Discard
 
-    protected void DiscardCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) DiscardCard(Player player, CardData dataFile, int logged)
     {
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        if (player.cardsInHand.Count <= dataFile.cardAmount)
-            DiscardAll(player, dataFile, logged);
-        else
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, false, logged));
+        int maxDiscard = Mathf.Min(dataFile.cardAmount, player.cardsInHand.Count);
+
+        if (logged >= 0)
+        {
+            if (player.cardsInHand.Count <= dataFile.cardAmount)
+                DiscardAll(player, dataFile, logged);
+            else
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, false, logged));
+        }
+        return (true, -3*maxDiscard);
     }
 
-    protected void AskDiscard(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskDiscard(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        if (player.cardsInHand.Count < dataFile.cardAmount)
-            return;
-
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, true, logged));
+        bool answer = player.cardsInHand.Count >= dataFile.cardAmount;
+        if (answer && logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, true, logged));
+        }
+        return (answer, -3 * dataFile.cardAmount);
     }
 
     void DiscardAll(Player player, CardData dataFile, int logged)
@@ -466,21 +528,31 @@ public class Card : PhotonCompatible
         return (total, canAdvance);
     }
 
-    protected void AdvanceTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) AdvanceTroop(Player player, CardData dataFile, int logged)
     {
         (int total, List<int> canAdvance) = CanAdvance(player);
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
+        int maxAdvance = Mathf.Min(dataFile.troopAmount, total);
+
+        if (logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
+        }
+        return (true, maxAdvance);
     }
 
-    protected void AskAdvance(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskAdvance(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canAdvance) = CanAdvance(player);
-        if (total < dataFile.troopAmount)
-            return;
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, true, logged));
+        bool answer = total >= dataFile.troopAmount;
+
+        if (answer && logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, true, logged));
+        }
+        return (answer, 4 * dataFile.troopAmount);
     }
 
     void ChooseAdvanceOne(Player player, CardData dataFile, List<int> canAdvance, bool optional, int logged)
@@ -591,21 +663,31 @@ public class Card : PhotonCompatible
         return (total, canRetreat);
     }
 
-    protected void RetreatTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) RetreatTroop(Player player, CardData dataFile, int logged)
     {
         (int total, List<int> canRetreat) = CanRetreat(player);
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
+        int maxRetreat = Mathf.Min(dataFile.troopAmount, total);
+
+        if (logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
+        }
+        return (true, maxRetreat);
     }
 
-    protected void AskRetreat(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskRetreat(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canRetreat) = CanRetreat(player);
-        if (total < dataFile.troopAmount)
-            return;
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, true, logged));
+        bool answer = total >= dataFile.troopAmount;
+
+        if (answer && logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, true, logged));
+        }
+        return (answer, -4 * dataFile.troopAmount);
     }
 
     void ChooseRetreatOne(Player player, CardData dataFile, List<int> canRetreat, bool optional, int logged)
@@ -707,11 +789,15 @@ public class Card : PhotonCompatible
         return new() { 0, 1, 2, 3};
     }
 
-    protected void AddScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddScout(Player player, CardData dataFile, int logged)
     {
         List<int> canAdd = CanAdd(player);
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
+        if (logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
+        }
+        return (true, 2*dataFile.scoutAmount);
     }
 
     void ChooseAddScout(Player player, CardData dataFile, List<int> canAdd, int logged)
@@ -767,21 +853,29 @@ public class Card : PhotonCompatible
         return (total, canLose);
     }
 
-    protected void LoseScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseScout(Player player, CardData dataFile, int logged)
     {
         (int total, List<int> canLose) = CanLose(player);
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
+        if (logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
+        }
+        return (true, -2 * Mathf.Min(total, dataFile.scoutAmount));
     }
 
-    protected void AskLoseScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseScout(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canLose) = CanLose(player);
-        if (total < dataFile.scoutAmount)
-            return;
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, true, logged));
+        bool answer = total >= dataFile.scoutAmount;
+
+        if (answer && logged >= 0)
+        {
+            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, true, logged));
+        }
+        return (answer, -2 * dataFile.scoutAmount);
     }
 
     void ChooseLoseScout(Player player, CardData dataFile, List<int> canLose, bool optional, int logged)
@@ -851,28 +945,36 @@ public class Card : PhotonCompatible
 
     #region Ask Pay
 
-    protected void AskLoseCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseCoin(Player player, CardData dataFile, int logged)
     {
-        if (player.resourceDict[Resource.Coin] < dataFile.coinAmount)
-            return;
+        mayStopEarly = true;
+        bool answer = player.resourceDict[Resource.Coin] >= dataFile.coinAmount;
 
-        Action action = () => LoseCoin(player, dataFile, logged);
-        if (dataFile.coinAmount == 0)
-            action();
-        else
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
+        if (answer && logged >= 0)
+        {
+            Action action = () => LoseCoin(player, dataFile, logged);
+            if (dataFile.coinAmount == 0)
+                action();
+            else
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
+        }
+        return (answer, dataFile.coinAmount * -1);
     }
 
-    protected void AskLoseAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseAction(Player player, CardData dataFile, int logged)
     {
-        if (player.resourceDict[Resource.Action] < dataFile.actionAmount)
-            return;
+        mayStopEarly = true;
+        bool answer = player.resourceDict[Resource.Action] >= dataFile.actionAmount;
 
-        Action action = () => LoseAction(player, dataFile, logged);
-        if (dataFile.actionAmount == 0)
-            action();
-        else
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Play to {this.name}?", dataFile, logged));
+        if (answer && logged >= 0)
+        {
+            Action action = () => LoseAction(player, dataFile, logged);
+            if (dataFile.actionAmount == 0)
+                action();
+            else
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Play to {this.name}?", dataFile, logged));
+        }
+        return (answer, dataFile.actionAmount * -3);
     }
 
     protected void ChoosePay(Player player, Action ifDone, string text, CardData dataFile, int logged)

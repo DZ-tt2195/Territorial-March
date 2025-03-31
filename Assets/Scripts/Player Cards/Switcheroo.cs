@@ -25,4 +25,9 @@ public class Switcheroo : PlayerCard
         player.ChangeScoutRPC(1, area3Scout-area2Scout, -1);
         player.ChangeScoutRPC(2, area2Scout-area3Scout, -1);
     }
+
+    public override int DoMath(Player player)
+    {
+        return this.dataFile.coinBonus;
+    }
 }

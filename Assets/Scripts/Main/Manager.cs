@@ -386,7 +386,7 @@ public class Manager : PhotonCompatible
     {
         if (PhotonNetwork.IsConnected)
         {
-            Debug.Log($"step {currentStep}: {playersInOrder[playerPosition].name} is done");
+            //Debug.Log($"step {currentStep}: {playersInOrder[playerPosition].name} is done");
             waitingOnPlayers--;
 
             if (waitingOnPlayers == 0)

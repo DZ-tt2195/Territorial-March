@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Explore : PlayerCard
 {
@@ -11,11 +12,28 @@ public class Explore : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        for (int i = 0; i<4; i++)
+        foreach (int area in ToAddScout(player))
+            player.ChangeScoutRPC(area, GetFile().scoutAmount, logged);
+    }
+
+    public override int DoMath(Player player)
+    {
+        int answer = this.dataFile.coinAmount;
+        foreach (int area in ToAddScout(player))
+            answer += dataFile.scoutAmount * 2;
+
+        return answer;
+    }
+
+    List<int> ToAddScout(Player player)
+    {
+        List<int> canAdd = new();
+        for (int i = 0; i < 4; i++)
         {
             (int troop, int scout) = player.CalcTroopScout(i);
             if (troop == dataFile.troopAmount)
-                player.ChangeScoutRPC(i, GetFile().scoutAmount, logged);
+                canAdd.Add(i);
         }
+        return canAdd;
     }
 }

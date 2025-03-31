@@ -70,20 +70,6 @@
       "B"
     ],
     [
-      "Occupy",
-      "For the rest of this turn, you gain control over one Area.",
-      "5",
-      "FALSE",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "B"
-    ],
-    [
       "Switcheroo",
       "Switch your Troop and Scout in Areas 2 and 3.",
       "6",
@@ -109,6 +95,20 @@
       "1",
       "1",
       "",
+      "B"
+    ],
+    [
+      "F",
+      "\"+1 Coin per Card in your hand.\"",
+      "3",
+      "TRUE",
+      "SetToHand/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
       "B"
     ]
   ]

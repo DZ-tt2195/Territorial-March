@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using System.Reflection;
 
 public class PlayerCard : Card
 {
@@ -29,5 +31,23 @@ public class PlayerCard : Card
             stepCounter = -1;
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         }
+    }
+
+    public override int DoMath(Player player)
+    {
+        int answer = this.dataFile.coinAmount;
+        foreach (string next in activationSteps)
+        {
+            MethodInfo method = FindMethod(next);
+            if (method.ReturnType == typeof((bool, int)))
+            {
+                (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { false, player, -1 });
+                if (success)
+                    answer += effect;
+                else
+                    break;
+            }
+        }
+        return answer;
     }
 }

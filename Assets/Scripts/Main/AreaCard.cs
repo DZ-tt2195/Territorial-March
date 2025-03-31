@@ -56,55 +56,73 @@ public class AreaCard : Card
         }
     }
 
-    protected void ControlThis(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlThis(Player player, CardData dataFile, int logged)
     {
-        if (player.areasControlled[areaNumber])
+        bool answer = player.areasControlled[areaNumber];
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void ControlThisNot(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlThisNot(Player player, CardData dataFile, int logged)
     {
-        if (!player.areasControlled[areaNumber])
+        bool answer = !player.areasControlled[areaNumber];
+        if (answer && logged >= 0)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (answer, 0);
     }
 
-    protected void AddScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddScoutHere(Player player, CardData dataFile, int logged)
     {
-        player.ChangeScoutRPC(this.areaNumber, dataFile.scoutAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ChangeScoutRPC(this.areaNumber, dataFile.scoutAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.scoutAmount * 2);
     }
 
-    protected void LoseScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseScoutHere(Player player, CardData dataFile, int logged)
     {
-        player.ChangeScoutRPC(this.areaNumber, -1 * dataFile.scoutAmount, logged);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (logged >= 0)
+        {
+            player.ChangeScoutRPC(this.areaNumber, -1 * dataFile.scoutAmount, logged);
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        }
+        return (true, dataFile.scoutAmount * -2);
     }
 
-    protected void AskLoseScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseScoutHere(Player player, CardData dataFile, int logged)
     {
+        mayStopEarly = true;
         (int troop, int scout) = player.CalcTroopScout(this.areaNumber);
-        if (scout < dataFile.scoutAmount)
-            return;
+        bool answer = scout >= dataFile.scoutAmount;
 
-        Action action = () => LoseScoutHere(player, dataFile, logged);
-        if (dataFile.scoutAmount == 0)
-            action();
-        else
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber+1}?", dataFile, logged));
+        if (answer && logged >= 0)
+        {
+            Action action = () => LoseScoutHere(player, dataFile, logged);
+            if (dataFile.scoutAmount == 0)
+                action();
+            else
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber + 1}?", dataFile, logged));
+        }
+        return (answer, dataFile.scoutAmount * -2);
     }
 
-    protected void SetToTroopHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToTroopHere(Player player, CardData dataFile, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
         SetAllStats(troop, dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
-    protected void SetToScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToScoutHere(Player player, CardData dataFile, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
         SetAllStats(scout, dataFile);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, 0);
     }
 
     #endregion

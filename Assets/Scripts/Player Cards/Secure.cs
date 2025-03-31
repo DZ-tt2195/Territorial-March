@@ -41,4 +41,9 @@ public class Secure : PlayerCard
         }
         return controlThis;
     }
+
+    public override int DoMath(Player player)
+    {
+        return this.dataFile.coinBonus + ((CanAdd(player).Count >= 1) ? dataFile.scoutAmount * 2 : 0);
+    }
 }

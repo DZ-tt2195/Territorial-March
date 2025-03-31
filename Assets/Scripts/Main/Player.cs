@@ -472,16 +472,6 @@ public class Player : PhotonCompatible
         }
     }
 
-    public void NewChains(List<int> decisionNumbers)
-    {
-        foreach (int next in decisionNumbers)
-            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentStep));
-        chainsToResolve.Remove(currentChain);
-
-        FindNewestChain();
-        currentStep.action.Compile().Invoke();
-    }
-
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
         if (this.chainTracker < this.currentChain.decisions.Count)
@@ -495,6 +485,16 @@ public class Player : PhotonCompatible
         {
             this.NewChains(possibleDecisions);
         }
+    }
+
+    void NewChains(List<int> decisionNumbers)
+    {
+        foreach (int next in decisionNumbers)
+            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentStep));
+        chainsToResolve.Remove(currentChain);
+
+        FindNewestChain();
+        currentStep.action.Compile().Invoke();
     }
 
     public List<int> ConvertToHundred(List<Card> listOfCards, bool optional)

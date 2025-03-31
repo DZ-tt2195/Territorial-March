@@ -98,7 +98,7 @@ public class PhotonCompatible : MonoBehaviour
                 else
                     break;
             }
-            if (method != null && (method.ReturnType == typeof(void) || method.ReturnType == typeof(IEnumerator)))
+            if (method != null)
             {
                 methodDictionary.Add(methodName, method);
             }
@@ -111,18 +111,4 @@ public class PhotonCompatible : MonoBehaviour
         return method;
     }
 
-    public void DestroyMe()
-    {
-        try
-        {
-            if (!PhotonNetwork.IsConnected)
-                Destroy(this.gameObject);
-            else if (pv.AmOwner)
-                PhotonNetwork.Destroy(this.pv);
-        }
-        catch
-        {
-
-        }
-    }
 }
