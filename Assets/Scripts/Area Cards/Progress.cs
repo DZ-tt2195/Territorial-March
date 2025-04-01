@@ -9,7 +9,7 @@ public class Progress : AreaCard
         this.bottomType = this.GetType();
     }
 
-    protected override void AreaInstructions(Player player, int logged)
+    public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
         AdvanceTroop(player, GetFile(), logged);
@@ -18,6 +18,9 @@ public class Progress : AreaCard
     protected override (int, List<int>) CanAdvance(Player player)
     {
         (int troop, int scout) = player.CalcTroopScout(0);
-        return (troop, new List<int>() { 0 });
+        if (troop == 0)
+            return (0, new List<int>() { -1 });
+        else
+            return (troop, new List<int>() { 0 });
     }
 }

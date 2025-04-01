@@ -9,7 +9,7 @@ public class Region : AreaCard
         this.bottomType = this.GetType();
     }
 
-    protected override void AreaInstructions(Player player, int logged)
+    public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
         Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));

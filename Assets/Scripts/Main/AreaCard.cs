@@ -33,7 +33,7 @@ public class AreaCard : Card
     internal void ResolveArea(int playerPosition, int logged)
     {
         Player player = Manager.inst.playersInOrder[playerPosition];
-        player.StartTurn(() => AreaInstructions(player, logged));
+        player.StartTurn(() => AreaInstructions(player, logged), this.areaNumber);
     }
 
     public override CardData GetFile()
@@ -41,12 +41,11 @@ public class AreaCard : Card
         return dataFile;
     }
 
-
     #endregion
 
 #region Instructions
 
-    protected virtual void AreaInstructions(Player player, int logged)
+    public virtual void AreaInstructions(Player player, int logged)
     {
         Log.inst.RememberStep(player, StepType.UndoPoint, () => player.EndTurn());
         if (dataFile.useSheets)

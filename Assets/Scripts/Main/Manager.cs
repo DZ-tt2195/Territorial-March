@@ -265,7 +265,7 @@ public class Manager : PhotonCompatible
     void InitialHand(int playerPosition, int cards)
     {
         Player player = playersInOrder[playerPosition];
-        player.StartTurn(() => ThisFunction());
+        player.StartTurn(() => ThisFunction(), -1);
 
         void ThisFunction()
         {

@@ -8,7 +8,7 @@ public class Placeholder : AreaCard
         this.bottomType = this.GetType();
     }
 
-    protected override void AreaInstructions(Player player, int logged)
+    public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
         int totalMoney = 0;

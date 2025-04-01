@@ -237,25 +237,13 @@ public class Card : PhotonCompatible
 
     protected int SetAllStats(int number, CardData dataFile)
     {
-        if (dataFile.miscAmount == 0)
-        {
-            dataFile.cardAmount = 0;
-            dataFile.coinAmount = 0;
-            dataFile.scoutAmount = 0;
-            dataFile.actionAmount = 0;
-            dataFile.troopAmount = 0;
-            return 0;
-        }
-        else
-        {
-            float multiplier = (dataFile.miscAmount > 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
+            float multiplier = (dataFile.miscAmount >= 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
             dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
             dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
             return (int)Mathf.Floor(number * multiplier);
-        }
     }
 
     protected (bool, int) SetToHand(Player player, CardData dataFile,  int logged)
@@ -364,20 +352,27 @@ public class Card : PhotonCompatible
         }
         else
         {
+            List<int> sortedCards = new() { -1 };
+            for (int i = 0; i < player.cardsInHand.Count; i++)
+            {
+                Card card = player.cardsInHand[i];
+                if (card.DoMath(player) >= 6)
+                    sortedCards.Add(i + 100);
+            }
             if (logged >= 0)
             {
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, sortedCards, logged));
             }
+            return (true, sortedCards.Max()-6);
         }
-        //return (true, 0);
     }
 
-    void ChoosePlay(Player player, CardData dataFile, int logged)
+    void ChoosePlay(Player player, CardData dataFile, List<int> sortedCards, int logged)
     {
         List<string> actions = new() { $"Don't Play" };
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(player.cardsInHand, true));
+            player.AIDecision(Next, sortedCards);
         }
         else
         {
@@ -415,31 +410,50 @@ public class Card : PhotonCompatible
 
     #region Discard
 
+    List<(int, int)> SortToDiscard(Player player)
+    {
+        return player.cardsInHand.Select((card, index) => (card.DoMath(player), index + 100)).OrderByDescending(tuple => tuple.Item1).ToList();
+    }
+
     protected (bool, int) DiscardCard(Player player, CardData dataFile, int logged)
     {
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
         int maxDiscard = Mathf.Min(dataFile.cardAmount, player.cardsInHand.Count);
+        List<(int, int)> sortedCards = SortToDiscard(player);
 
         if (logged >= 0)
         {
             if (player.cardsInHand.Count <= dataFile.cardAmount)
                 DiscardAll(player, dataFile, logged);
             else
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, false, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, false, logged));
         }
-        return (true, -3*maxDiscard);
+
+        int valueLost = 0;
+        for (int i = 0; i<maxDiscard; i++)
+            valueLost += (-1 * sortedCards[i].Item1) + 3;
+        return (true, valueLost);
     }
 
     protected (bool, int) AskDiscard(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         bool answer = player.cardsInHand.Count >= dataFile.cardAmount;
+        List<(int, int)> sortedCards = SortToDiscard(player);
+
         if (answer && logged >= 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, true, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, true, logged));
         }
-        return (answer, -3 * dataFile.cardAmount);
+
+        int valueLost = 0;
+        if (answer)
+        {
+            for (int i = 0; i < dataFile.cardAmount; i++)
+                valueLost += (-1 * sortedCards[i].Item1) + 3;
+        }
+        return (answer, valueLost);
     }
 
     void DiscardAll(Player player, CardData dataFile, int logged)
@@ -450,7 +464,7 @@ public class Card : PhotonCompatible
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
-    void ChooseDiscard(Player player, CardData dataFile, bool optional, int logged)
+    void ChooseDiscard(Player player, CardData dataFile, List<(int, int)> sorted, bool optional, int logged)
     {
         string parathentical = (dataFile.cardAmount == 1) ? "" : $" ({sideCounter+1}/{dataFile.cardAmount})";
         List<string> actions = new();
@@ -458,7 +472,7 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(player.cardsInHand, optional));
+            player.AIDecision(Next, new() { sorted[0].Item2 });
         }
         else
         {
@@ -478,20 +492,16 @@ public class Card : PhotonCompatible
             int convertedChoice = player.choice - 100;
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
-                Card toPlay = player.cardsInHand[convertedChoice];
-                player.DiscardPlayerCard(toPlay, logged);
+                Card toDiscard = player.cardsInHand[convertedChoice];
+                player.DiscardPlayerCard(toDiscard, logged);
                 Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
                 PostDiscarding(player, true, dataFile, logged);
 
+                List<(int, int)> sortedCards = SortToDiscard(player);
                 if (sideCounter == dataFile.cardAmount)
-                {
-                    PostDiscarding(player, true, dataFile, logged);
                     Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-                }
                 else
-                {
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, false, logged));
-                }
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sorted, false, logged));
             }
             else
             {
@@ -617,7 +627,7 @@ public class Card : PhotonCompatible
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Resolve, player.ConvertToHundred(newPositions, false));
         else
-            player.ChooseTroopDisplay(newPositions, "Where to advance this troop?", Resolve);
+            player.ChooseTroopDisplay(newPositions, $"Advance troop from Area {chosenTroop+1} to where?", Resolve);
 
         void Resolve()
         {

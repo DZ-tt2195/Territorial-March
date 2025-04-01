@@ -14,6 +14,20 @@
       "artCredit"
     ],
     [
+      "F",
+      "\"+2 Coin per Card in your hand.\"",
+      "0",
+      "TRUE",
+      "SetToHand/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "2",
+      "B"
+    ],
+    [
       "Secure",
       "\"+2 Scout, both in one Area you control.\"",
       "2",
@@ -95,20 +109,6 @@
       "1",
       "1",
       "",
-      "B"
-    ],
-    [
-      "F",
-      "\"+1 Coin per Card in your hand.\"",
-      "3",
-      "TRUE",
-      "SetToHand/AddCoin",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "1",
       "B"
     ]
   ]

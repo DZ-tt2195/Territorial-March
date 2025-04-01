@@ -11,6 +11,7 @@ using System;
 [Serializable] public class DecisionChain
 {
     public bool complete = false;
+    public int currentArea;
     public List<int> decisions;
     public float math = 0;
     public NextStep toThisPoint;
@@ -23,18 +24,19 @@ using System;
         return answer;
     }
 
-    public DecisionChain(NextStep toThisPoint)
+    public DecisionChain(NextStep toThisPoint, int currentArea)
     {
         complete = false;
+        this.currentArea = currentArea;
         decisions = new();
         this.toThisPoint = toThisPoint;
     }
 
-    public DecisionChain(List<int> oldList, int toAdd, NextStep toThisPoint)
+    public DecisionChain(List<int> oldList, int toAdd, int currentArea, NextStep toThisPoint)
     {
         complete = false;
+        this.currentArea = currentArea;
         decisions = new(oldList) {toAdd};
-        //Debug.Log($"new chain at {toThisPoint.actionName}: {PrintDecisions()}");
         this.toThisPoint = toThisPoint;
     }
 }
@@ -404,13 +406,14 @@ public class Player : PhotonCompatible
 
 #region AI Simulate
 
-    public void StartTurn(Action action)
+    public void StartTurn(Action action, int currentArea)
     {
         currentChain = null;
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
         this.DoFunction(() => this.ChangeButtonColor(false));
+        firstAction = action;
 
         for (int i = 0; i<4; i++)
         {
@@ -424,10 +427,9 @@ public class Player : PhotonCompatible
         if (myType == PlayerType.Bot)
         {
             simulating = true;
-            firstAction = action;
             action();
 
-            currentChain = new(Log.inst.historyStack[0]);
+            currentChain = new(Log.inst.historyStack[0], currentArea);
             chainsToResolve.Add(currentChain);
 
             StartCoroutine(FindAIRoute());
@@ -440,10 +442,15 @@ public class Player : PhotonCompatible
 
             IEnumerator Wait()
             {
-                if (!PhotonNetwork.IsConnected || PhotonNetwork.CurrentRoom.MaxPlayers == 1)
-                    yield return new WaitForSeconds(1);
-
-                firstAction = action;
+                yield return new WaitForSeconds(0.5f);
+                foreach (Player player in Manager.inst.playersInOrder)
+                {
+                    if (player.myType == PlayerType.Bot)
+                    {
+                        while (player.simulating)
+                            yield return null;
+                    }
+                }
                 action();
                 PopStack();
             }
@@ -456,19 +463,15 @@ public class Player : PhotonCompatible
 
             finishedChains = finishedChains.Shuffle();
             currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
-
-            string answer = $"Best chain: {currentChain.math} -> ";
-            foreach (int nextInt in currentChain.decisions)
-                answer += $"{nextInt} ";
-            Debug.Log(answer);
+            Debug.Log($"Best chain: {currentChain.math} -> {currentChain.PrintDecisions()}");
 
             finishedChains.Clear();
             chainTracker = -1;
-            simulating = false;
-
             Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
+
             DoFunction(() => ChangeButtonColor(true));
             Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
+            simulating = false;
         }
     }
 
@@ -490,21 +493,11 @@ public class Player : PhotonCompatible
     void NewChains(List<int> decisionNumbers)
     {
         foreach (int next in decisionNumbers)
-            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentStep));
+            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentChain.currentArea, currentStep));
         chainsToResolve.Remove(currentChain);
 
         FindNewestChain();
         currentStep.action.Compile().Invoke();
-    }
-
-    public List<int> ConvertToHundred(List<Card> listOfCards, bool optional)
-    {
-        List<int> newList = new();
-        if (optional)
-            newList.Add(-1);
-        for (int i = 0; i < listOfCards.Count; i++)
-            newList.Add(i + 100);
-        return newList;
     }
 
     public List<int> ConvertToHundred(List<int> listOfInts, bool optional)
@@ -512,8 +505,12 @@ public class Player : PhotonCompatible
         List<int> newList = new();
         if (optional)
             newList.Add(-1);
+
         for (int i = 0; i < listOfInts.Count; i++)
-            newList.Add(listOfInts[i] + 100);
+        {
+            if (listOfInts[i] >= 0)
+                newList.Add(listOfInts[i] + 100);
+        }
         return newList;
     }
 
@@ -526,9 +523,23 @@ public class Player : PhotonCompatible
         if (myType == PlayerType.Bot)
         {
             if (currentChain.complete)
+            {
                 Done();
+            }
             else
-                FinishChain();
+            {
+                currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
+                AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
+                if (nextArea is Camp)
+                {
+                    FinishChain();
+                }
+                else
+                {
+                    nextArea.AreaInstructions(this, 0);
+                    PopStack();
+                }
+            }
         }
         else
         {
@@ -560,7 +571,6 @@ public class Player : PhotonCompatible
 
     void FinishChain()
     {
-        Log.inst.AddTextRPC(this, "end chain", LogAdd.Personal, 0);
         currentChain.complete = true;
         chainsToResolve.Remove(currentChain);
         finishedChains.Add(currentChain);
@@ -588,7 +598,7 @@ public class Player : PhotonCompatible
                         answer += troopArray[i] * i * 8;
 
                     if (scoutArray[i] + troopArray[i] > controlNumbers[i])
-                        answer += 3;
+                        answer += 2;
                 }
 
                 return answer;
@@ -790,7 +800,7 @@ public class Player : PhotonCompatible
 
     public void PopStack()
     {
-        if (Log.inst.currentDecisionInStack >= 0)
+        if (Log.inst.currentDecisionInStack >= 0 && Log.inst.currentDecisionInStack < Log.inst.historyStack.Count)
         {
             int number = Log.inst.currentDecisionInStack;
             Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, number));
@@ -804,7 +814,7 @@ public class Player : PhotonCompatible
         foreach (Action action in newActions)
             action();
 
-        if (currentChain == null && myType == PlayerType.Bot)
+        if (myType == PlayerType.Bot && currentChain == null)
             FindNewestChain();
 
         for (int i = Log.inst.historyStack.Count - 1; i >= 0; i--)
