@@ -3,7 +3,7 @@
       "cardName",
       "textBox",
       "useSheets",
-      "playInstructions",
+      "cardInstructions",
       "cardAmount",
       "coinAmount",
       "actionAmount",

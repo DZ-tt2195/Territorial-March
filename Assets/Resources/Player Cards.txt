@@ -4,7 +4,7 @@
       "textBox",
       "coinBonus",
       "useSheets",
-      "playInstructions",
+      "cardInstructions",
       "cardAmount",
       "coinAmount",
       "actionAmount",

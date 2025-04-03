@@ -11,9 +11,9 @@ public class CardGallery : MonoBehaviour
 #region Setup
 
     [SerializeField] TMP_Text searchResults;
-    [SerializeField] RectTransform storeCards;
+    [SerializeField] GridLayoutGroup storeCards;
     [SerializeField] TMP_InputField searchInput;
-    [SerializeField] TMP_Dropdown costDropdown;
+    [SerializeField] TMP_Dropdown coinDropdown;
     [SerializeField] TMP_Dropdown typeDropdown;
     [SerializeField] Scrollbar cardScroll;
     List<Card> allCards = new();
@@ -21,15 +21,22 @@ public class CardGallery : MonoBehaviour
     private void Start()
     {
         searchInput.onValueChanged.AddListener(ChangeSearch);
-        costDropdown.onValueChanged.AddListener(ChangeDropdown);
+        coinDropdown.onValueChanged.AddListener(ChangeDropdown);
         typeDropdown.onValueChanged.AddListener(ChangeDropdown);
 
-        foreach (string cardName in CarryVariables.inst.cardScripts)
+        for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
         {
-            /*
-            GameObject nextObject = Instantiate(CarryVariables.inst.cardPrefab.gameObject);
-            allCards.Add(CarryVariables.inst.AddCardComponent(nextObject, cardName));
-            */
+            GameObject nextObject = Instantiate(CarryVariables.inst.playerCardPrefab.gameObject);
+            PlayerCard card = nextObject.AddComponent<PlayerCard>();
+            card.AssignInfo(i);
+            allCards.Add(card);
+        }
+        for (int i = 0; i < CarryVariables.inst.areaCardFiles.Count; i++)
+        {
+            GameObject nextObject = Instantiate(CarryVariables.inst.areaCardPrefab.gameObject);
+            AreaCard card = nextObject.AddComponent<AreaCard>();
+            card.AssignInfo(i);
+            allCards.Add(card);
         }
 
         SearchCards();
@@ -58,35 +65,65 @@ public class CardGallery : MonoBehaviour
 
     void SearchCards()
     {
-        int searchCost;
-        try { searchCost = int.Parse(costDropdown.options[costDropdown.value].text); }
-        catch { searchCost = -1; }
+        int searchCoin;
+        if (typeDropdown.options[typeDropdown.value].text == "Area")
+        {
+            searchCoin = -1;
+            coinDropdown.gameObject.SetActive(false);
+        }
+        else
+        {
+            coinDropdown.gameObject.SetActive(true);
+            try { searchCoin = int.Parse(coinDropdown.options[coinDropdown.value].text); }
+            catch { searchCoin = -1; }
+        }
 
         foreach (Card card in allCards)
         {
-            /*
-            bool stringMatch = (CompareStrings(searchInput.text, card.extraText) || CompareStrings(searchInput.text, card.name));
-            bool costMatch = ((searchCost == -1) || card.coinCost == searchCost);
-            bool typeMatch = typeDropdown.options[typeDropdown.value].text switch
+            bool stringMatch = (CompareStrings(searchInput.text, card.GetFile().textBox) || CompareStrings(searchInput.text, card.name));
+            bool crownMatch = false;
+            bool typeMatch = false;
+
+            if (typeDropdown.options[typeDropdown.value].text == "Area")
             {
-                "Any" => true,
-                _ => false
-            };
-            if (stringMatch && costMatch && typeMatch)
+                crownMatch = true;
+                typeMatch = card is AreaCard;
+            }
+            else if (typeDropdown.options[typeDropdown.value].text == "Card")
             {
-                card.transform.SetParent(storeCards);
+                if ((card is PlayerCard))
+                {
+                    PlayerCardData data = (PlayerCardData)card.GetFile();
+                    crownMatch = (searchCoin == -1) || data.coinBonus == searchCoin;
+                    typeMatch = true;
+                }
+            }
+
+            if (stringMatch && crownMatch && typeMatch)
+            {
+                card.transform.SetParent(storeCards.transform);
                 card.transform.SetAsLastSibling();
             }
             else
             {
                 card.transform.SetParent(null);
             }
-            */
         }
 
         storeCards.transform.localPosition = new Vector3(0, -1050, 0);
-        storeCards.sizeDelta = new Vector3(2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.childCount / 8f))));
-        searchResults.text = $"Found {storeCards.childCount} Cards";
+        if (typeDropdown.options[typeDropdown.value].text == "Area")
+        {
+            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3(2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 6f))));
+            storeCards.cellSize = CarryVariables.inst.areaCardPrefab.GetComponent<RectTransform>().sizeDelta;
+            storeCards.constraintCount = 6;
+        }
+        else
+        {
+            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3(2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 8f))));
+            storeCards.cellSize = CarryVariables.inst.playerCardPrefab.GetComponent<RectTransform>().sizeDelta;
+            storeCards.constraintCount = 8;
+        }
+        searchResults.text = $"Found {storeCards.transform.childCount} Cards";
     }
 
     #endregion

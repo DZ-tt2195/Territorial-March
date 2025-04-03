@@ -30,7 +30,7 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right && this.data != null)
-            CarryVariables.inst.RightClickDisplay(this.data, cg.alpha);
+            CarryVariables.inst.RightClickDisplay(this.data, cg.alpha, this.data is PlayerCardData);
     }
 
     public float GetAlpha()

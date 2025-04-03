@@ -53,10 +53,9 @@ public class CarryVariables : MonoBehaviour
     [Foldout("Right click", true)]
     [SerializeField] Transform rightClickBackground;
     [SerializeField] CardLayout rightClickCard;
+    [SerializeField] CardLayout rightClickLandscape;
     [SerializeField] TMP_Text rightClickText;
     [SerializeField] TMP_Text artistText;
-    public Sprite faceDownPlayerCard;
-    public Sprite faceDownAreaCard;
 
     [Foldout("Card data", true)]
     public List<PlayerCardData> playerCardFiles { get; private set; }
@@ -67,8 +66,6 @@ public class CarryVariables : MonoBehaviour
 
     [Foldout("Misc", true)]
     [SerializeField] Transform permanentCanvas;
-    public Sprite faceDownSprite;
-    [ReadOnly] public List<string> cardScripts = new();
 
     private void Awake()
     {
@@ -95,10 +92,15 @@ public class CarryVariables : MonoBehaviour
             rightClickBackground.gameObject.SetActive(false);
     }
 
-    public void RightClickDisplay(CardData data, float alpha)
+    public void RightClickDisplay(CardData data, float alpha, bool isCard)
     {
         rightClickBackground.gameObject.SetActive(true);
+
+        rightClickCard.gameObject.SetActive(isCard);
         rightClickCard.FillInCards(data, alpha);
+
+        rightClickLandscape.gameObject.SetActive(!isCard);
+        rightClickLandscape.FillInCards(data, alpha);
 
         if (alpha == 0)
         {

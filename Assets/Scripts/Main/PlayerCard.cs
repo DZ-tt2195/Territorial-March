@@ -16,6 +16,7 @@ public class PlayerCard : Card
     {
         this.dataFile = CarryVariables.inst.playerCardFiles[fileNumber];
         GetInstructions(dataFile);
+        layout.FillInCards(dataFile, 1);
     }
 
     public override CardData GetFile()
@@ -41,7 +42,7 @@ public class PlayerCard : Card
             MethodInfo method = FindMethod(next);
             if (method.ReturnType == typeof((bool, int)))
             {
-                (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { false, player, -1 });
+                (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { player, GetFile(), -1 });
                 if (success)
                     answer += effect;
                 else
