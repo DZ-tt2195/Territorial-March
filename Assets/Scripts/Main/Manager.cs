@@ -136,7 +136,7 @@ public class Manager : PhotonCompatible
 
         IEnumerator WaitForPlayers()
         {
-            if (PhotonNetwork.IsConnected)
+            if (PhotonNetwork.IsConnected && PhotonNetwork.CurrentRoom.MaxPlayers >= 2)
             {
                 instructions.text = $"Waiting for more players ({storePlayers.childCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})";
                 while (storePlayers.childCount < PhotonNetwork.CurrentRoom.MaxPlayers)
@@ -386,8 +386,8 @@ public class Manager : PhotonCompatible
     {
         if (PhotonNetwork.IsConnected)
         {
-            //Debug.Log($"step {currentStep}: {playersInOrder[playerPosition].name} is done");
             waitingOnPlayers--;
+            Debug.Log($"step {currentStep}: {playersInOrder[playerPosition].name} is done; waiting for {waitingOnPlayers} more");
 
             if (waitingOnPlayers == 0)
             {

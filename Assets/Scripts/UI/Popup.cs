@@ -28,7 +28,7 @@ public class Popup : MonoBehaviour
     internal void StatsSetup(Player player, string header, Vector2 position)
     {
         decidingPlayer = player;
-        this.textbox.text = (header);
+        this.textbox.text = KeywordTooltip.instance.EditText(header);
         this.transform.SetParent(Manager.inst.canvas.transform);
         this.transform.localPosition = position;
         this.transform.localScale = new Vector3(1, 1, 1);

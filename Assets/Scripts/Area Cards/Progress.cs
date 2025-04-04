@@ -18,6 +18,7 @@ public class Progress : AreaCard
     protected override (int, List<int>) CanAdvance(Player player)
     {
         (int troop, int scout) = player.CalcTroopScout(0);
+        Debug.Log($"{this.name} / {player.name}: {troop} troop in area 1");
         if (troop == 0)
             return (0, new List<int>() { -1 });
         else

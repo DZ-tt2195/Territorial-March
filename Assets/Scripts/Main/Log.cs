@@ -7,7 +7,7 @@ using Photon.Pun;
 using System.Linq.Expressions;
 using System;
 
-public enum StepType { None, UndoPoint, Revert, Wait }
+public enum StepType { None, UndoPoint, Hold, Revert, Wait }
 public enum LogAdd { Personal, Public, Remember }
 
 [Serializable]
@@ -36,7 +36,7 @@ public class NextStep
         }
 
         this.stepType = stepType;
-        completed = stepType != StepType.UndoPoint;
+        completed = stepType is StepType.None or StepType.Revert or StepType.Wait;
     }
 }
 
@@ -276,6 +276,7 @@ public class Log : PhotonCompatible
                         player.inReaction.Clear();
                         player.PopStack();
                     }
+
                     break;
                 }
                 else
@@ -348,12 +349,12 @@ public class Log : PhotonCompatible
         if (undo)
         {
             step.completed = false;
-            //Debug.Log($"turned off: {stepNumber}, {step.actionName}");
+            //Debug.Log($"undone: {stepNumber}, {step.actionName}");
         }
         else
         {
             step.completed = true;
-            //Debug.Log($"turned on: {stepNumber}, {step.actionName}");
+            Debug.Log($"done: {stepNumber}, {step.actionName}");
         }
     }
 

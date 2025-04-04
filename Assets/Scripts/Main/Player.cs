@@ -83,7 +83,14 @@ public class Player : PhotonCompatible
     public bool simulating
     {
         get { return _simulating; }
-        private set { Debug.Log($"{this.name} simulating - {value}"); _simulating = value; }
+        private set
+        {
+            if (_simulating != value)
+            {
+                Debug.Log($"{this.name} simulating - {value}");
+                _simulating = value;
+            }
+        }
     }
     List<DecisionChain> chainsToResolve = new();
     List<DecisionChain> finishedChains = new();
@@ -314,7 +321,8 @@ public class Player : PhotonCompatible
             else if (amount < 0)
                 Log.inst.AddTextRPC(this, $"{this.name} removes {Mathf.Abs(amount)} Scout from Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
         }
-        UpdateTexts();
+        if (logged >= 0)
+            UpdateTexts();
     }
 
     public void MoveTroopRPC(int oldArea, int newArea, int logged, string source = "")
@@ -342,7 +350,8 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC(this, $"{this.name} retreats 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
         }
-        UpdateTexts();
+        if (logged >= 0)
+            UpdateTexts();
     }
 
     public (int, int) CalcTroopScout(int area)
@@ -360,7 +369,8 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
         }
-        UpdateTexts();
+        if (logged >= 0)
+            UpdateTexts();
     }
 
     public void ResourceRPC(Resource resource, int amount, int logged, string source = "")
@@ -388,7 +398,8 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
         }
-        UpdateTexts();
+        if (logged >= 0)
+            UpdateTexts();
     }
 
     public void UpdateTexts()
@@ -412,6 +423,7 @@ public class Player : PhotonCompatible
         chainsToResolve.Clear();
         finishedChains.Clear();
         chainTracker = -1;
+
         this.DoFunction(() => this.ChangeButtonColor(false));
         firstAction = action;
 
@@ -430,6 +442,7 @@ public class Player : PhotonCompatible
             action();
 
             currentChain = new(Log.inst.historyStack[0], currentArea);
+            Debug.Log(currentChain != null);
             chainsToResolve.Add(currentChain);
 
             StartCoroutine(FindAIRoute());
@@ -468,6 +481,7 @@ public class Player : PhotonCompatible
             finishedChains.Clear();
             chainTracker = -1;
             Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
+            Log.inst.historyStack.Clear();
 
             DoFunction(() => ChangeButtonColor(true));
             Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
@@ -477,27 +491,25 @@ public class Player : PhotonCompatible
 
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
-        if (this.chainTracker < this.currentChain.decisions.Count)
+        if (this.currentChain == null)
+        {
+            Debug.LogError($"no active chain");
+        }
+        else if (this.chainTracker < this.currentChain.decisions.Count)
         {
             int nextDecision = this.currentChain.decisions[this.chainTracker];
-            //Debug.Log($"resolved continue turn with choice {next}");
             this.inReaction.Add(Next);
             this.DecisionMade(nextDecision);
         }
         else
         {
-            this.NewChains(possibleDecisions);
+            foreach (int next in possibleDecisions)
+                chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentChain.currentArea, currentStep));
+            chainsToResolve.Remove(currentChain);
+
+            FindNewestChain();
+            currentStep.action.Compile().Invoke();
         }
-    }
-
-    void NewChains(List<int> decisionNumbers)
-    {
-        foreach (int next in decisionNumbers)
-            chainsToResolve.Add(new(currentChain.decisions ?? new(), next, currentChain.currentArea, currentStep));
-        chainsToResolve.Remove(currentChain);
-
-        FindNewestChain();
-        currentStep.action.Compile().Invoke();
     }
 
     public List<int> ConvertToHundred(List<int> listOfInts, bool optional)
@@ -531,14 +543,10 @@ public class Player : PhotonCompatible
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
                 if (nextArea is Camp)
-                {
                     FinishChain();
-                }
                 else
-                {
                     nextArea.AreaInstructions(this, 0);
-                    PopStack();
-                }
+                PopStack();
             }
         }
         else
@@ -551,6 +559,7 @@ public class Player : PhotonCompatible
 
         void Done()
         {
+            Debug.Log($"{this.name} wrap up turn");
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
@@ -576,7 +585,7 @@ public class Player : PhotonCompatible
         finishedChains.Add(currentChain);
 
         currentChain.math = PlayerScore();
-        //Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
+        Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
         currentChain = null;
 
         float PlayerScore()
@@ -611,6 +620,7 @@ public class Player : PhotonCompatible
         if (this.myType == PlayerType.Bot && firstAction != null)
         {
             firstAction();
+            this.chainTracker = -1;
             PopStack();
         }
     }
@@ -761,6 +771,7 @@ public class Player : PhotonCompatible
     void FindNewestChain()
     {
         bool needUndo = false;
+        Debug.Log(chainsToResolve.Count);
 
         for (int i = chainsToResolve.Count - 1; i >= 0; i--)
         {
@@ -790,7 +801,7 @@ public class Player : PhotonCompatible
                 break;
             }
         }
-
+        Debug.Log(currentChain != null);
         if (needUndo)
         {
             //Debug.Log($"AI UNDO to {currentStep.actionName}");
@@ -820,14 +831,16 @@ public class Player : PhotonCompatible
         for (int i = Log.inst.historyStack.Count - 1; i >= 0; i--)
         {
             NextStep step = Log.inst.historyStack[i];
-            if (step.stepType == StepType.UndoPoint && !step.completed)
+            bool rightStep = step.stepType is StepType.UndoPoint or StepType.Hold;
+
+            if (rightStep && !step.completed)
             {
                 currentStep = step;
                 Log.inst.currentDecisionInStack = i;
-                Log.inst.undoToThis = step;
 
-                if (currentChain != null)
+                if (currentChain != null && step.stepType == StepType.UndoPoint)
                 {
+                    Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
                     chainTracker++;
                 }

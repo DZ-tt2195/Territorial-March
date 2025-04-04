@@ -458,7 +458,8 @@ public class Card : PhotonCompatible
 
     void DiscardAll(Player player, CardData dataFile, int logged)
     {
-        for (int i = 0; i < player.cardsInHand.Count; i++)
+        int toDiscard = player.cardsInHand.Count;
+        for (int i = 0; i < toDiscard; i++)
             player.DiscardPlayerCard(player.cardsInHand[0], logged);
         PostDiscarding(player, true, dataFile, logged);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
@@ -982,7 +983,7 @@ public class Card : PhotonCompatible
             if (dataFile.actionAmount == 0)
                 action();
             else
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Play to {this.name}?", dataFile, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Action to {this.name}?", dataFile, logged));
         }
         return (answer, dataFile.actionAmount * -3);
     }

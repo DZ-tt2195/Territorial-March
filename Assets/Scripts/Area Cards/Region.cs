@@ -12,7 +12,7 @@ public class Region : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+        Log.inst.RememberStep(this, StepType.Hold, () => Loop(player, logged));
     }
 
     protected override void PostAdvance(Player player, bool success, CardData dataFile, int logged)
@@ -20,7 +20,7 @@ public class Region : AreaCard
         if (success)
         {
             player.ResourceRPC(Resource.Coin, -dataFile.coinAmount, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+            Log.inst.RememberStep(this, StepType.Hold, () => Loop(player, logged));
         }
     }
 
