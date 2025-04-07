@@ -66,6 +66,7 @@ public class CarryVariables : MonoBehaviour
 
     [Foldout("Misc", true)]
     [SerializeField] Transform permanentCanvas;
+    public bool playWithBot;
 
     private void Awake()
     {
@@ -75,6 +76,9 @@ public class CarryVariables : MonoBehaviour
             Application.targetFrameRate = 60;
             StartCoroutine(GetScripts());
             DontDestroyOnLoad(this.gameObject);
+
+            if (!Application.isEditor)
+                playWithBot = true;
         }
         else
         {

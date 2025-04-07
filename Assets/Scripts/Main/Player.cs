@@ -87,7 +87,7 @@ public class Player : PhotonCompatible
         {
             if (_simulating != value)
             {
-                Debug.Log($"{this.name} simulating - {value}");
+                if (myType == PlayerType.Bot) Debug.Log($"{this.name} simulating - {value}");
                 _simulating = value;
             }
         }
@@ -96,7 +96,16 @@ public class Player : PhotonCompatible
     List<DecisionChain> finishedChains = new();
     int[] controlNumbers = new int[4];
     public DecisionChain currentChain { get; private set; }
-    public int chainTracker;
+    private int _chainTracker;
+    public int chainTracker
+    {
+        get { return _chainTracker; }
+        set
+        {
+            //if (myType == PlayerType.Bot) Debug.Log($"{_chainTracker} -> {value}");
+            _chainTracker = value;
+        }
+    }
 
     #endregion
 
@@ -116,7 +125,7 @@ public class Player : PhotonCompatible
         troopArray[0] = 12;
         if (PhotonNetwork.IsConnected && pv.AmOwner)
         {
-            if (PhotonNetwork.CurrentRoom.MaxPlayers == 1 && Manager.inst.storePlayers.childCount == 0)
+            if (CarryVariables.inst.playWithBot && PhotonNetwork.CurrentRoom.MaxPlayers == 1 && Manager.inst.storePlayers.childCount == 0)
                 DoFunction(() => SendName("Bot"), RpcTarget.AllBuffered);
             else
                 DoFunction(() => SendName(PlayerPrefs.GetString("Online Username")), RpcTarget.AllBuffered);
@@ -178,12 +187,6 @@ public class Player : PhotonCompatible
             }
             Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
         }
-    }
-
-    internal void InitialHand(int starting)
-    {
-        DrawCardRPC(starting, 0);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => this.EndTurn());
     }
 
     #endregion
@@ -442,7 +445,6 @@ public class Player : PhotonCompatible
             action();
 
             currentChain = new(Log.inst.historyStack[0], currentArea);
-            Debug.Log(currentChain != null);
             chainsToResolve.Add(currentChain);
 
             StartCoroutine(FindAIRoute());
@@ -455,7 +457,7 @@ public class Player : PhotonCompatible
 
             IEnumerator Wait()
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(Log.inst.waitTime);
                 foreach (Player player in Manager.inst.playersInOrder)
                 {
                     if (player.myType == PlayerType.Bot)
@@ -468,32 +470,38 @@ public class Player : PhotonCompatible
                 PopStack();
             }
         }
+    }
 
-        IEnumerator FindAIRoute()
+    IEnumerator FindAIRoute()
+    {
+        float timer = 0.25f;
+        while (timer >= 0f)
         {
-            while (chainsToResolve.Count > 0)
-                yield return null;
-
-            finishedChains = finishedChains.Shuffle();
-            currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
-            Debug.Log($"Best chain: {currentChain.math} -> {currentChain.PrintDecisions()}");
-
-            finishedChains.Clear();
-            chainTracker = -1;
-            Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
-            Log.inst.historyStack.Clear();
-
-            DoFunction(() => ChangeButtonColor(true));
-            Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
-            simulating = false;
+            timer -= Time.deltaTime;
+            if (timer <= 0f && chainsToResolve.Count > 0)
+                timer = 0.25f;
+            yield return null;
         }
+
+        finishedChains = finishedChains.Shuffle();
+        currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
+        Debug.Log($"Best chain: {currentChain.math} -> {currentChain.PrintDecisions()}");
+
+        finishedChains.Clear();
+        Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
+        Log.inst.historyStack.Clear();
+        this.chainTracker = 0;
+
+        DoFunction(() => ChangeButtonColor(true));
+        Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
+        simulating = false;
     }
 
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
         if (this.currentChain == null)
         {
-            Debug.LogError($"no active chain");
+            Debug.LogError($"bot has no chain for next decision");
         }
         else if (this.chainTracker < this.currentChain.decisions.Count)
         {
@@ -508,7 +516,8 @@ public class Player : PhotonCompatible
             chainsToResolve.Remove(currentChain);
 
             FindNewestChain();
-            currentStep.action.Compile().Invoke();
+            if (currentChain != null)
+                currentStep.action.Compile().Invoke();
         }
     }
 
@@ -559,7 +568,6 @@ public class Player : PhotonCompatible
 
         void Done()
         {
-            Debug.Log($"{this.name} wrap up turn");
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
@@ -581,11 +589,11 @@ public class Player : PhotonCompatible
     void FinishChain()
     {
         currentChain.complete = true;
-        chainsToResolve.Remove(currentChain);
         finishedChains.Add(currentChain);
 
         currentChain.math = PlayerScore();
         Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
+        chainsToResolve.Remove(currentChain);
         currentChain = null;
 
         float PlayerScore()
@@ -619,8 +627,9 @@ public class Player : PhotonCompatible
     {
         if (this.myType == PlayerType.Bot && firstAction != null)
         {
+            //Debug.Log("do bot turn");
             firstAction();
-            this.chainTracker = -1;
+            this.chainTracker = 0;
             PopStack();
         }
     }
@@ -663,7 +672,7 @@ public class Player : PhotonCompatible
         else if (listOfCards.Count == 1 && action != null)
         {
             Log.inst.undoToThis = null;
-            DecisionMade(0);
+            DecisionMade(0+100);
         }
         else
         {
@@ -722,7 +731,7 @@ public class Player : PhotonCompatible
         else if (possibleChoices.Count == 1 && action != null)
         {
             Log.inst.undoToThis = null;
-            DecisionMade(possibleChoices[0]);
+            DecisionMade(possibleChoices[0]+100);
         }
         else
         {
@@ -771,7 +780,7 @@ public class Player : PhotonCompatible
     void FindNewestChain()
     {
         bool needUndo = false;
-        Debug.Log(chainsToResolve.Count);
+        //Debug.Log(chainsToResolve.Count);
 
         for (int i = chainsToResolve.Count - 1; i >= 0; i--)
         {
@@ -797,11 +806,10 @@ public class Player : PhotonCompatible
                 chainsToResolve.RemoveAt(i);
                 currentChain = newChain;
                 currentStep = newChain.toThisPoint;
-                //Debug.Log($"switched chains (undo {needUndo}), {currentChain.toThisPoint.actionName}. decisions: {currentChain.PrintDecisions()}");
+                //Debug.Log($"switched chains (undo {needUndo}), {currentChain.toThisPoint.actionName}");
                 break;
             }
         }
-        Debug.Log(currentChain != null);
         if (needUndo)
         {
             //Debug.Log($"AI UNDO to {currentStep.actionName}");
@@ -811,10 +819,14 @@ public class Player : PhotonCompatible
 
     public void PopStack()
     {
-        if (Log.inst.currentDecisionInStack >= 0 && Log.inst.currentDecisionInStack < Log.inst.historyStack.Count)
+        for (int i = 0; i<Log.inst.historyStack.Count; i++)
         {
-            int number = Log.inst.currentDecisionInStack;
-            Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, number));
+            if (Log.inst.historyStack[i] == currentStep)
+            {
+                Debug.Log($"decision {i} complete: {Log.inst.historyStack[i].actionName}");
+                Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
+                break;
+            }
         }
 
         List<Action> newActions = new();
@@ -825,26 +837,29 @@ public class Player : PhotonCompatible
         foreach (Action action in newActions)
             action();
 
+        StartCoroutine(Delay());
+    }
+
+    IEnumerator Delay()
+    {
+        if (myType == PlayerType.Bot) yield return null;
+
         if (myType == PlayerType.Bot && currentChain == null)
             FindNewestChain();
 
         for (int i = Log.inst.historyStack.Count - 1; i >= 0; i--)
         {
             NextStep step = Log.inst.historyStack[i];
-            bool rightStep = step.stepType is StepType.UndoPoint or StepType.Hold;
 
-            if (rightStep && !step.completed)
+            if (step.stepType == StepType.UndoPoint && !step.completed)
             {
                 currentStep = step;
-                Log.inst.currentDecisionInStack = i;
-
-                if (currentChain != null && step.stepType == StepType.UndoPoint)
+                if (currentChain != null)
                 {
                     Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
                     chainTracker++;
                 }
-
                 step.action.Compile().Invoke();
                 break;
             }

@@ -7,7 +7,7 @@ using Photon.Pun;
 using System.Linq.Expressions;
 using System;
 
-public enum StepType { None, UndoPoint, Hold, Revert, Wait }
+public enum StepType { None, UndoPoint, Revert }
 public enum LogAdd { Personal, Public, Remember }
 
 [Serializable]
@@ -36,7 +36,7 @@ public class NextStep
         }
 
         this.stepType = stepType;
-        completed = stepType is StepType.None or StepType.Revert or StepType.Wait;
+        completed = stepType is StepType.None or StepType.Revert;
     }
 }
 
@@ -61,7 +61,6 @@ public class Log : PhotonCompatible
         [SerializeField] Button undoButton;
         bool currentUndoState = false;
         public List<NextStep> historyStack = new();
-        public int currentDecisionInStack = -1;
         public float waitTime { get; private set; }
 
     protected override void Awake()
@@ -272,7 +271,6 @@ public class Log : PhotonCompatible
                 {
                     if (player.myType == PlayerType.Human)
                     {
-                        currentDecisionInStack = -1;
                         player.inReaction.Clear();
                         player.PopStack();
                     }
@@ -312,17 +310,14 @@ public class Log : PhotonCompatible
             {
                 foreach (NextStep step in historyStack)
                 {
-                    if (step.stepType == StepType.Wait)
-                    {
-                        yield return new WaitForSeconds(waitTime);
-                    }
-                    else if (step.stepType == StepType.Revert)
+                    if (step.stepType == StepType.Revert)
                     {
                         (string instruction, object[] parameters) = step.source.TranslateFunction(step.action);
                         DoFunction(() => StepForOthers(step.source.pv.ViewID, instruction, parameters), RpcTarget.Others);
                     }
                 }
             }
+            yield return null;
         }
     }
 
@@ -339,7 +334,6 @@ public class Log : PhotonCompatible
         historyStack.Clear();
         undosInLog.Clear();
         DisplayUndoBar(false);
-        currentDecisionInStack = -1;
     }
 
     [PunRPC]
@@ -354,19 +348,8 @@ public class Log : PhotonCompatible
         else
         {
             step.completed = true;
-            Debug.Log($"done: {stepNumber}, {step.actionName}");
+            //Debug.Log($"done: {stepNumber}, {step.actionName}");
         }
-    }
-
-    public IEnumerator AddWait()
-    {
-        yield return new WaitForSeconds(waitTime);
-        this.RememberStep(this, StepType.Wait, () => WaitFunction());
-    }
-
-    [PunRPC]
-    void WaitFunction()
-    {
     }
 
     #endregion

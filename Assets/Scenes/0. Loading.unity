@@ -791,8 +791,7 @@ MonoBehaviour:
   rightClickText: {fileID: 938853688}
   artistText: {fileID: 938853688}
   permanentCanvas: {fileID: 2019941104}
-  faceDownSprite: {fileID: 21300000, guid: c85382f08dc8e4d02b5cb721fd5a1c65, type: 3}
-  cardScripts: []
+  playWithBot: 1
 --- !u!4 &631609476
 Transform:
   m_ObjectHideFlags: 0

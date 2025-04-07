@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Photon.Pun;
-using System.Reflection;
 
 public class Card : PhotonCompatible
 {
