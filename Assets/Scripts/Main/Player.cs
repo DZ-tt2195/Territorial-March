@@ -12,6 +12,7 @@ using System;
 {
     public bool complete = false;
     public int currentArea;
+    public int tracker;
     public List<int> decisions;
     public float math = 0;
     public NextStep toThisPoint;
@@ -30,6 +31,7 @@ using System;
         this.currentArea = currentArea;
         decisions = new();
         this.toThisPoint = toThisPoint;
+        this.tracker = 0;
     }
 
     public DecisionChain(List<int> oldList, int toAdd, int currentArea, NextStep toThisPoint)
@@ -38,6 +40,7 @@ using System;
         this.currentArea = currentArea;
         decisions = new(oldList) {toAdd};
         this.toThisPoint = toThisPoint;
+        this.tracker = decisions.Count - 1;
     }
 }
 
@@ -96,6 +99,7 @@ public class Player : PhotonCompatible
     List<DecisionChain> finishedChains = new();
     int[] controlNumbers = new int[4];
     public DecisionChain currentChain { get; private set; }
+    /*
     private int _chainTracker;
     public int chainTracker
     {
@@ -105,7 +109,7 @@ public class Player : PhotonCompatible
             if (myType == PlayerType.Bot) Debug.Log($"chain tracker: {_chainTracker} -> {value}");
             _chainTracker = value;
         }
-    }
+    }*/
 
     #endregion
 
@@ -330,8 +334,16 @@ public class Player : PhotonCompatible
 
     public void MoveTroopRPC(int oldArea, int newArea, int logged, string source = "")
     {
-        if (troopArray[oldArea] == 0 || oldArea == newArea)
+        if (troopArray[oldArea] == 0)
+        {
+            Debug.LogError($"can't advance troops from {oldArea} (no troops there)");
             return;
+        }
+        if (troopArray[oldArea] == 0 || oldArea == newArea)
+        {
+            Debug.LogError($"can't advance troops from {oldArea} to {newArea}");
+            return;
+        }
         Log.inst.RememberStep(this, StepType.Revert, () => MoveTroop(false, oldArea, newArea, logged, source));
     }
 
@@ -426,7 +438,6 @@ public class Player : PhotonCompatible
         currentChain = null;
         chainsToResolve.Clear();
         finishedChains.Clear();
-        chainTracker = -1;
 
         this.DoFunction(() => this.ChangeButtonColor(false));
         firstAction = action;
@@ -447,6 +458,7 @@ public class Player : PhotonCompatible
 
             currentChain = new(Log.inst.historyStack[0], currentArea);
             chainsToResolve.Add(currentChain);
+            Debug.Log($"starting score for bot: {PlayerScore()}");
 
             StartCoroutine(FindAIRoute());
             PopStack();
@@ -488,10 +500,8 @@ public class Player : PhotonCompatible
         currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
         Debug.Log($"Best chain: {currentChain.math} -> {currentChain.PrintDecisions()}");
 
-        finishedChains.Clear();
         Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
         Log.inst.historyStack.Clear();
-        this.chainTracker = 0;
 
         DoFunction(() => ChangeButtonColor(true));
         Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
@@ -500,10 +510,11 @@ public class Player : PhotonCompatible
 
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
-        if (this.chainTracker < this.currentChain.decisions.Count)
+        if (this.currentChain.tracker < this.currentChain.decisions.Count)
         {
-            int nextDecision = this.currentChain.decisions[this.chainTracker];
+            int nextDecision = this.currentChain.decisions[this.currentChain.tracker];
             this.inReaction.Add(Next);
+            this.currentChain.tracker++;
             this.DecisionMade(nextDecision);
         }
         else
@@ -549,14 +560,9 @@ public class Player : PhotonCompatible
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
                 if (nextArea is Camp)
-                {
                     FinishChain();
-                }
                 else
-                {
                     nextArea.AreaInstructions(this, 0);
-                    chainTracker--;
-                }
                 PopStack();
             }
         }
@@ -594,34 +600,34 @@ public class Player : PhotonCompatible
         finishedChains.Add(currentChain);
 
         currentChain.math = PlayerScore();
-        //Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
+        Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
         chainsToResolve.Remove(currentChain);
         currentChain = null;
+    }
 
-        float PlayerScore()
+    float PlayerScore()
+    {
+        if (troopArray[3] == 12)
         {
-            if (troopArray[3] == 12)
+            return Mathf.Infinity;
+        }
+        else
+        {
+            int answer = cardsInHand.Count * 3 + resourceDict[Resource.Action] * 3 + resourceDict[Resource.Coin];
+            for (int i = 0; i < 4; i++)
             {
-                return Mathf.Infinity;
+                answer += scoutArray[i] * 2;
+
+                if (i == 1 || i == 2)
+                    answer += troopArray[i] * i * 4;
+                else if (i == 3)
+                    answer += troopArray[i] * i * 8;
+
+                if (scoutArray[i] + troopArray[i] > controlNumbers[i])
+                    answer += 2;
             }
-            else
-            {
-                int answer = cardsInHand.Count * 3 + resourceDict[Resource.Action] * 3 + resourceDict[Resource.Coin];
-                for (int i = 0; i < 4; i++)
-                {
-                    answer += scoutArray[i] * 2;
 
-                    if (i == 1 || i == 2)
-                        answer += troopArray[i] * i * 4;
-                    else if (i == 3)
-                        answer += troopArray[i] * i * 8;
-
-                    if (scoutArray[i] + troopArray[i] > controlNumbers[i])
-                        answer += 2;
-                }
-
-                return answer;
-            }
+            return answer;
         }
     }
 
@@ -631,7 +637,7 @@ public class Player : PhotonCompatible
         {
             //Debug.Log("do bot turn");
             firstAction();
-            this.chainTracker = -1;
+            this.currentChain.tracker = 0;
             PopStack();
         }
     }
@@ -814,9 +820,8 @@ public class Player : PhotonCompatible
         }
         if (needUndo)
         {
-            //Debug.Log($"AI UNDO to {currentStep.actionName}");
+            Debug.Log($"AI UNDO to {currentStep.actionName}");
             Log.inst.InvokeUndo(this, currentStep);
-            this.chainTracker--;
         }
     }
 
@@ -865,7 +870,6 @@ public class Player : PhotonCompatible
                 {
                     Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
-                    chainTracker++;
                 }
                 step.action.Compile().Invoke();
                 if (step.stepType == StepType.Holding)

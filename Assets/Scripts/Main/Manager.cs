@@ -161,7 +161,7 @@ public class Manager : PhotonCompatible
 
     void ReadySetup()
     {
-        List<int> usedAreas = ChooseAreas(new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
+        List<int> usedAreas = ChooseAreas(new List<int>() { 1, 6, 0, PlayerPrefs.GetInt("Area 2") }, 4);
         //usedAreas = usedAreas.Shuffle();
         for (int i = 0; i < usedAreas.Count; i++)
         {

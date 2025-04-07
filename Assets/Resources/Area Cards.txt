@@ -65,19 +65,6 @@
       "A"
     ],
     [
-      "3",
-      "\"Discard your hand. +1 Card per Card discarded.\"",
-      "TRUE",
-      "SetToHand/DiscardCard/DrawCard",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "1",
-      "A"
-    ],
-    [
       "4",
       "\"If you don't control this, -2 Coin.\"",
       "TRUE",

@@ -265,8 +265,6 @@ public class Log : PhotonCompatible
             }
             else if (next.stepType == StepType.UndoPoint)
             {
-                player.chainTracker--;
-
                 if (next == toThisPoint || i == 0)
                 {
                     if (player.myType == PlayerType.Human)
@@ -294,7 +292,7 @@ public class Log : PhotonCompatible
         historyStack.Add(newStep);
 
         //Debug.Log($"step {currentStep}: {action}");
-        if (!(type is StepType.UndoPoint or StepType.Holding))
+        if (type is StepType.Revert or StepType.None)
             newStep.action.Compile().Invoke();
     }
 

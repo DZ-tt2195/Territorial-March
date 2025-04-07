@@ -388,8 +388,6 @@ public class Card : PhotonCompatible
                 Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
 
                 PostPlaying(player, toPlay, dataFile, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-
                 player.DiscardPlayerCard(toPlay, -1);
                 toPlay.ResolveCard(player, logged + 1);
             }
@@ -403,6 +401,7 @@ public class Card : PhotonCompatible
 
     protected virtual void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
     {
+        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
     #endregion
@@ -611,10 +610,11 @@ public class Card : PhotonCompatible
         }
     }
 
-    void ChooseAdvanceTwo(Player player, CardData dataFile, int chosenTroop, int logged)
+    void ChooseAdvanceTwo(Player player, CardData dataFile, int chosenArea, int logged)
     {
+        //Debug.Log($"{this.name}: {player.name} reached chooseAdvanceTwo, choosing {chosenArea}");
         List<int> newPositions = new();
-        if (chosenTroop == 0)
+        if (chosenArea == 0)
         {
             newPositions.Add(1);
             newPositions.Add(2);
@@ -627,13 +627,13 @@ public class Card : PhotonCompatible
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Resolve, player.ConvertToHundred(newPositions, false));
         else
-            player.ChooseTroopDisplay(newPositions, $"Advance troop from Area {chosenTroop+1} to where?", Resolve);
+            player.ChooseTroopDisplay(newPositions, $"Advance troop from Area {chosenArea + 1} to where?", Resolve);
 
         void Resolve()
         {
             int convertedChoice = player.choice - 100;
             if (convertedChoice >= 0)
-                player.MoveTroopRPC(chosenTroop, convertedChoice, logged);
+                player.MoveTroopRPC(chosenArea, convertedChoice, logged);
             Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
 
             if (sideCounter == dataFile.troopAmount)
