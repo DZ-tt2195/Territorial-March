@@ -12,7 +12,7 @@ public class Region : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+        Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
     }
 
     protected override void PostAdvance(Player player, bool success, CardData dataFile, int logged)
@@ -20,27 +20,13 @@ public class Region : AreaCard
         if (success)
         {
             player.ResourceRPC(Resource.Coin, -dataFile.coinAmount, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+            Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
         }
     }
 
     void Loop(Player player, int logged)
     {
-        Log.inst.undoToThis = null;
-        if (player.myType == PlayerType.Bot)
-        {
-            player.AIDecision(Next, new() { -1 });
-        }
-        else
-        {
-            player.inReaction.Add(Next);
-            player.PopStack();
-        }
-
-        void Next()
-        {
-            if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-                AskAdvance(player, GetFile(), logged);
-        }
+        if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
+            AskAdvance(player, GetFile(), logged);
     }
 }

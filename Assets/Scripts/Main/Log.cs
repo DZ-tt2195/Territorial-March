@@ -7,7 +7,7 @@ using Photon.Pun;
 using System.Linq.Expressions;
 using System;
 
-public enum StepType { None, UndoPoint, Revert }
+public enum StepType { None, UndoPoint, Holding, Revert }
 public enum LogAdd { Personal, Public, Remember }
 
 [Serializable]
@@ -274,7 +274,6 @@ public class Log : PhotonCompatible
                         player.inReaction.Clear();
                         player.PopStack();
                     }
-
                     break;
                 }
                 else
@@ -295,7 +294,7 @@ public class Log : PhotonCompatible
         historyStack.Add(newStep);
 
         //Debug.Log($"step {currentStep}: {action}");
-        if (type != StepType.UndoPoint)
+        if (!(type is StepType.UndoPoint or StepType.Holding))
             newStep.action.Compile().Invoke();
     }
 

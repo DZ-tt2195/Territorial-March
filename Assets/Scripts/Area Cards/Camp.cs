@@ -14,7 +14,7 @@ public class Camp : AreaCard
         base.AreaInstructions(player, logged);
         player.DrawCardRPC(dataFile.cardAmount, logged);
         player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+        Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
     }
 
     protected override void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
@@ -22,27 +22,13 @@ public class Camp : AreaCard
         if (cardToPlay != null)
         {
             player.ResourceRPC(Resource.Action, -1, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => Loop(player, logged));
+            Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
         }
     }
 
     void Loop(Player player, int logged)
     {
-        Log.inst.undoToThis = null;
-        if (player.myType == PlayerType.Bot)
-        {
-            player.AIDecision(Next, new() { -1 });
-        }
-        else
-        {
-            player.inReaction.Add(Next);
-            player.PopStack();
-        }
-
-        void Next()
-        {
-            if (player.resourceDict[Resource.Action] >= 1)
-                PlayCard(player, GetFile(), logged);
-        }
+        if (player.resourceDict[Resource.Action] >= 1)
+            PlayCard(player, GetFile(), logged);
     }
 }

@@ -158,8 +158,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 588ef8c399be844eb83a407d95fd8de6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPosition: 0
-  areaPosition: 0
 --- !u!1 &6371696441662794196
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,7 +312,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2654096985965689815
 RectTransform:
   m_ObjectHideFlags: 0

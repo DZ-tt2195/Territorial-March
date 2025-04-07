@@ -102,7 +102,7 @@ public class Player : PhotonCompatible
         get { return _chainTracker; }
         set
         {
-            //if (myType == PlayerType.Bot) Debug.Log($"{_chainTracker} -> {value}");
+            if (myType == PlayerType.Bot) Debug.Log($"chain tracker: {_chainTracker} -> {value}");
             _chainTracker = value;
         }
     }
@@ -412,7 +412,8 @@ public class Player : PhotonCompatible
         foreach (TroopDisplay display in myDisplays)
         {
             (int troop, int scout) = CalcTroopScout(display.areaPosition);
-            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout", areasControlled[display.areaPosition] ? Color.yellow : Color.white);
+            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout",
+                areasControlled[display.areaPosition] ? Color.yellow : Color.gray);
         }
     }
 
@@ -499,11 +500,7 @@ public class Player : PhotonCompatible
 
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
-        if (this.currentChain == null)
-        {
-            Debug.LogError($"bot has no chain for next decision");
-        }
-        else if (this.chainTracker < this.currentChain.decisions.Count)
+        if (this.chainTracker < this.currentChain.decisions.Count)
         {
             int nextDecision = this.currentChain.decisions[this.chainTracker];
             this.inReaction.Add(Next);
@@ -539,7 +536,7 @@ public class Player : PhotonCompatible
 
 #region End Turn
 
-    public void EndTurn()
+    internal void EndTurn()
     {
         if (myType == PlayerType.Bot)
         {
@@ -552,9 +549,14 @@ public class Player : PhotonCompatible
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
                 if (nextArea is Camp)
+                {
                     FinishChain();
+                }
                 else
+                {
                     nextArea.AreaInstructions(this, 0);
+                    chainTracker--;
+                }
                 PopStack();
             }
         }
@@ -592,7 +594,7 @@ public class Player : PhotonCompatible
         finishedChains.Add(currentChain);
 
         currentChain.math = PlayerScore();
-        Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
+        //Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
         chainsToResolve.Remove(currentChain);
         currentChain = null;
 
@@ -629,7 +631,7 @@ public class Player : PhotonCompatible
         {
             //Debug.Log("do bot turn");
             firstAction();
-            this.chainTracker = 0;
+            this.chainTracker = -1;
             PopStack();
         }
     }
@@ -814,20 +816,25 @@ public class Player : PhotonCompatible
         {
             //Debug.Log($"AI UNDO to {currentStep.actionName}");
             Log.inst.InvokeUndo(this, currentStep);
+            this.chainTracker--;
+        }
+    }
+
+    void StepCleared()
+    {
+        for (int i = 0; i < Log.inst.historyStack.Count; i++)
+        {
+            if (Log.inst.historyStack[i] == currentStep)
+            {
+                Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
+                break;
+            }
         }
     }
 
     public void PopStack()
     {
-        for (int i = 0; i<Log.inst.historyStack.Count; i++)
-        {
-            if (Log.inst.historyStack[i] == currentStep)
-            {
-                Debug.Log($"decision {i} complete: {Log.inst.historyStack[i].actionName}");
-                Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
-                break;
-            }
-        }
+        StepCleared();
 
         List<Action> newActions = new();
         for (int i = 0; i < inReaction.Count; i++)
@@ -851,16 +858,18 @@ public class Player : PhotonCompatible
         {
             NextStep step = Log.inst.historyStack[i];
 
-            if (step.stepType == StepType.UndoPoint && !step.completed)
+            if ((step.stepType is StepType.UndoPoint or StepType.Holding) && !step.completed)
             {
                 currentStep = step;
-                if (currentChain != null)
+                if (currentChain != null && step.stepType == StepType.UndoPoint)
                 {
                     Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
                     chainTracker++;
                 }
                 step.action.Compile().Invoke();
+                if (step.stepType == StepType.Holding)
+                    PopStack();
                 break;
             }
         }

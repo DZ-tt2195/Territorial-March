@@ -6,7 +6,7 @@ using TMPro;
 
 public class TroopDisplay : PhotonCompatible
 {
-    public int playerPositon { get; private set; }
+    public int playerPosition { get; private set; }
     public int areaPosition { get; private set; }
 
     TMP_Text myText;
@@ -30,7 +30,7 @@ public class TroopDisplay : PhotonCompatible
 
     public void AssignInfo(int playerPosition, int areaPosition)
     {
-        this.playerPositon = playerPositon;
+        this.playerPosition = playerPosition;
         this.areaPosition = areaPosition;
     }
 
