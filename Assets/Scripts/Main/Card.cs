@@ -582,12 +582,12 @@ public class Card : PhotonCompatible
         {
             if (optional)
             {
-                player.ChooseButton(actions, new(0, 250), $"Advance a troop with {this.name}{parathentical}.", Next);
+                player.ChooseButton(actions, new(0, 250), $"Advance a Troop with {this.name}{parathentical}.", Next);
                 player.ChooseTroopDisplay(canAdvance, "", null);
             }
             else
             {
-                player.ChooseTroopDisplay(canAdvance, $"Advance a troop with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canAdvance, $"Advance a Troop with {this.name}{parathentical}.", Next);
             }
         }
 
@@ -612,7 +612,6 @@ public class Card : PhotonCompatible
 
     void ChooseAdvanceTwo(Player player, CardData dataFile, int chosenArea, int logged)
     {
-        //Debug.Log($"{this.name}: {player.name} reached chooseAdvanceTwo, choosing {chosenArea}");
         List<int> newPositions = new();
         if (chosenArea == 0)
         {
@@ -817,7 +816,7 @@ public class Card : PhotonCompatible
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
         else
-            player.ChooseTroopDisplay(canAdd, "Add a scout to an Area.", Next);
+            player.ChooseTroopDisplay(canAdd, "Add a Scout to an Area.", Next);
 
         void Next()
         {
@@ -906,14 +905,14 @@ public class Card : PhotonCompatible
         {
             if (optional)
             {
-                player.ChooseButton(actions, new(0, 250), $"Lose a scout with {this.name}{parathentical}.", Next);
+                player.ChooseButton(actions, new(0, 250), $"Lose a Scout with {this.name}{parathentical}.", Next);
                 player.ChooseTroopDisplay(canLose, "", null);
             }
             else
             {
                 if (canLose.Count <= 1)
                     Log.inst.undoToThis = null;
-                player.ChooseTroopDisplay(canLose, $"Lose a scout with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canLose, $"Lose a Scout with {this.name}{parathentical}.", Next);
             }
         }
 

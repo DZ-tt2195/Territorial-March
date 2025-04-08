@@ -86,6 +86,14 @@ public class CarryVariables : MonoBehaviour
         }
     }
 
+    public string PrintIntList(List<int> listOfInts)
+    {
+        string answer = "";
+        foreach (int next in listOfInts)
+            answer += $"{next}, ";
+        return answer;
+    }
+
     #endregion
 
 #region Right click

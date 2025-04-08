@@ -19,7 +19,7 @@ public class Region : AreaCard
     {
         if (success)
         {
-            player.ResourceRPC(Resource.Coin, -dataFile.coinAmount, logged);
+            player.ResourceRPC(Resource.Coin, -1*dataFile.coinAmount, logged);
             Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
         }
     }

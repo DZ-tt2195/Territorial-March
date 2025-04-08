@@ -251,33 +251,36 @@ public class Log : PhotonCompatible
         {
             NextStep next = historyStack[i];
 
-            if (next.stepType == StepType.Revert)
+            switch (next.stepType)
             {
-                (string instruction, object[] parameters) = next.source.TranslateFunction(next.action);
-
-                object[] newParameters = new object[parameters.Length];
-                newParameters[0] = true;
-                for (int j = 1; j < parameters.Length; j++)
-                    newParameters[j] = parameters[j];
-
-                next.source.StringParameters(instruction, newParameters);
-                historyStack.RemoveAt(i);
-            }
-            else if (next.stepType == StepType.UndoPoint)
-            {
-                if (next == toThisPoint || i == 0)
-                {
-                    if (player.myType == PlayerType.Human)
+                case StepType.UndoPoint:
+                    if (next == toThisPoint || i == 0)
                     {
-                        player.inReaction.Clear();
-                        player.PopStack();
+                        if (player.myType == PlayerType.Human)
+                        {
+                            player.inReaction.Clear();
+                            player.PopStack();
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        historyStack.RemoveAt(i);
                     }
                     break;
-                }
-                else
-                {
+                case StepType.Holding:
                     historyStack.RemoveAt(i);
-                }
+                    break;
+                case StepType.Revert:
+                    (string instruction, object[] parameters) = next.source.TranslateFunction(next.action);
+                    object[] newParameters = new object[parameters.Length];
+                    newParameters[0] = true;
+                    for (int j = 1; j < parameters.Length; j++)
+                        newParameters[j] = parameters[j];
+
+                    next.source.StringParameters(instruction, newParameters);
+                    historyStack.RemoveAt(i);
+                    break;
             }
         }
     }

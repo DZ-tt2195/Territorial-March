@@ -17,14 +17,6 @@ using System;
     public float math = 0;
     public NextStep toThisPoint;
 
-    public string PrintDecisions()
-    {
-        string answer = "";
-        foreach (int next in this.decisions)
-            answer += $"{next}, ";
-        return answer;
-    }
-
     public DecisionChain(NextStep toThisPoint, int currentArea)
     {
         complete = false;
@@ -336,12 +328,12 @@ public class Player : PhotonCompatible
     {
         if (troopArray[oldArea] == 0)
         {
-            Debug.LogError($"can't advance troops from {oldArea} (no troops there)");
+            Debug.LogError($"can't advance troops from area {oldArea} (no troops there)");
             return;
         }
-        if (troopArray[oldArea] == 0 || oldArea == newArea)
+        if (oldArea == newArea)
         {
-            Debug.LogError($"can't advance troops from {oldArea} to {newArea}");
+            Debug.LogError($"can't advance troops from area {oldArea} to {newArea}");
             return;
         }
         Log.inst.RememberStep(this, StepType.Revert, () => MoveTroop(false, oldArea, newArea, logged, source));
@@ -498,7 +490,7 @@ public class Player : PhotonCompatible
 
         finishedChains = finishedChains.Shuffle();
         currentChain = finishedChains.OrderByDescending(chain => chain.math).FirstOrDefault();
-        Debug.Log($"Best chain: {currentChain.math} -> {currentChain.PrintDecisions()}");
+        Debug.Log($"Best chain: {currentChain.math} -> {CarryVariables.inst.PrintIntList(currentChain.decisions)}");
 
         Log.inst.InvokeUndo(this, Log.inst.historyStack[0]);
         Log.inst.historyStack.Clear();
@@ -512,10 +504,10 @@ public class Player : PhotonCompatible
     {
         if (this.currentChain.tracker < this.currentChain.decisions.Count)
         {
-            int nextDecision = this.currentChain.decisions[this.currentChain.tracker];
+            int nextChoice = currentChain.decisions[currentChain.tracker];
             this.inReaction.Add(Next);
             this.currentChain.tracker++;
-            this.DecisionMade(nextDecision);
+            this.DecisionMade(nextChoice);
         }
         else
         {
@@ -524,8 +516,7 @@ public class Player : PhotonCompatible
             chainsToResolve.Remove(currentChain);
 
             FindNewestChain();
-            if (currentChain != null)
-                currentStep.action.Compile().Invoke();
+            currentStep.action.Compile().Invoke();
         }
     }
 
@@ -600,7 +591,7 @@ public class Player : PhotonCompatible
         finishedChains.Add(currentChain);
 
         currentChain.math = PlayerScore();
-        Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {currentChain.PrintDecisions()}");
+        Debug.Log($"CHAIN ENDED with score {currentChain.math}. decisions: {CarryVariables.inst.PrintIntList(currentChain.decisions)}");
         chainsToResolve.Remove(currentChain);
         currentChain = null;
     }
