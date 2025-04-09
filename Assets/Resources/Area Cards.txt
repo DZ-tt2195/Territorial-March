@@ -91,6 +91,32 @@
       "A"
     ],
     [
+      "6",
+      "\"You may pay 4 Coin for +2 Action.\"",
+      "TRUE",
+      "AskLoseCoin/AddAction",
+      "",
+      "4",
+      "2",
+      "",
+      "",
+      "",
+      "A"
+    ],
+    [
+      "7",
+      "\"+1 Scout per Area you control.\"",
+      "TRUE",
+      "SetToControl/AddScout",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "A"
+    ],
+    [
       "Progress",
       "\"+1 Troop from Area 1 (if you have one there).\"",
       "FALSE",
@@ -99,6 +125,19 @@
       "",
       "",
       "1",
+      "",
+      "",
+      "A"
+    ],
+    [
+      "Conversion",
+      "\"+1 Scout here. Then remove any amount of your Scout here for +2 Coin each.\"",
+      "FALSE",
+      "AddScout/RemoveScout/AddCoin",
+      "",
+      "2",
+      "",
+      "",
       "",
       "",
       "A"

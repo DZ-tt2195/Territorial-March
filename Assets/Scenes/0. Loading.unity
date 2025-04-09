@@ -931,6 +931,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Area Card
       objectReference: {fileID: 0}
+    - target: {fileID: 5712142621495061074, guid: f1101af7e727d4d36ae7fa01ff6de9dd, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8297eb584e38d4e2b8a2f0cd9ff69f30, type: 3}
     - target: {fileID: 6133385833797075993, guid: f1101af7e727d4d36ae7fa01ff6de9dd, type: 3}
       propertyPath: sceneViewId
       value: 1

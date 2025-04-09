@@ -433,7 +433,7 @@ public class Card : PhotonCompatible
         return (true, valueLost);
     }
 
-    protected (bool, int) AskDiscard(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskDiscardCard(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         bool answer = player.cardsInHand.Count >= dataFile.cardAmount;

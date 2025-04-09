@@ -708,8 +708,11 @@ public class Player : PhotonCompatible
         slider.StatsSetup(this, "Choose a number.", min, max, new(0, -1000));
 
         inReaction.Add(() => Destroy(slider.gameObject));
-        inReaction.Add(action);
-        Manager.inst.Instructions(changeInstructions);
+        if (action != null)
+        {
+            inReaction.Add(action);
+            Manager.inst.Instructions(changeInstructions);
+        }
     }
 
     public void ChooseTroopDisplay(List<int> possibleChoices, string changeInstructions, Action action)
