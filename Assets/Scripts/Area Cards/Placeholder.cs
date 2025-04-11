@@ -11,13 +11,11 @@ public class Placeholder : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        int totalMoney = 0;
         for (int i = 0; i<4; i++)
         {
             (int troop, int scout) = player.CalcTroopScout(i);
             if (troop >= dataFile.troopAmount)
-                totalMoney += dataFile.coinAmount;
+                player.DrawCardRPC(1, logged);
         }
-        player.ResourceRPC(Resource.Coin, totalMoney, logged);
     }
 }

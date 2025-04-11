@@ -28,6 +28,20 @@
       "B"
     ],
     [
+      "X",
+      "You may pay 3 Coin for +3 Card.",
+      "0",
+      "TRUE",
+      "AskLoseCoin/DrawCard",
+      "3",
+      "3",
+      "",
+      "",
+      "",
+      "",
+      "B"
+    ],
+    [
       "Secure",
       "\"+2 Scout, both in one Area you control.\"",
       "2",
@@ -95,6 +109,20 @@
       "",
       "",
       "1",
+      "B"
+    ],
+    [
+      "H",
+      "You may spend 1 Action for +5 Coin.",
+      "4",
+      "TRUE",
+      "AskLoseAction/AddCoin",
+      "",
+      "5",
+      "1",
+      "",
+      "",
+      "",
       "B"
     ],
     [
