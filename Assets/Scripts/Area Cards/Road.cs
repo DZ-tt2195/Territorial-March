@@ -1,7 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 
-public class Region : AreaCard
+public class Road : AreaCard
 {
     protected override void Awake()
     {

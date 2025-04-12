@@ -23,10 +23,10 @@
       "",
       "",
       "",
-      "A"
+      "Garret DeChellis|Dominion: Allies|(Tent)"
     ],
     [
-      "Region",
+      "Road",
       "\"Repeat as desired: Pay 4 Coin for +1 Troop.\"",
       "FALSE",
       "",
@@ -36,7 +36,7 @@
       "1",
       "",
       "",
-      "A"
+      "Martin Hoffmann|Dominion: Hinterlands|(Silk Road)"
     ],
     [
       "Placeholder",
@@ -66,11 +66,11 @@
     ],
     [
       "4",
-      "\"If you don't control this, -2 Coin.\"",
+      "\"If you don't control this, -1 Card.\"",
       "TRUE",
-      "ControlThisNot/LoseCoin",
+      "ControlThisNot/DiscardCard",
+      "1",
       "",
-      "2",
       "",
       "",
       "",

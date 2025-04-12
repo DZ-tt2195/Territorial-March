@@ -107,12 +107,13 @@ public class CarryVariables : MonoBehaviour
     public void RightClickDisplay(CardData data, float alpha, bool isCard)
     {
         rightClickBackground.gameObject.SetActive(true);
-
         rightClickCard.gameObject.SetActive(isCard);
-        rightClickCard.FillInCards(data, alpha);
-
         rightClickLandscape.gameObject.SetActive(!isCard);
-        rightClickLandscape.FillInCards(data, alpha);
+
+        if (isCard)
+            rightClickCard.FillInCards(data, alpha);
+        else
+            rightClickLandscape.FillInCards(data, alpha);
 
         if (alpha == 0)
         {
@@ -121,7 +122,7 @@ public class CarryVariables : MonoBehaviour
         else
         {
             artistText.transform.parent.gameObject.SetActive(!data.artCredit.IsNullOrEmpty());
-            artistText.text = data.artCredit;
+            artistText.text = data.artCredit.Replace("|", "\n");
         }
     }
 

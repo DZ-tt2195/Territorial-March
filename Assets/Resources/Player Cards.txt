@@ -67,7 +67,7 @@
       "0",
       "1",
       "",
-      "B"
+      "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
       "D",
