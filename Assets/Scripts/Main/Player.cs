@@ -24,6 +24,7 @@ using System;
         decisions = new();
         this.toThisPoint = toThisPoint;
         this.tracker = 0;
+        //Debug.Log($"new chain: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
     }
 
     public DecisionChain(List<int> oldList, int toAdd, int currentArea, NextStep toThisPoint)
@@ -33,6 +34,7 @@ using System;
         decisions = new(oldList) {toAdd};
         this.toThisPoint = toThisPoint;
         this.tracker = decisions.Count - 1;
+        //Debug.Log($"new chain: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
     }
 }
 
@@ -308,7 +310,7 @@ public class Player : PhotonCompatible
             else if (amount < 0)
                 Log.inst.AddTextRPC(this, $"{this.name} removes {Mathf.Abs(amount)} Scout from Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
         }
-        if (logged >= 0)
+        if (logged >= 0 && !simulating)
             UpdateTexts();
     }
 
@@ -345,7 +347,7 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC(this, $"{this.name} retreats 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
         }
-        if (logged >= 0)
+        if (logged >= 0 && !simulating)
             UpdateTexts();
     }
 
@@ -363,7 +365,7 @@ public class Player : PhotonCompatible
                 Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
-            if (logged >= 0)
+            if (logged >= 0 && !simulating)
                 UpdateTexts();
         }
     }
@@ -393,7 +395,7 @@ public class Player : PhotonCompatible
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
         }
-        if (logged >= 0)
+        if (logged >= 0 && !simulating)
             UpdateTexts();
     }
 
@@ -429,7 +431,7 @@ public class Player : PhotonCompatible
 
             currentChain = new(Log.inst.historyStack[0], currentArea);
             chainsToResolve.Add(currentChain);
-            Debug.Log($"starting score for bot: {PlayerScore()}");
+            Debug.Log($"NEW SIMULATION starting with score of {PlayerScore()}");
 
             StartCoroutine(FindAIRoute());
             PopStack();
@@ -458,12 +460,12 @@ public class Player : PhotonCompatible
 
     IEnumerator FindAIRoute()
     {
-        float timer = 0.25f;
+        float timer = 1f;
         while (timer >= 0f)
         {
             timer -= Time.deltaTime;
             if (timer <= 0f && chainsToResolve.Count > 0)
-                timer = 0.25f;
+                timer = 1f;
             yield return null;
         }
 
@@ -475,7 +477,7 @@ public class Player : PhotonCompatible
         Log.inst.historyStack.Clear();
 
         DoFunction(() => ChangeButtonColor(true));
-        Manager.inst.UpdateControl();
+        Manager.inst.UpdateControl(-1);
         Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
         simulating = false;
     }
@@ -534,7 +536,8 @@ public class Player : PhotonCompatible
                     FinishChain();
                 else
                     nextArea.AreaInstructions(this, 0);
-                Manager.inst.UpdateControl();
+
+                Log.inst.RememberStep(this, StepType.Revert, () => UpdateControl(false));
                 PopStack();
             }
         }
@@ -564,6 +567,12 @@ public class Player : PhotonCompatible
                 Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
             }
         }
+    }
+
+    [PunRPC]
+    void UpdateControl(bool undo)
+    {
+        Manager.inst.UpdateControl(-1);
     }
 
     void FinishChain()
@@ -795,26 +804,24 @@ public class Player : PhotonCompatible
         }
         if (needUndo)
         {
-            Debug.Log($"AI UNDO to {currentStep.actionName}");
+            Debug.Log($"AI UNDO to {currentStep.actionName} (tracker: {currentChain.tracker} - {CarryVariables.inst.PrintIntList(currentChain.decisions)})");
             Log.inst.InvokeUndo(this, currentStep);
-        }
-    }
-
-    void StepCleared()
-    {
-        for (int i = 0; i < Log.inst.historyStack.Count; i++)
-        {
-            if (Log.inst.historyStack[i] == currentStep)
-            {
-                Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
-                break;
-            }
         }
     }
 
     public void PopStack()
     {
-        StepCleared();
+        for (int i = 0; i < Log.inst.historyStack.Count; i++)
+        {
+            if (Log.inst.historyStack[i] == currentStep)
+            {
+                if (currentStep.stepType == StepType.Holding)
+                    Log.inst.historyStack.RemoveAt(i);
+                else
+                    Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
+                break;
+            }
+        }
 
         List<Action> newActions = new();
         for (int i = 0; i < inReaction.Count; i++)
@@ -829,10 +836,12 @@ public class Player : PhotonCompatible
 
     IEnumerator Delay()
     {
-        if (myType == PlayerType.Bot) yield return null;
-
-        if (myType == PlayerType.Bot && currentChain == null)
-            FindNewestChain();
+        if (myType == PlayerType.Bot)
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (currentChain == null)
+                FindNewestChain();
+        }
 
         for (int i = Log.inst.historyStack.Count - 1; i >= 0; i--)
         {
@@ -845,7 +854,9 @@ public class Player : PhotonCompatible
                 {
                     Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
+                    //Debug.Log($"do {step.actionName} (tracker: {currentChain.tracker} - {CarryVariables.inst.PrintIntList(currentChain.decisions)})");
                 }
+
                 step.action.Compile().Invoke();
                 if (step.stepType == StepType.Holding)
                     PopStack();

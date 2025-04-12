@@ -13,7 +13,9 @@ public class Another : AreaCard
         base.AreaInstructions(player, logged);
         (int troop, int scout) = player.CalcTroopScout(1);
         player.ResourceRPC(Resource.Coin, troop, logged);
-        player.MoveTroopRPC(1, 2, -1);
+
         Log.inst.AddTextRPC(player, $"{player.name} moves {troop} Troop to Area 3.", LogAdd.Remember, logged);
+        for (int i = 0; i < troop; i++)
+            player.MoveTroopRPC(1, 2, -1);
     }
 }

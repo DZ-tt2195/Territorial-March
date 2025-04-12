@@ -162,7 +162,7 @@ public class Manager : PhotonCompatible
     void ReadySetup()
     {
         List<int> usedAreas = ChooseAreas(new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
-        usedAreas = usedAreas.Shuffle();
+        //usedAreas = usedAreas.Shuffle();
         for (int i = 0; i < usedAreas.Count; i++)
         {
             GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
@@ -347,7 +347,7 @@ public class Manager : PhotonCompatible
 
             SendOutCards();
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
-            DoFunction(() => UpdateControl());
+            DoFunction(() => UpdateControl(0));
 
             if (playersInOrder != null)
                 waitingOnPlayers = playersInOrder.Count;
@@ -511,13 +511,13 @@ public class Manager : PhotonCompatible
     }
 
     [PunRPC]
-    internal void UpdateControl()
+    internal void UpdateControl(int logged)
     {
         for (int i = 0; i < 4; i++)
         {
             (Player controller, int highest) = CalculateControl(i);
             foreach (Player player in playersInOrder)
-                player.UpdateAreaControl(i, player == controller, 0);
+                player.UpdateAreaControl(i, player == controller, logged);
         }
     }
 

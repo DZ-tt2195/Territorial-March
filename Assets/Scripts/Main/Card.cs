@@ -236,13 +236,13 @@ public class Card : PhotonCompatible
 
     protected int SetAllStats(int number, CardData dataFile)
     {
-            float multiplier = (dataFile.miscAmount >= 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
-            dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
-            dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
-            dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
-            dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
-            dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
-            return (int)Mathf.Floor(number * multiplier);
+        float multiplier = (dataFile.miscAmount >= 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
+        dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
+        dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
+        dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
+        dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
+        dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
+        return (int)Mathf.Floor(number * multiplier);
     }
 
     protected (bool, int) SetToHand(Player player, CardData dataFile,  int logged)

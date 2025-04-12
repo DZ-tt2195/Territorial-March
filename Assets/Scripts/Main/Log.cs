@@ -23,7 +23,8 @@ public class NextStep
     {
         this.source = source;
         this.action = action;
-        this.actionName = $"{action.ToString().Replace("() => ", "")}";
+        MethodCallExpression methodCall = (MethodCallExpression)action.Body;
+        this.actionName = methodCall.Method.Name;
         ChangeType(stepType);
     }
 
@@ -357,11 +358,8 @@ public class Log : PhotonCompatible
         List<NextStep> hasStepName = new();
         foreach (NextStep step in historyStack)
         {
-            if (step.action.Body is MethodCallExpression methodCall)
-            {
-                if (methodCall.Method.Name == name)
-                    hasStepName.Add(step);
-            }
+            if(step.actionName == name)
+                hasStepName.Add(step);
         }
         return hasStepName;
     }

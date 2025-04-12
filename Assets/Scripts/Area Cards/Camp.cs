@@ -28,7 +28,7 @@ public class Camp : AreaCard
 
     void Loop(Player player, int logged)
     {
-        if (player.resourceDict[Resource.Action] >= 1)
+        if (player.resourceDict[Resource.Action] >= 1 && player.cardsInHand.Count >= 1)
             PlayCard(player, GetFile(), logged);
     }
 }
