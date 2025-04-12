@@ -18,7 +18,7 @@ public class Explore : PlayerCard
 
     public override int DoMath(Player player)
     {
-        int answer = this.dataFile.coinAmount;
+        int answer = this.dataFile.coinBonus;
         foreach (int area in ToAddScout(player))
             answer += dataFile.scoutAmount * 2;
 

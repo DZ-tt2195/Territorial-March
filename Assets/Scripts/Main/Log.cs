@@ -352,6 +352,20 @@ public class Log : PhotonCompatible
         }
     }
 
+    public List<NextStep> SearchHistory(string name)
+    {
+        List<NextStep> hasStepName = new();
+        foreach (NextStep step in historyStack)
+        {
+            if (step.action.Body is MethodCallExpression methodCall)
+            {
+                if (methodCall.Method.Name == name)
+                    hasStepName.Add(step);
+            }
+        }
+        return hasStepName;
+    }
+
     #endregion
 
 }

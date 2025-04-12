@@ -347,7 +347,7 @@ public class Manager : PhotonCompatible
 
             SendOutCards();
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
-            DoFunction(() => UpdateAllDisplays());
+            DoFunction(() => UpdateControl());
 
             if (playersInOrder != null)
                 waitingOnPlayers = playersInOrder.Count;
@@ -511,7 +511,7 @@ public class Manager : PhotonCompatible
     }
 
     [PunRPC]
-    void UpdateAllDisplays()
+    internal void UpdateControl()
     {
         for (int i = 0; i < 4; i++)
         {

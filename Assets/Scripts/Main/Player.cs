@@ -89,19 +89,7 @@ public class Player : PhotonCompatible
     }
     List<DecisionChain> chainsToResolve = new();
     List<DecisionChain> finishedChains = new();
-    int[] controlNumbers = new int[4];
     public DecisionChain currentChain { get; private set; }
-    /*
-    private int _chainTracker;
-    public int chainTracker
-    {
-        get { return _chainTracker; }
-        set
-        {
-            if (myType == PlayerType.Bot) Debug.Log($"chain tracker: {_chainTracker} -> {value}");
-            _chainTracker = value;
-        }
-    }*/
 
     #endregion
 
@@ -375,9 +363,9 @@ public class Player : PhotonCompatible
                 Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
+            if (logged >= 0)
+                UpdateTexts();
         }
-        if (logged >= 0)
-            UpdateTexts();
     }
 
     public void ResourceRPC(Resource resource, int amount, int logged, string source = "")
@@ -434,15 +422,6 @@ public class Player : PhotonCompatible
         this.DoFunction(() => this.ChangeButtonColor(false));
         firstAction = action;
 
-        for (int i = 0; i<4; i++)
-        {
-            (Player controller, int highest) = Manager.inst.CalculateControl(i);
-            if (controller == this)
-                controlNumbers[i] = highest - 1;
-            else
-                controlNumbers[i] = highest;
-        }
-
         if (myType == PlayerType.Bot)
         {
             simulating = true;
@@ -496,6 +475,7 @@ public class Player : PhotonCompatible
         Log.inst.historyStack.Clear();
 
         DoFunction(() => ChangeButtonColor(true));
+        Manager.inst.UpdateControl();
         Manager.inst.DoFunction(() => Manager.inst.CompletedTurn(this.playerPosition), RpcTarget.MasterClient);
         simulating = false;
     }
@@ -554,6 +534,7 @@ public class Player : PhotonCompatible
                     FinishChain();
                 else
                     nextArea.AreaInstructions(this, 0);
+                Manager.inst.UpdateControl();
                 PopStack();
             }
         }
@@ -614,7 +595,7 @@ public class Player : PhotonCompatible
                 else if (i == 3)
                     answer += troopArray[i] * i * 8;
 
-                if (scoutArray[i] + troopArray[i] > controlNumbers[i])
+                if (areasControlled[i])
                     answer += 2;
             }
 
