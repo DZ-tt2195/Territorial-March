@@ -28,6 +28,6 @@ public class Switcheroo : PlayerCard
 
     public override int DoMath(Player player)
     {
-        return this.dataFile.coinBonus;
+        return this.dataFile.startingCoin;
     }
 }

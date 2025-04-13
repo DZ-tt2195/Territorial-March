@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
@@ -30,5 +31,13 @@ public class Camp : AreaCard
     {
         if (player.resourceDict[Resource.Action] >= 1 && player.cardsInHand.Count >= 1)
             PlayCard(player, GetFile(), logged);
+    }
+
+    protected override List<int> SimulatePlay(Player player)
+    {
+        player.resourceDict[Resource.Action]--;
+        List<int> simulate = base.SimulatePlay(player);
+        player.resourceDict[Resource.Action]++;
+        return simulate;
     }
 }

@@ -94,7 +94,7 @@ public class CardGallery : MonoBehaviour
                 if ((card is PlayerCard))
                 {
                     PlayerCardData data = (PlayerCardData)card.GetFile();
-                    crownMatch = (searchCoin == -1) || data.coinBonus == searchCoin;
+                    crownMatch = (searchCoin == -1) || data.startingCoin == searchCoin;
                     typeMatch = true;
                 }
             }

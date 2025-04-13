@@ -2,7 +2,7 @@
     [
       "cardName",
       "textBox",
-      "coinBonus",
+      "startingCoin",
       "useSheets",
       "cardInstructions",
       "cardAmount",

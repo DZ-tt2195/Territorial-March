@@ -10,7 +10,7 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
 
     TMP_Text description;
     TMP_Text cardName;
-    TMP_Text coinBonus;
+    TMP_Text startingCoin;
     CardData data;
 
     private void Awake()
@@ -21,8 +21,8 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
 
         try
         {
-            GameObject findCoin = cg.transform.Find("Coin Bonus").gameObject;
-            coinBonus = findCoin.GetComponent<TMP_Text>();
+            GameObject findCoin = cg.transform.Find("Starting Coin").gameObject;
+            startingCoin = findCoin.GetComponent<TMP_Text>();
         } catch { }
         artBox = cg.transform.Find("Art Box").GetComponent<Image>();
     }
@@ -50,6 +50,6 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
         cardName.text = data.cardName;
 
         if (data is PlayerCardData converted)
-            coinBonus.text = $"{converted.coinBonus}";
+            startingCoin.text = $"{converted.startingCoin}";
     }
 }

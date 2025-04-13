@@ -30,7 +30,7 @@ public class CardData
 [Serializable]
 public class PlayerCardData : CardData
 {
-    public int coinBonus;
+    public int startingCoin;
 }
 
 public class CarryVariables : MonoBehaviour

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Reflection;
+using System.Collections.Generic;
 
 public class PlayerCard : Card
 {
@@ -26,7 +27,7 @@ public class PlayerCard : Card
 
     public virtual void ResolveCard(Player player, int logged)
     {
-        player.ResourceRPC(Resource.Coin, this.dataFile.coinBonus, logged);
+        player.ResourceRPC(Resource.Coin, this.dataFile.startingCoin, logged);
         if (dataFile.useSheets)
         {
             stepCounter = -1;
@@ -36,7 +37,7 @@ public class PlayerCard : Card
 
     public override int DoMath(Player player)
     {
-        int answer = this.dataFile.coinAmount;
+        int answer = this.dataFile.startingCoin;
         foreach (string next in activationSteps)
         {
             MethodInfo method = FindMethod(next);

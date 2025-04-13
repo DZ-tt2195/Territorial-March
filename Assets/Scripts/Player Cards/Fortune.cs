@@ -17,7 +17,7 @@ public class Fortune : PlayerCard
 
     public override int DoMath(Player player)
     {
-        int answer = this.dataFile.coinBonus;
+        int answer = this.dataFile.startingCoin;
         List<NextStep> listOfSteps = Log.inst.SearchHistory("ChangeResource");
 
         foreach (NextStep step in listOfSteps)

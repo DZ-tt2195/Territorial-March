@@ -647,7 +647,7 @@ GameObject:
   - component: {fileID: 1741299631289097455}
   - component: {fileID: 7127695628226279564}
   m_Layer: 0
-  m_Name: Coin Bonus
+  m_Name: Starting Coin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
