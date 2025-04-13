@@ -21,6 +21,9 @@ public class Card : PhotonCompatible
     protected int sideCounter;
     protected bool mayStopEarly;
 
+    public bool recalculate;
+    public int mathResult { get; protected set; }
+
     protected override void Awake()
     {
         base.Awake();
@@ -75,9 +78,8 @@ public class Card : PhotonCompatible
         return null;
     }
 
-    public virtual int DoMath(Player player)
+    public virtual void DoMath(Player player)
     {
-        return 0;
     }
 
     #endregion
@@ -325,17 +327,14 @@ public class Card : PhotonCompatible
     {
         List<int> sortedCards = new() { -1 };
         for (int i = 0; i < player.cardsInHand.Count; i++)
+            player.cardsInHand[i].recalculate = true;
+
+        for (int i = 0; i < player.cardsInHand.Count; i++)
         {
             Card card = player.cardsInHand[i];
-            player.cardsInHand.RemoveAt(i);
-            PlayerCardData data = (PlayerCardData)card.GetFile();
-            player.resourceDict[Resource.Coin] += data.startingCoin;
-
-            if (card.DoMath(player) >= 6)
+            card.DoMath(player);
+            if (card.mathResult >= 6)
                 sortedCards.Add(i + 100);
-
-            player.cardsInHand.Insert(i, card);
-            player.resourceDict[Resource.Coin] -= data.startingCoin;
         }
 
         return sortedCards;
@@ -403,21 +402,35 @@ public class Card : PhotonCompatible
 
     #region Discard
 
-    List<(int, int)> SortToDiscard(Player player)
+    List<(int, int)> SortToDiscard(Player player, int logged)
     {
         List<Card> possibleCards = new();
         possibleCards.AddRange(player.cardsInHand);
         possibleCards.Remove(this);
-        return possibleCards.Select((card, index) => (card.DoMath(player), index + 100)).
-            OrderByDescending(tuple => tuple.Item1).ToList();
+        if (logged >= 0)
+        {
+            for (int i = 0; i < player.cardsInHand.Count; i++)
+                player.cardsInHand[i].recalculate = true;
+
+            for (int i = 0; i < player.cardsInHand.Count; i++)
+                player.cardsInHand[i].DoMath(player);
+            
+            return possibleCards.Select((card, index) => (card.mathResult, index + 100)).
+                OrderByDescending(tuple => tuple.mathResult).ToList();
+        }
+        else
+        {
+            List<(int, int)> newList = new();
+            foreach (Card card in possibleCards)
+                newList.Add((0, 0));
+            return newList;
+        }
     }
 
     protected (bool, int) DiscardCard(Player player, CardData dataFile, int logged)
     {
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        List<(int, int)> sortedCards = SortToDiscard(player);
-        int maxDiscard = Mathf.Min(dataFile.cardAmount, sortedCards.Count);
-
+        List<(int, int)> sortedCards = SortToDiscard(player, logged);
         if (logged >= 0)
         {
             if (player.cardsInHand.Count <= dataFile.cardAmount)
@@ -425,17 +438,13 @@ public class Card : PhotonCompatible
             else
                 Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, false, logged));
         }
-
-        int valueLost = 0;
-        for (int i = 0; i < maxDiscard; i++)
-            valueLost += (-1 * sortedCards[i].Item1) + 3;
-        return (true, valueLost);
+        return (true, -3 * Mathf.Min(dataFile.cardAmount, sortedCards.Count));
     }
 
     protected (bool, int) AskDiscardCard(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        List<(int, int)> sortedCards = SortToDiscard(player);
+        List<(int, int)> sortedCards = SortToDiscard(player, logged);
         bool answer = sortedCards.Count >= dataFile.cardAmount;
 
         if (answer && logged >= 0)
@@ -443,14 +452,7 @@ public class Card : PhotonCompatible
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, true, logged));
         }
-
-        int valueLost = 0;
-        if (answer)
-        {
-            for (int i = 0; i < dataFile.cardAmount; i++)
-                valueLost += (-1 * sortedCards[i].Item1) + 3;
-        }
-        return (answer, valueLost);
+        return (answer, -3*dataFile.cardAmount);
     }
 
     void DiscardAll(Player player, CardData dataFile, int logged)
@@ -495,7 +497,7 @@ public class Card : PhotonCompatible
                 Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
                 PostDiscarding(player, true, dataFile, logged);
 
-                List<(int, int)> sortedCards = SortToDiscard(player);
+                List<(int, int)> sortedCards = SortToDiscard(player, logged);
                 if (sideCounter == dataFile.cardAmount)
                     Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
                 else

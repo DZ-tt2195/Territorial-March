@@ -26,8 +26,10 @@ public class Switcheroo : PlayerCard
         player.ChangeScoutRPC(2, area2Scout-area3Scout, -1);
     }
 
-    public override int DoMath(Player player)
+    public override void DoMath(Player player)
     {
-        return this.dataFile.startingCoin;
+        if (recalculate)
+            mathResult = this.dataFile.startingCoin;
+        recalculate = false;
     }
 }

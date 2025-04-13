@@ -162,7 +162,7 @@ public class Manager : PhotonCompatible
     void ReadySetup()
     {
         List<int> usedAreas = ChooseAreas(new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
-        //usedAreas = usedAreas.Shuffle();
+        usedAreas = usedAreas.Shuffle();
         for (int i = 0; i < usedAreas.Count; i++)
         {
             GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);

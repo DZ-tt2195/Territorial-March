@@ -284,7 +284,7 @@ public class Player : PhotonCompatible
 
     #endregion
 
-#region Resources
+#region Troop Scout
 
     public void ChangeScoutRPC(int area, int amount, int logged, string source = "")
     {
@@ -366,6 +366,10 @@ public class Player : PhotonCompatible
             UpdateTexts();
         }
     }
+
+    #endregion
+
+#region Resources
 
     public void ResourceRPC(Resource resource, int amount, int logged, string source = "")
     {

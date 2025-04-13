@@ -16,13 +16,15 @@ public class Explore : PlayerCard
             player.ChangeScoutRPC(area, GetFile().scoutAmount, logged);
     }
 
-    public override int DoMath(Player player)
+    public override void DoMath(Player player)
     {
-        int answer = this.dataFile.startingCoin;
-        foreach (int area in ToAddScout(player))
-            answer += dataFile.scoutAmount * 2;
-
-        return answer;
+        if (recalculate)
+        {
+            mathResult = this.dataFile.startingCoin;
+            foreach (int area in ToAddScout(player))
+                mathResult += dataFile.scoutAmount * 2;
+        }
+        recalculate = false;
     }
 
     List<int> ToAddScout(Player player)

@@ -42,8 +42,10 @@ public class Secure : PlayerCard
         return controlThis;
     }
 
-    public override int DoMath(Player player)
+    public override void DoMath(Player player)
     {
-        return this.dataFile.startingCoin + ((CanAdd(player).Count >= 1) ? dataFile.scoutAmount * 2 : 0);
+        if (recalculate)
+            mathResult = this.dataFile.startingCoin + ((CanAdd(player).Count >= 1) ? dataFile.scoutAmount * 2 : 0);
+        recalculate = false;
     }
 }

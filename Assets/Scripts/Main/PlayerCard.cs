@@ -35,21 +35,30 @@ public class PlayerCard : Card
         }
     }
 
-    public override int DoMath(Player player)
+    public override void DoMath(Player player)
     {
-        int answer = this.dataFile.startingCoin;
-        foreach (string next in activationSteps)
+        if (recalculate)
         {
-            MethodInfo method = FindMethod(next);
-            if (method.ReturnType == typeof((bool, int)))
+            mathResult = this.dataFile.startingCoin;
+            player.resourceDict[Resource.Coin] += dataFile.startingCoin;
+            int index = player.cardsInHand.IndexOf(this);
+            player.cardsInHand.RemoveAt(index);
+
+            foreach (string next in activationSteps)
             {
-                (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { player, GetFile(), -1 });
-                if (success)
-                    answer += effect;
-                else
-                    break;
+                MethodInfo method = FindMethod(next);
+                if (method.ReturnType == typeof((bool, int)))
+                {
+                    (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { player, GetFile(), -1 });
+                    if (success)
+                        mathResult += effect;
+                    else
+                        break;
+                }
             }
+            player.resourceDict[Resource.Coin] -= dataFile.startingCoin;
+            player.cardsInHand.Insert(index, this);
         }
-        return answer;
+        recalculate = false;
     }
 }

@@ -182,6 +182,20 @@
       "X"
     ],
     [
+      "M",
+      "You may retreat 1 Troop for +2 Card.",
+      "5",
+      "TRUE",
+      "AskRetreatTroop/DrawCard",
+      "2",
+      "",
+      "",
+      "1",
+      "",
+      "",
+      "X"
+    ],
+    [
       "N",
       "You may lose 2 Scout for +2 Action.",
       "5",

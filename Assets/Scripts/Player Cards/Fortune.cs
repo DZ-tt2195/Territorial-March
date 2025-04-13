@@ -12,24 +12,28 @@ public class Fortune : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        player.ResourceRPC(Resource.Coin, DoMath(player), logged);
+        recalculate = true;
+        DoMath(player);
+        player.ResourceRPC(Resource.Coin, mathResult, logged);
     }
 
-    public override int DoMath(Player player)
+    public override void DoMath(Player player)
     {
-        int answer = this.dataFile.startingCoin;
-        List<NextStep> listOfSteps = Log.inst.SearchHistory("ChangeResource");
-
-        foreach (NextStep step in listOfSteps)
+        if (recalculate)
         {
-            (string instruction, object[] stepParameters) = step.source.TranslateFunction(step.action);
-            if ((int)stepParameters[1] == (int)Resource.Coin)
+            mathResult = this.dataFile.startingCoin;
+            List<NextStep> listOfSteps = Log.inst.SearchHistory("ChangeResource");
+
+            foreach (NextStep step in listOfSteps)
             {
-                if ((int)stepParameters[2] > 0)
-                    answer += (int)stepParameters[2];
+                (string instruction, object[] stepParameters) = step.source.TranslateFunction(step.action);
+                if ((int)stepParameters[1] == (int)Resource.Coin)
+                {
+                    if ((int)stepParameters[2] > 0)
+                        mathResult += (int)stepParameters[2];
+                }
             }
         }
-
-        return answer;
+        recalculate = false;
     }
 }
