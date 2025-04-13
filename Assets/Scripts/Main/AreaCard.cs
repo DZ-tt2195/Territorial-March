@@ -111,17 +111,13 @@ public class AreaCard : Card
     protected (bool, int) SetToTroopHere(Player player, CardData dataFile, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        SetAllStats(troop, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        return SetAllStats(player, dataFile, troop, logged);
     }
 
     protected (bool, int) SetToScoutHere(Player player, CardData dataFile, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        SetAllStats(scout, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        return SetAllStats(player, dataFile, scout, logged);
     }
 
     #endregion

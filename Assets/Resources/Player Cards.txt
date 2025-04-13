@@ -154,6 +154,48 @@
       "X"
     ],
     [
+      "R",
+      "If you have 10 Coin or more, +1 Troop.",
+      "4",
+      "TRUE",
+      "CoinOrMore/AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "10",
+      "X"
+    ],
+    [
+      "S",
+      "\"+1 Scout per Action you have.\"",
+      "4",
+      "TRUE",
+      "SetToAction/AddScout",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "X"
+    ],
+    [
+      "N",
+      "You may lose 2 Scout for +2 Action.",
+      "5",
+      "TRUE",
+      "AskLoseScout/AddAction",
+      "",
+      "",
+      "2",
+      "",
+      "2",
+      "",
+      "X"
+    ],
+    [
       "Switcheroo",
       "Switch your Troop and Scout in Areas 2 and 3.",
       "6",

@@ -234,104 +234,117 @@ public class Card : PhotonCompatible
 
     #region Setters
 
-    protected int SetAllStats(int number, CardData dataFile)
+    protected (bool, int) SetAllStats(Player player, CardData dataFile, int number, int logged)
     {
         float multiplier = (dataFile.miscAmount >= 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
-        dataFile.cardAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.coinAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.scoutAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.actionAmount = (int)Mathf.Floor(number * multiplier);
-        dataFile.troopAmount = (int)Mathf.Floor(number * multiplier);
-        return (int)Mathf.Floor(number * multiplier);
+        int calculated = (int)Mathf.Floor(number * multiplier);
+        dataFile.cardAmount = calculated;
+        dataFile.coinAmount = calculated;
+        dataFile.scoutAmount = calculated;
+        dataFile.actionAmount = calculated;
+        dataFile.troopAmount = calculated;
+
+        if (logged >= 0)
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        return (true, calculated);
     }
 
     protected (bool, int) SetToHand(Player player, CardData dataFile,  int logged)
     {
-        SetAllStats(player.cardsInHand.Count, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        if (logged >= 0)
+            return SetAllStats(player, dataFile, player.cardsInHand.Count, logged);
+        else
+            return SetAllStats(player, dataFile, player.cardsInHand.Count - 1, logged);
     }
 
     protected (bool, int) SetToCoin(Player player, CardData dataFile,  int logged)
     {
-        SetAllStats(player.resourceDict[Resource.Coin], dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        PlayerCardData converted = (PlayerCardData)dataFile;
+        if (logged >= 0)
+            return SetAllStats(player, dataFile, player.resourceDict[Resource.Coin], logged);
+        else
+            return SetAllStats(player, dataFile, player.resourceDict[Resource.Coin] + converted.coinBonus, logged);
     }
 
     protected (bool, int) SetToAction(Player player, CardData dataFile,  int logged)
     {
-        SetAllStats(player.resourceDict[Resource.Action], dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        if (logged >= 0)
+            return SetAllStats(player, dataFile, player.resourceDict[Resource.Action], logged);
+        else
+            return SetAllStats(player, dataFile, player.resourceDict[Resource.Action] -1, logged);
     }
 
     protected (bool, int) SetToControl(Player player, CardData dataFile,  int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
-        SetAllStats(areasControlled, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        return SetAllStats(player, dataFile, areasControlled, logged);
     }
 
     protected (bool, int) SetToNotControl(Player player, CardData dataFile,  int logged)
     {
         int areasNotControlled = player.areasControlled.Count(control => !control);
-        SetAllStats(areasNotControlled, dataFile);
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (true, 0);
+        return SetAllStats(player, dataFile, areasNotControlled, logged);
     }
 
     #endregion
 
     #region Booleans
 
-    protected (bool, int) HandOrMore(Player player, CardData dataFile,  int logged)
+    protected (bool, int) ResolveBoolean(Player player, CardData dataFile, bool answer, int logged)
     {
-        bool answer = player.cardsInHand.Count >= dataFile.miscAmount;
-        if (answer && logged >= 0)
+        if (logged >= 0 && answer)
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         return (answer, 0);
+    }
+
+    protected (bool, int) HandOrMore(Player player, CardData dataFile, int logged)
+    {
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.cardsInHand.Count >= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.cardsInHand.Count-1 >= dataFile.miscAmount, logged);
     }
 
     protected (bool, int) HandOrLess(Player player, CardData dataFile,  int logged)
     {
-        bool answer = player.cardsInHand.Count <= dataFile.miscAmount;
-        if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (answer, 0);
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.cardsInHand.Count <= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.cardsInHand.Count - 1 <= dataFile.miscAmount, logged);
     }
 
     protected (bool, int) CoinOrMore(Player player, CardData dataFile,  int logged)
     {
-        bool answer = player.resourceDict[Resource.Coin] >= dataFile.miscAmount;
-        if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (answer, 0);
+        PlayerCardData converted = (PlayerCardData)dataFile;
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] >= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] + converted.coinBonus >= dataFile.miscAmount, logged);
     }
 
     protected (bool, int) CoinOrLess(Player player, CardData dataFile,  int logged)
     {
-        bool answer = player.resourceDict[Resource.Coin] <= dataFile.miscAmount;
-        if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (answer, 0);
+        PlayerCardData converted = (PlayerCardData)dataFile;
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] <= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] + converted.coinBonus <= dataFile.miscAmount, logged);
     }
 
     protected (bool, int) ActionOrMore(Player player, CardData dataFile,  int logged)
     {
-        bool answer = player.resourceDict[Resource.Action] >= dataFile.miscAmount;
-        if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (answer, 0);
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] >= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] - 1 >= dataFile.miscAmount, logged);
     }
 
     protected (bool, int) ActionOrLess(Player player, CardData dataFile,  int logged)
     {
-        bool answer = player.resourceDict[Resource.Action] <= dataFile.miscAmount;
-        if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-        return (answer, 0);
+        if (logged >= 0)
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] <= dataFile.miscAmount, logged);
+        else
+            return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] - 1 <= dataFile.miscAmount, logged);
     }
 
     #endregion
@@ -410,14 +423,16 @@ public class Card : PhotonCompatible
 
     List<(int, int)> SortToDiscard(Player player)
     {
-        return player.cardsInHand.Select((card, index) => (card.DoMath(player), index + 100)).OrderByDescending(tuple => tuple.Item1).ToList();
+        List<Card> possibleCards = player.cardsInHand;
+        possibleCards.Remove(this);
+        return possibleCards.Select((card, index) => (card.DoMath(player), index + 100)).OrderByDescending(tuple => tuple.Item1).ToList();
     }
 
     protected (bool, int) DiscardCard(Player player, CardData dataFile, int logged)
     {
         Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-        int maxDiscard = Mathf.Min(dataFile.cardAmount, player.cardsInHand.Count);
         List<(int, int)> sortedCards = SortToDiscard(player);
+        int maxDiscard = Mathf.Min(dataFile.cardAmount, sortedCards.Count);
 
         if (logged >= 0)
         {
@@ -436,8 +451,8 @@ public class Card : PhotonCompatible
     protected (bool, int) AskDiscardCard(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.cardsInHand.Count >= dataFile.cardAmount;
         List<(int, int)> sortedCards = SortToDiscard(player);
+        bool answer = sortedCards.Count >= dataFile.cardAmount;
 
         if (answer && logged >= 0)
         {
@@ -957,15 +972,20 @@ public class Card : PhotonCompatible
     protected (bool, int) AskLoseCoin(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Coin] >= dataFile.coinAmount;
-
-        if (answer && logged >= 0)
+        bool answer = true;
+        if (logged >= 0)
         {
-            Action action = () => LoseCoin(player, dataFile, logged);
-            if (dataFile.coinAmount == 0)
-                action();
-            else
+            answer = player.resourceDict[Resource.Coin] >= dataFile.coinAmount;
+            if (answer)
+            {
+                Action action = () => LoseCoin(player, dataFile, logged);
                 Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
+            }
+        }
+        else
+        {
+            PlayerCardData converted = (PlayerCardData)dataFile;
+            answer = player.resourceDict[Resource.Coin] + converted.coinBonus >= dataFile.coinAmount;
         }
         return (answer, dataFile.coinAmount * -1);
     }
@@ -973,15 +993,20 @@ public class Card : PhotonCompatible
     protected (bool, int) AskLoseAction(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Action] >= dataFile.actionAmount;
-
-        if (answer && logged >= 0)
+        bool answer = true;
+        if (logged >= 0)
         {
-            Action action = () => LoseAction(player, dataFile, logged);
-            if (dataFile.actionAmount == 0)
-                action();
-            else
+            answer = player.resourceDict[Resource.Action] >= dataFile.actionAmount;
+            if (answer)
+            {
+                Action action = () => LoseAction(player, dataFile, logged);
                 Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Action to {this.name}?", dataFile, logged));
+            }
+        }
+        else
+        {
+            PlayerCardData converted = (PlayerCardData)dataFile;
+            answer = player.resourceDict[Resource.Action] -1 >= dataFile.actionAmount;
         }
         return (answer, dataFile.actionAmount * -3);
     }
