@@ -15,10 +15,10 @@
     ],
     [
       "G",
-      "\"+3 Action, -1 Card.\"",
+      "You may discard 1 Card for +3 Action.",
       "0",
       "TRUE",
-      "AddAction/DiscardCard",
+      "AskDiscardCard/AddAction",
       "1",
       "",
       "3",

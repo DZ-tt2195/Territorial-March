@@ -24,7 +24,7 @@ using System;
         decisions = new();
         this.toThisPoint = toThisPoint;
         this.tracker = 0;
-        Debug.Log($"new chain: {toThisPoint.source.name}: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
+        Debug.Log($"NEW CHAIN: {toThisPoint.source.name}: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
     }
 
     public DecisionChain(NextStep toThisPoint, int currentArea, List<int> oldList, int toAdd)
@@ -34,7 +34,7 @@ using System;
         decisions = new(oldList) {toAdd};
         this.toThisPoint = toThisPoint;
         this.tracker = decisions.Count - 1;
-        Debug.Log($"new chain: {toThisPoint.source.name}: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
+        Debug.Log($"NEW CHAIN: {toThisPoint.source.name}: {toThisPoint.actionName} - {tracker} -> {CarryVariables.inst.PrintIntList(decisions)}");
     }
 }
 
@@ -393,7 +393,7 @@ public class Player : PhotonCompatible
             resourceDict[(Resource)resource] += amount;
             if (amount > 0)
                 Log.inst.AddTextRPC(this, $"{this.name} gets +{Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
-            else
+            else if (amount < 0)
                 Log.inst.AddTextRPC(this, $"{this.name} loses {Mathf.Abs(amount)} {(Resource)resource}{parathentical}.", LogAdd.Personal, logged);
         }
         UpdateTexts();
@@ -483,7 +483,12 @@ public class Player : PhotonCompatible
 
     public void AIDecision(Action Next, List<int> possibleDecisions)
     {
-        if (this.currentChain.tracker < this.currentChain.decisions.Count)
+        if (possibleDecisions.Count == 1)
+        {
+            this.inReaction.Add(Next);
+            this.DecisionMade(possibleDecisions[0]);
+        }
+        else if (this.currentChain.tracker < this.currentChain.decisions.Count)
         {
             int nextChoice = currentChain.decisions[currentChain.tracker];
             this.inReaction.Add(Next);
@@ -768,6 +773,13 @@ public class Player : PhotonCompatible
 
 #region Resolve
 
+    public void DecisionMade(int value)
+    {
+        choice = value;
+        //Debug.Log($"made choice of {value}");
+        PopStack();
+    }
+
     void FindNewestChain()
     {
         bool needUndo = false;
@@ -834,7 +846,7 @@ public class Player : PhotonCompatible
     {
         if (myType == PlayerType.Bot)
         {
-            //yield return null;
+            yield return null;
             if (currentChain == null)
                 FindNewestChain();
         }
@@ -850,7 +862,7 @@ public class Player : PhotonCompatible
                 {
                     Log.inst.undoToThis = step;
                     currentChain.toThisPoint = step;
-                    //Debug.Log($"do {step.actionName} (tracker: {currentChain.tracker} - {CarryVariables.inst.PrintIntList(currentChain.decisions)})");
+                    //Debug.Log($"do {step.actionName} with ${resourceDict[Resource.Coin]} (tracker: {currentChain.tracker} - {CarryVariables.inst.PrintIntList(currentChain.decisions)})");
                 }
 
                 step.action.Compile().Invoke();
@@ -860,13 +872,6 @@ public class Player : PhotonCompatible
             }
         }
         yield return null;
-    }
-
-    public void DecisionMade(int value)
-    {
-        choice = value;
-        //Debug.Log($"made choice of {value}");
-        PopStack();
     }
 
     #endregion

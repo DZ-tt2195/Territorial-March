@@ -19,7 +19,7 @@ public class Road : AreaCard
     {
         if (success)
         {
-            player.ResourceRPC(Resource.Coin, -1*dataFile.coinAmount, logged);
+            player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
             Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
         }
     }
@@ -27,6 +27,6 @@ public class Road : AreaCard
     void Loop(Player player, int logged)
     {
         if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-            AskAdvance(player, GetFile(), logged);
+            AskAdvanceTroop(player, GetFile(), logged);
     }
 }

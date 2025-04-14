@@ -167,9 +167,15 @@ public class Card : PhotonCompatible
     protected void ChangeSideCount(bool undo, int change)
     {
         if (undo)
-            sideCounter -= change;
+        {
+            sideCounter = Mathf.Max(0, sideCounter - change);
+            //Debug.Log($"unchange side counter: {sideCounter}");
+        }
         else
-            sideCounter += change;
+        {
+            sideCounter = Mathf.Max(0, sideCounter + change);
+            //Debug.Log($"change side counter: {sideCounter}");
+        }
     }
 
     [PunRPC]
@@ -551,7 +557,7 @@ public class Card : PhotonCompatible
         return (true, maxAdvance);
     }
 
-    protected (bool, int) AskAdvance(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskAdvanceTroop(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canAdvance) = CanAdvance(player);
@@ -686,7 +692,7 @@ public class Card : PhotonCompatible
         return (true, maxRetreat);
     }
 
-    protected (bool, int) AskRetreat(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskRetreatTroop(Player player, CardData dataFile, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canRetreat) = CanRetreat(player);
