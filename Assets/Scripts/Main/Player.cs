@@ -63,7 +63,7 @@ public class Player : PhotonCompatible
     [SerializeField] Transform privateDiscard;
 
     [Foldout("UI", true)]
-    [SerializeField] TMP_Text resourceText;
+    TMP_Text resourceText;
     Button myButton;
     Button resignButton;
     Transform keepHand;
@@ -150,11 +150,9 @@ public class Player : PhotonCompatible
         myButton = Instantiate(CarryVariables.inst.playerButtonPrefab);
         myButton.transform.SetParent(Manager.inst.canvas.transform);
         myButton.transform.localScale = Vector3.one;
-        myButton.transform.localPosition = new(-1100, 425 - (100 * playerPosition));
-        myButton.transform.GetChild(0).GetComponent<TMP_Text>().text = this.name;
+        myButton.transform.localPosition = new(-1125, 225 - (playerPosition * 125));
         myButton.onClick.AddListener(MoveScreen);
-        if (!PhotonNetwork.IsConnected || PhotonNetwork.CurrentRoom.MaxPlayers == 1)
-            myButton.gameObject.SetActive(false);
+        resourceText = myButton.transform.GetChild(0).GetComponent<TMP_Text>();
 
         resourceDict = new()
         {
@@ -404,7 +402,7 @@ public class Player : PhotonCompatible
         if (simulating)
             return;
 
-        resourceText.text = KeywordTooltip.instance.EditText($"{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Action]} Action");
+        resourceText.text = KeywordTooltip.instance.EditText($"{this.name}:\n{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Action]} Action");
 
         foreach (TroopDisplay display in myDisplays)
         {
@@ -896,7 +894,7 @@ public class Player : PhotonCompatible
     [PunRPC]
     internal void ChangeButtonColor(bool done)
     {
-        myButton.image.color = (done) ? Color.yellow : Color.white;
+        myButton.image.color = (done) ? Color.yellow : Color.gray;
     }
 
     #endregion

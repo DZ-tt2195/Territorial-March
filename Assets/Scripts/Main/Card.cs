@@ -441,7 +441,7 @@ public class Card : PhotonCompatible
         {
             if (player.cardsInHand.Count <= dataFile.cardAmount)
                 DiscardAll(player, dataFile, logged);
-            else
+            else if (dataFile.cardAmount > 0)
                 Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, false, logged));
         }
         return (true, -3 * Mathf.Min(dataFile.cardAmount, sortedCards.Count));
@@ -453,7 +453,7 @@ public class Card : PhotonCompatible
         List<(int, int)> sortedCards = SortToDiscard(player, logged);
         bool answer = sortedCards.Count >= dataFile.cardAmount;
 
-        if (answer && logged >= 0)
+        if (answer && logged >= 0 && dataFile.cardAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, true, logged));
@@ -549,7 +549,7 @@ public class Card : PhotonCompatible
         (int total, List<int> canAdvance) = CanAdvance(player);
         int maxAdvance = Mathf.Min(dataFile.troopAmount, total);
 
-        if (logged >= 0)
+        if (logged >= 0 && dataFile.troopAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
@@ -563,7 +563,7 @@ public class Card : PhotonCompatible
         (int total, List<int> canAdvance) = CanAdvance(player);
         bool answer = total >= dataFile.troopAmount;
 
-        if (answer && logged >= 0)
+        if (answer && logged >= 0 && dataFile.troopAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, true, logged));
@@ -808,7 +808,7 @@ public class Card : PhotonCompatible
     protected (bool, int) AddScout(Player player, CardData dataFile, int logged)
     {
         List<int> canAdd = CanAdd(player);
-        if (logged >= 0)
+        if (logged >= 0 && dataFile.scoutAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
@@ -872,7 +872,7 @@ public class Card : PhotonCompatible
     protected (bool, int) LoseScout(Player player, CardData dataFile, int logged)
     {
         (int total, List<int> canLose) = CanLose(player);
-        if (logged >= 0)
+        if (logged >= 0 && dataFile.scoutAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
@@ -886,7 +886,7 @@ public class Card : PhotonCompatible
         (int total, List<int> canLose) = CanLose(player);
         bool answer = total >= dataFile.scoutAmount;
 
-        if (answer && logged >= 0)
+        if (answer && logged >= 0 && dataFile.scoutAmount > 0)
         {
             Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, true, logged));

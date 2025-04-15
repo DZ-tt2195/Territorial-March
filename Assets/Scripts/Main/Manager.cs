@@ -83,7 +83,7 @@ public class Manager : PhotonCompatible
 
         if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
         {
-            for (int j = 0; j < 60; j++)
+            while (masterDeck.childCount < 60)
             {
                 for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
                 {

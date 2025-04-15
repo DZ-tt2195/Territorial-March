@@ -917,7 +917,6 @@ MonoBehaviour:
     completed: 0
   undoButton: {fileID: 1198459832}
   historyStack: []
-  currentDecisionInStack: -1
 --- !u!114 &443184486
 MonoBehaviour:
   m_ObjectHideFlags: 0
