@@ -63,7 +63,7 @@ public class AreaCard : Card
         return (answer, 0);
     }
 
-    protected (bool, int) ControlThisNot(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlNot(Player player, CardData dataFile, int logged)
     {
         bool answer = !player.areasControlled[areaNumber];
         if (answer && logged >= 0)
@@ -97,13 +97,10 @@ public class AreaCard : Card
         (int troop, int scout) = player.CalcTroopScout(this.areaNumber);
         bool answer = scout >= dataFile.scoutAmount;
 
-        if (answer && logged >= 0)
+        if (logged >= 0 && answer)
         {
             Action action = () => LoseScoutHere(player, dataFile, logged);
-            if (dataFile.scoutAmount == 0)
-                action();
-            else
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber + 1}?", dataFile, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber + 1}?", dataFile, logged));
         }
         return (answer, dataFile.scoutAmount * -2);
     }

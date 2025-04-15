@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class Placeholder : AreaCard
+public class Balance : AreaCard
 {
     protected override void Awake()
     {
@@ -11,11 +12,9 @@ public class Placeholder : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        for (int i = 0; i<4; i++)
-        {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (troop >= dataFile.troopAmount)
-                player.DrawCardRPC(dataFile.cardAmount, logged);
-        }
+        if (player.areasControlled[1])
+            player.DrawCardRPC(GetFile().cardAmount, logged);
+        if (player.areasControlled[2])
+            player.DrawCardRPC(GetFile().actionAmount, logged);
     }
 }

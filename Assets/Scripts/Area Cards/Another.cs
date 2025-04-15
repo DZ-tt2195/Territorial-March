@@ -11,11 +11,8 @@ public class Another : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        (int troop, int scout) = player.CalcTroopScout(1);
-        player.ResourceRPC(Resource.Coin, troop, logged);
-
-        Log.inst.AddTextRPC(player, $"{player.name} moves {troop} Troop to Area 3.", LogAdd.Remember, logged);
-        for (int i = 0; i < troop; i++)
-            player.MoveTroopRPC(1, 2, -1);
+        (int area1Troop, int area1Scout) = player.CalcTroopScout(1);
+        (int area2Troop, int area2Scout) = player.CalcTroopScout(2);
+        player.ResourceRPC(Resource.Coin, dataFile.coinAmount * Mathf.Min(area1Troop, area2Troop), logged);
     }
 }
