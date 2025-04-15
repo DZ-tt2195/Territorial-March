@@ -182,10 +182,36 @@
       "X"
     ],
     [
+      "10",
+      "\"+4 Coin, -1 Card.\"",
+      "TRUE",
+      "AddCoin/DiscardCard",
+      "1",
+      "4",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "11",
+      "You may pay 2 Coin for +2 Scout.",
+      "TRUE",
+      "AskLoseCoin/AddScout",
+      "",
+      "2",
+      "",
+      "",
+      "2",
+      "",
+      "X"
+    ],
+    [
       "Balance",
       "If you control Area 2, +1 Card. If you control Area 3, +1 Action.",
       "FALSE",
-      "DrawCard/AddAction",
+      "ControlThis/DrawCard/AddAction",
       "1",
       "",
       "1",

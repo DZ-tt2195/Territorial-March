@@ -113,13 +113,15 @@ public class CardGallery : MonoBehaviour
         storeCards.transform.localPosition = new Vector3(0, -1050, 0);
         if (typeDropdown.options[typeDropdown.value].text == "Area")
         {
-            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3(2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 6f))));
+            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3
+                (2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 5f))));
             storeCards.cellSize = CarryVariables.inst.areaCardPrefab.GetComponent<RectTransform>().sizeDelta;
-            storeCards.constraintCount = 6;
+            storeCards.constraintCount = 5;
         }
         else
         {
-            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3(2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 8f))));
+            storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3
+                (2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 8f))));
             storeCards.cellSize = CarryVariables.inst.playerCardPrefab.GetComponent<RectTransform>().sizeDelta;
             storeCards.constraintCount = 8;
         }
