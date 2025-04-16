@@ -219,6 +219,19 @@
       "",
       "",
       "X"
+    ],
+    [
+      "Plenty",
+      "If you have more Action than Card in hand, +1 Troop.",
+      "FALSE",
+      "AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "",
+      "X"
     ]
   ]
 }

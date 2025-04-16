@@ -12,7 +12,7 @@ public class Throne : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        AskLoseCoin(player, GetFile(), logged);
+        AskLoseAction(player, GetFile(), logged);
     }
 
     protected override void PostPayment(Player player, bool success, CardData dataFile, int logged)
@@ -41,8 +41,8 @@ public class Throne : PlayerCard
     {
         if (recalculate)
         {
-            if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-                mathResult = -dataFile.coinAmount + (2 * dataFile.miscAmount - 1) * 3;
+            if (player.resourceDict[Resource.Action] >= dataFile.actionAmount)
+                mathResult = -dataFile.actionAmount + (2 * dataFile.miscAmount - 1) * 3;
             else
                 mathResult = 0;
         }
