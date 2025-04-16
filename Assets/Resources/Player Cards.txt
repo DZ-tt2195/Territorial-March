@@ -28,6 +28,20 @@
       "X"
     ],
     [
+      "Throne",
+      "You may pay 3 Coin to play 1 Card 2x.",
+      "0",
+      "FALSE",
+      "AskLoseCoin/PlayCard",
+      "",
+      "3",
+      "",
+      "",
+      "",
+      "2",
+      "X"
+    ],
+    [
       "X",
       "You may pay 3 Coin for +3 Card.",
       "0",
@@ -70,6 +84,20 @@
       "X"
     ],
     [
+      "Choosie",
+      "Choose one: +4 Coin; +2 Scout; +1 Troop.",
+      "2",
+      "FALSE",
+      "AddCoin/AddScout/AdvanceTroop",
+      "",
+      "4",
+      "",
+      "1",
+      "2",
+      "",
+      "X"
+    ],
+    [
       "J",
       "\"+1 Troop per Area you control.\"",
       "2",
@@ -81,20 +109,6 @@
       "",
       "",
       "1",
-      "X"
-    ],
-    [
-      "Secure",
-      "\"+2 Scout, both in one Area you control.\"",
-      "2",
-      "FALSE",
-      "AddScout",
-      "",
-      "",
-      "",
-      "",
-      "2",
-      "",
       "X"
     ],
     [
@@ -151,6 +165,20 @@
       "",
       "",
       "1",
+      "X"
+    ],
+    [
+      "Secure",
+      "\"+1 Scout in one Area you control.\"",
+      "4",
+      "FALSE",
+      "AddScout",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "",
       "X"
     ],
     [
@@ -262,6 +290,20 @@
       "",
       "1",
       "1",
+      "",
+      "X"
+    ],
+    [
+      "Z",
+      "\"-1 Card\"",
+      "8",
+      "TRUE",
+      "DiscardCard",
+      "1",
+      "",
+      "",
+      "",
+      "",
       "",
       "X"
     ]

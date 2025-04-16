@@ -65,7 +65,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public void CreateRoom(int playerCount)
     {
-        if (username.text == "")
+        if (username.text.Trim() == "")
         {
             StartCoroutine(ErrorMessage("You forgot to type in a username."));
         }
@@ -79,15 +79,15 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public void JoinRoom()
     {
-        if (join.text == "")
+        if (join.text.Trim() == "")
         {
             StartCoroutine(ErrorMessage("You forgot to type in the host's name."));
         }
-        else if (username.text == "")
+        else if (username.text.Trim() == "")
         {
             StartCoroutine(ErrorMessage("You forgot to type in a username."));
         }
-        PhotonNetwork.JoinRoom(join.text.ToUpper());
+        PhotonNetwork.JoinRoom(join.text.Trim().ToUpper());
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -102,7 +102,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        PlayerPrefs.SetString("Online Username", username.text);
+        PlayerPrefs.SetString("Online Username", username.text.Trim());
         PhotonNetwork.LoadLevel("2. Game");
     }
 

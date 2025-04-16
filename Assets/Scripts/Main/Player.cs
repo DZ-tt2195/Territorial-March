@@ -402,7 +402,7 @@ public class Player : PhotonCompatible
         if (simulating)
             return;
 
-        resourceText.text = KeywordTooltip.instance.EditText($"{this.name}:\n{cardsInHand.Count} Card, {resourceDict[Resource.Coin]} Coin, {resourceDict[Resource.Action]} Action");
+        resourceText.text = KeywordTooltip.instance.EditText($"{this.name}:\n{cardsInHand.Count} Card, {resourceDict[Resource.Action]} Action, {resourceDict[Resource.Coin]} Coin");
 
         foreach (TroopDisplay display in myDisplays)
         {

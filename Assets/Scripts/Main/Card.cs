@@ -348,22 +348,10 @@ public class Card : PhotonCompatible
 
     protected (bool, int) PlayCard(Player player, CardData dataFile, int logged)
     {
-        if (player.cardsInHand.Count == 0)
-        {
-            if (logged >= 0)
-            {
-                Log.inst.AddTextRPC(player, $"{player.name} can't play anything.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
-            }
-            return (true, 0);
-        }
-        else
-        {
-            List<int> sortedCards = SimulatePlay(player);
-            if (logged >= 0)
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, sortedCards, logged));
-            return (true, sortedCards.Max() - 6);
-        }
+        List<int> sortedCards = SimulatePlay(player);
+        if (logged >= 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, sortedCards, logged));
+        return (true, sortedCards.Count == 0 ? 0 : sortedCards.Max() - 6);
     }
 
     void ChoosePlay(Player player, CardData dataFile, List<int> sortedCards, int logged)
@@ -385,23 +373,25 @@ public class Card : PhotonCompatible
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
                 PlayerCard toPlay = (PlayerCard)player.cardsInHand[convertedChoice];
-                Log.inst.AddTextRPC(player, $"{player.name} plays {toPlay.name}.", LogAdd.Remember, logged);
-
                 PostPlaying(player, toPlay, dataFile, logged);
-                player.DiscardPlayerCard(toPlay, -1);
-                toPlay.ResolveCard(player, logged + 1);
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+                PostPlaying(player, null, dataFile, logged);
             }
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         }
     }
 
     protected virtual void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
     {
-        Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+        if (cardToPlay != null)
+        {
+            Log.inst.AddTextRPC(player, $"{player.name} plays {cardToPlay.name}.", LogAdd.Remember, logged);
+            player.DiscardPlayerCard(cardToPlay, -1);
+            cardToPlay.ResolveCard(player, logged + 1);
+        }
     }
 
     #endregion
@@ -413,6 +403,7 @@ public class Card : PhotonCompatible
         List<Card> possibleCards = new();
         possibleCards.AddRange(player.cardsInHand);
         possibleCards.Remove(this);
+
         if (logged >= 0)
         {
             for (int i = 0; i < player.cardsInHand.Count; i++)
@@ -995,10 +986,20 @@ public class Card : PhotonCompatible
         void Next()
         {
             if (player.choice == 0)
+            {
                 ifDone();
+                PostPayment(player, true, dataFile, logged);
+            }
             else
+            {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't use {this.name}.", LogAdd.Personal, logged);
+                PostPayment(player, false, dataFile, logged);
+            }
         }
+    }
+
+    protected virtual void PostPayment(Player player, bool success, CardData dataFile, int logged)
+    {
     }
 
     #endregion

@@ -20,6 +20,7 @@ public class Camp : AreaCard
 
     protected override void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
     {
+        base.PostPlaying(player, cardToPlay, dataFile, logged);
         if (cardToPlay != null)
         {
             player.ResourceRPC(Resource.Action, -1, logged);
