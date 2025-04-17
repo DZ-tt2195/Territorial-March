@@ -12,7 +12,8 @@ public class Throne : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        AskLoseAction(player, GetFile(), logged);
+        if (player.cardsInHand.Count > 0)
+            AskLoseAction(player, GetFile(), logged);
     }
 
     protected override void PostPayment(Player player, bool success, CardData dataFile, int logged)
@@ -21,14 +22,14 @@ public class Throne : PlayerCard
             PlayCard(player, dataFile, logged);
     }
 
-    protected override void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
+    protected override void PostPlay(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
     {
         if (cardToPlay != null)
         {
             for (int i = 0; i < dataFile.miscAmount - 1; i++)
                 Log.inst.RememberStep(this, StepType.Holding, () => ReplayCard(player, cardToPlay, logged));
         }
-        base.PostPlaying(player, cardToPlay, dataFile, logged);
+        base.PostPlay(player, cardToPlay, dataFile, logged);
     }
 
     void ReplayCard(Player player, PlayerCard cardToPlay, int logged)
@@ -41,7 +42,7 @@ public class Throne : PlayerCard
     {
         if (recalculate)
         {
-            if (player.resourceDict[Resource.Action] >= dataFile.actionAmount)
+            if (player.resourceDict[Resource.Action] >= dataFile.actionAmount && player.cardsInHand.Count > 0)
                 mathResult = -dataFile.actionAmount + (2 * dataFile.miscAmount - 1) * 3;
             else
                 mathResult = 0;

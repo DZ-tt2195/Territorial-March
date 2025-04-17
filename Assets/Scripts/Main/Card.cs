@@ -373,18 +373,18 @@ public class Card : PhotonCompatible
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
                 PlayerCard toPlay = (PlayerCard)player.cardsInHand[convertedChoice];
-                PostPlaying(player, toPlay, dataFile, logged);
+                PostPlay(player, toPlay, dataFile, logged);
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
-                PostPlaying(player, null, dataFile, logged);
+                PostPlay(player, null, dataFile, logged);
             }
             Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
         }
     }
 
-    protected virtual void PostPlaying(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
+    protected virtual void PostPlay(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
     {
         if (cardToPlay != null)
         {
@@ -457,7 +457,7 @@ public class Card : PhotonCompatible
         int toDiscard = player.cardsInHand.Count;
         for (int i = 0; i < toDiscard; i++)
             player.DiscardPlayerCard(player.cardsInHand[0], logged);
-        PostDiscarding(player, true, dataFile, logged);
+        PostDiscard(player, true, dataFile, logged);
         Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
     }
 
@@ -492,7 +492,7 @@ public class Card : PhotonCompatible
                 Card toDiscard = player.cardsInHand[convertedChoice];
                 player.DiscardPlayerCard(toDiscard, logged);
                 Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
-                PostDiscarding(player, true, dataFile, logged);
+                PostDiscard(player, true, dataFile, logged);
 
                 List<(int, int)> sortedCards = SortToDiscard(player, logged);
                 if (sideCounter == dataFile.cardAmount)
@@ -503,7 +503,7 @@ public class Card : PhotonCompatible
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
-                PostDiscarding(player, false, dataFile, logged);
+                PostDiscard(player, false, dataFile, logged);
 
                 if (!mayStopEarly)
                     Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
@@ -511,7 +511,7 @@ public class Card : PhotonCompatible
         }
     }
 
-    protected virtual void PostDiscarding(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostDiscard(Player player, bool success, CardData dataFile, int logged)
     {
     }
 

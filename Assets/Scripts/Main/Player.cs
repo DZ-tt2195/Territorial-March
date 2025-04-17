@@ -361,7 +361,8 @@ public class Player : PhotonCompatible
                 Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
-            UpdateTexts();
+            if (logged >= 0)
+                UpdateTexts();
         }
     }
 
@@ -844,7 +845,7 @@ public class Player : PhotonCompatible
     {
         if (myType == PlayerType.Bot)
         {
-            yield return null;
+            //yield return null;
             if (currentChain == null)
                 FindNewestChain();
         }
