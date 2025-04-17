@@ -114,7 +114,7 @@ public class CardGallery : MonoBehaviour
         if (typeDropdown.options[typeDropdown.value].text == "Area")
         {
             storeCards.GetComponent<RectTransform>().sizeDelta = new Vector3
-                (2560, Math.Max(800, 400 * (Mathf.Ceil(storeCards.transform.childCount / 5f))));
+                (2560, Math.Max(750, 250 * (Mathf.Ceil(storeCards.transform.childCount / 5f))));
             storeCards.cellSize = CarryVariables.inst.areaCardPrefab.GetComponent<RectTransform>().sizeDelta;
             storeCards.constraintCount = 5;
         }

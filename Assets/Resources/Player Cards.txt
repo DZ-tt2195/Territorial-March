@@ -28,20 +28,6 @@
       "X"
     ],
     [
-      "Throne",
-      "You may lose 1 Action to play 1 Card 2x.",
-      "0",
-      "FALSE",
-      "AskLoseAction/PlayCard",
-      "",
-      "",
-      "1",
-      "",
-      "",
-      "2",
-      "X"
-    ],
-    [
       "X",
       "You may pay 3 Coin for +3 Card.",
       "0",

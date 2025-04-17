@@ -51,7 +51,7 @@ public class AreaCard : Card
         if (dataFile.useSheets)
         {
             stepCounter = -1;
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, dataFile, logged);
         }
     }
 
@@ -59,7 +59,7 @@ public class AreaCard : Card
     {
         bool answer = player.areasControlled[areaNumber];
         if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, dataFile, logged);
         return (answer, 0);
     }
 
@@ -67,7 +67,7 @@ public class AreaCard : Card
     {
         bool answer = !player.areasControlled[areaNumber];
         if (answer && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, dataFile, logged);
         return (answer, 0);
     }
 
@@ -76,7 +76,7 @@ public class AreaCard : Card
         if (logged >= 0)
         {
             player.ChangeScoutRPC(this.areaNumber, dataFile.scoutAmount, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, dataFile, logged);
         }
         return (true, dataFile.scoutAmount * 2);
     }
@@ -86,7 +86,7 @@ public class AreaCard : Card
         if (logged >= 0)
         {
             player.ChangeScoutRPC(this.areaNumber, -1 * dataFile.scoutAmount, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, dataFile, logged);
         }
         return (true, dataFile.scoutAmount * -2);
     }

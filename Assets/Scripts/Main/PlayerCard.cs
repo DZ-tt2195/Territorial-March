@@ -31,7 +31,7 @@ public class PlayerCard : Card
         if (dataFile.useSheets)
         {
             stepCounter = -1;
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player, dataFile, logged));
+            NextStepRPC(player, GetFile(), logged);
         }
     }
 
