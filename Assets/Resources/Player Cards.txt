@@ -14,7 +14,7 @@
       "artCredit"
     ],
     [
-      "G",
+      "A",
       "You may discard 1 Card for +3 Action.",
       "0",
       "TRUE",
@@ -28,7 +28,7 @@
       "X"
     ],
     [
-      "X",
+      "B",
       "You may pay 3 Coin for +3 Card.",
       "0",
       "TRUE",
@@ -42,7 +42,7 @@
       "X"
     ],
     [
-      "A",
+      "C",
       "\"+1 Troop, +1 Scout.\"",
       "0",
       "TRUE",
@@ -98,7 +98,7 @@
       "X"
     ],
     [
-      "J",
+      "D",
       "\"+1 Troop per Area you control.\"",
       "2",
       "TRUE",
@@ -126,7 +126,7 @@
       "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
-      "D",
+      "E",
       "\"+1 Card per Area you control.\"",
       "3",
       "TRUE",
@@ -140,7 +140,7 @@
       "X"
     ],
     [
-      "E",
+      "F",
       "\"+1 Action per Area you control.\"",
       "3",
       "TRUE",
@@ -154,7 +154,7 @@
       "X"
     ],
     [
-      "F",
+      "G",
       "\"+1 Coin per Card in your hand.\"",
       "3",
       "TRUE",
@@ -183,20 +183,6 @@
     ],
     [
       "H",
-      "You may spend 1 Action for +5 Coin.",
-      "4",
-      "TRUE",
-      "AskLoseAction/AddCoin",
-      "",
-      "5",
-      "1",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "R",
       "If you have 10 Coin or more, +1 Troop.",
       "4",
       "TRUE",
@@ -210,7 +196,7 @@
       "X"
     ],
     [
-      "S",
+      "I",
       "\"+1 Scout per Action you have.\"",
       "4",
       "TRUE",
@@ -224,7 +210,21 @@
       "X"
     ],
     [
-      "M",
+      "J",
+      "You may spend 1 Action for +5 Coin.",
+      "5",
+      "TRUE",
+      "AskLoseAction/AddCoin",
+      "",
+      "5",
+      "1",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "K",
       "You may retreat 1 Troop for +2 Card.",
       "5",
       "TRUE",
@@ -238,8 +238,8 @@
       "X"
     ],
     [
-      "N",
-      "You may lose 2 Scout for +2 Action.",
+      "L",
+      "You may remove 2 Scout for +2 Action.",
       "5",
       "TRUE",
       "AskLoseScout/AddAction",
@@ -252,7 +252,7 @@
       "X"
     ],
     [
-      "O",
+      "M",
       "You may discard 2 Card for +2 Troop.",
       "5",
       "TRUE",
@@ -281,20 +281,34 @@
     ],
     [
       "Reposition",
-      "\"+1 Troop, -1 Troop. +1 Scout, -1 Scout.\"",
+      "\"+1 Troop, -1 Troop.\"",
       "6",
       "TRUE",
-      "AdvanceTroop/RetreatTroop/AddScout/LoseScout",
+      "AdvanceTroop/RetreatTroop",
       "",
       "",
       "",
       "1",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "N",
+      "\"+1 Scout, -1 Scout.\"",
+      "6",
+      "TRUE",
+      "AddScout/LoseScout",
+      "",
+      "",
+      "",
+      "",
       "1",
       "",
       "X"
     ],
     [
-      "Z",
+      "O",
       "\"-1 Card\"",
       "8",
       "TRUE",
@@ -305,6 +319,20 @@
       "",
       "",
       "",
+      "X"
+    ],
+    [
+      "P",
+      "If you control 0 or 1 Areas, -1 Action (you can go below 0 Action).",
+      "8",
+      "TRUE",
+      "ControlOrLess/LoseAction",
+      "",
+      "",
+      "1",
+      "",
+      "",
+      "1",
       "X"
     ]
   ]

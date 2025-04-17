@@ -228,7 +228,7 @@ public class Player : PhotonCompatible
         card.layout.FillInCards(card.GetFile(), 0);
     }
 
-    public void SortHand()
+    void SortHand()
     {
         float start = -1100;
         float end = 475;
@@ -274,8 +274,11 @@ public class Player : PhotonCompatible
         {
             cardsInHand.Remove(card);
             card.transform.SetParent(privateDiscard);
-            Log.inst.AddTextRPC(this, $"{this.name} discards {card.name}.", LogAdd.Personal, logged);
             StartCoroutine(card.MoveCard(new(0, -10000), 0.25f, Vector3.one));
+            if (InControl() && myType == PlayerType.Human)
+                Log.inst.AddTextRPC(this, $"{this.name} discards {card.name}.", LogAdd.Personal, logged);
+            else
+                Log.inst.AddTextRPC(this, $"{this.name} draws 1 Card.", LogAdd.Personal, logged);
         }
         SortHand();
     }
@@ -372,9 +375,9 @@ public class Player : PhotonCompatible
 
     public void ResourceRPC(Resource resource, int amount, int logged, string source = "")
     {
-        int actualAmount = amount;
+        int actualAmount = amount;/*
         if (resourceDict[resource] + amount < 0)
-            actualAmount = -1 * resourceDict[resource];
+            actualAmount = -1 * resourceDict[resource];*/
 
         Log.inst.RememberStep(this, StepType.Revert, () => ChangeResource(false, (int)resource, actualAmount, logged, source));
     }
@@ -403,13 +406,14 @@ public class Player : PhotonCompatible
         if (simulating)
             return;
 
-        resourceText.text = KeywordTooltip.instance.EditText($"{this.name}:\n{cardsInHand.Count} Card, {resourceDict[Resource.Action]} Action, {resourceDict[Resource.Coin]} Coin");
+        resourceText.text = KeywordTooltip.instance.EditText
+            ($"{this.name}:\n{cardsInHand.Count} Card, {resourceDict[Resource.Action]} Action, {resourceDict[Resource.Coin]} Coin");
 
         foreach (TroopDisplay display in myDisplays)
         {
             (int troop, int scout) = CalcTroopScout(display.areaPosition);
             display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout",
-                areasControlled[display.areaPosition] ? Color.yellow : Color.gray);
+                areasControlled[display.areaPosition] ? Color.yellow : new(0.7f, 0.7f, 0.7f));
         }
     }
 
@@ -895,7 +899,7 @@ public class Player : PhotonCompatible
     [PunRPC]
     internal void ChangeButtonColor(bool done)
     {
-        myButton.image.color = (done) ? Color.yellow : Color.gray;
+        myButton.image.color = (done) ? Color.yellow : new(0.7f, 0.7f, 0.7f);
     }
 
     #endregion

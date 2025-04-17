@@ -65,20 +65,20 @@
       "X"
     ],
     [
-      "4",
-      "\"If you don't control this, -1 Card.\"",
+      "2",
+      "\"If you don't control this, -1 Action (you can go below 0 Action).\"",
       "TRUE",
-      "ControlNot/DiscardCard",
+      "ControlNot/LoseAction",
+      "",
+      "",
       "1",
-      "",
-      "",
       "",
       "",
       "",
       "X"
     ],
     [
-      "5",
+      "3",
       "\"You may spend 1 Action for +1 Troop.\"",
       "TRUE",
       "AskLoseAction/AdvanceTroop",
@@ -91,7 +91,7 @@
       "X"
     ],
     [
-      "6",
+      "4",
       "\"If you control this, +1 Action per 2 Card in your hand (round down).\"",
       "TRUE",
       "ControlThis/SetToHand/AddAction",
@@ -104,7 +104,7 @@
       "X"
     ],
     [
-      "7",
+      "5",
       "\"+1 Scout per Area you control.\"",
       "TRUE",
       "SetToControl/AddScout",
@@ -156,10 +156,10 @@
       "X"
     ],
     [
-      "8",
-      "\"+1 Action, -1 Troop.\"",
+      "6",
+      "\"+1 Action. If you don't control this, -1 Troop.\"",
       "TRUE",
-      "AddAction/RetreatTroop",
+      "AddAction/ControlNot/RetreatTroop",
       "",
       "",
       "1",
@@ -169,7 +169,7 @@
       "X"
     ],
     [
-      "9",
+      "7",
       "If you have 2 Action or more, +4 Coin.",
       "TRUE",
       "ActionOrMore/AddCoin",
@@ -182,7 +182,7 @@
       "X"
     ],
     [
-      "10",
+      "8",
       "\"+4 Coin, -1 Card.\"",
       "TRUE",
       "AddCoin/DiscardCard",
@@ -195,7 +195,7 @@
       "X"
     ],
     [
-      "11",
+      "9",
       "You may pay 2 Coin for +2 Scout.",
       "TRUE",
       "AskLoseCoin/AddScout",
@@ -237,7 +237,7 @@
       "Penalty",
       "Retreat 1 Troop unless you pay 2 Coin.",
       "FALSE",
-      "LoseCoin/AskRetreatTroop",
+      "AskLoseCoin/AskRetreatTroop",
       "",
       "2",
       "",

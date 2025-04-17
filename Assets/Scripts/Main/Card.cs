@@ -249,7 +249,8 @@ public class Card : PhotonCompatible
     protected (bool, int) SetAllStats(Player player, CardData dataFile, int number, int logged)
     {
         float multiplier = (dataFile.miscAmount >= 0) ? dataFile.miscAmount : -1f / dataFile.miscAmount;
-        int calculated = (int)Mathf.Floor(number * multiplier);
+        int calculated = (number > 0) ? (int)Mathf.Floor(number * multiplier) : 0;
+
         dataFile.cardAmount = calculated;
         dataFile.coinAmount = calculated;
         dataFile.scoutAmount = calculated;
@@ -324,9 +325,16 @@ public class Card : PhotonCompatible
         return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] >= dataFile.miscAmount, logged);
     }
 
-    protected (bool, int) ActionOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlOrMore(Player player, CardData dataFile, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] <= dataFile.miscAmount, logged);
+        int areasControlled = player.areasControlled.Count(control => control);
+        return ResolveBoolean(player, dataFile, areasControlled >= dataFile.miscAmount, logged);
+    }
+
+    protected (bool, int) ControlOrLess(Player player, CardData dataFile, int logged)
+    {
+        int areasControlled = player.areasControlled.Count(control => control);
+        return ResolveBoolean(player, dataFile, areasControlled <= dataFile.miscAmount, logged);
     }
 
     #endregion
