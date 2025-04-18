@@ -51,47 +51,47 @@ public class AreaCard : Card
         if (dataFile.useSheets)
         {
             stepCounter = -1;
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         }
     }
 
-    protected (bool, int) ControlThis(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlThis(Player player, int logged)
     {
         bool answer = player.areasControlled[areaNumber];
         if (answer && logged >= 0)
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         return (answer, 0);
     }
 
-    protected (bool, int) ControlNot(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlNot(Player player, int logged)
     {
         bool answer = !player.areasControlled[areaNumber];
         if (answer && logged >= 0)
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         return (answer, 0);
     }
 
-    protected (bool, int) AddScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddScoutHere(Player player, int logged)
     {
         if (logged >= 0)
         {
             player.ChangeScoutRPC(this.areaNumber, dataFile.scoutAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         }
         return (true, dataFile.scoutAmount * 2);
     }
 
-    protected (bool, int) LoseScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseScoutHere(Player player, int logged)
     {
         if (logged >= 0)
         {
             player.ChangeScoutRPC(this.areaNumber, -1 * dataFile.scoutAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         }
         return (true, dataFile.scoutAmount * -2);
     }
 
-    protected (bool, int) AskLoseScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseScoutHere(Player player, int logged)
     {
         mayStopEarly = true;
         (int troop, int scout) = player.CalcTroopScout(this.areaNumber);
@@ -99,19 +99,19 @@ public class AreaCard : Card
 
         if (logged >= 0 && answer)
         {
-            Action action = () => LoseScoutHere(player, dataFile, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber + 1}?", dataFile, logged));
+            Action action = () => LoseScoutHere(player, logged);
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Remove {dataFile.scoutAmount} Scout from Area {areaNumber + 1}?", logged));
         }
         return (answer, dataFile.scoutAmount * -2);
     }
 
-    protected (bool, int) SetToTroopHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToTroopHere(Player player, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
         return SetAllStats(player, dataFile, troop, logged);
     }
 
-    protected (bool, int) SetToScoutHere(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToScoutHere(Player player, int logged)
     {
         (int troop, int scout) = player.CalcTroopScout(areaNumber);
         return SetAllStats(player, dataFile, scout, logged);

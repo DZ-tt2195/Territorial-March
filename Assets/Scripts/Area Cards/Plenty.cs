@@ -13,6 +13,6 @@ public class Plenty : AreaCard
     {
         base.AreaInstructions(player, logged);
         if (player.resourceDict[Resource.Action] > player.cardsInHand.Count)
-            AdvanceTroop(player, GetFile(), logged);
+            AdvanceTroop(player, logged);
     }
 }

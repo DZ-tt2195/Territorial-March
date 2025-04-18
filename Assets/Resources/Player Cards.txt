@@ -295,7 +295,7 @@
     ],
     [
       "N",
-      "\"+1 Scout, -1 Scout.\"",
+      "\"+1 Scout, -1 Scout (you can go below 0 Scout in an Area).\"",
       "6",
       "TRUE",
       "AddScout/LoseScout",

@@ -18,9 +18,9 @@ public class Camp : AreaCard
         Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
     }
 
-    protected override void PostPlay(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
+    protected override void PostPlay(Player player, PlayerCard cardToPlay, int logged)
     {
-        base.PostPlay(player, cardToPlay, dataFile, logged);
+        base.PostPlay(player, cardToPlay, logged);
         if (cardToPlay != null)
         {
             player.ResourceRPC(Resource.Action, -1, logged);
@@ -31,7 +31,7 @@ public class Camp : AreaCard
     void Loop(Player player, int logged)
     {
         if (player.resourceDict[Resource.Action] >= 1 && player.cardsInHand.Count >= 1)
-            PlayCard(player, GetFile(), logged);
+            PlayCard(player, logged);
     }
 
     protected override List<int> SimulatePlay(Player player)

@@ -18,7 +18,6 @@ public class Card : PhotonCompatible
 
     protected List<string> activationSteps = new();
     protected int stepCounter;
-    protected int sideCounter;
     protected bool mayStopEarly;
 
     public bool recalculate;
@@ -145,14 +144,14 @@ public class Card : PhotonCompatible
 
     #region Misc
 
-    protected void NextStepRPC(Player player, CardData dataFile, int logged)
+    protected void NextStepRPC(Player player, int logged)
     {
-        if (dataFile.useSheets && logged >= 0)
-            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player.playerPosition, dataFile, logged));
+        if (GetFile().useSheets && logged >= 0)
+            Log.inst.RememberStep(this, StepType.Revert, () => DoNextStep(false, player.playerPosition, logged));
     }
 
     [PunRPC]
-    void DoNextStep(bool undo, int playerPosition, CardData dataFile, int logged)
+    void DoNextStep(bool undo, int playerPosition, int logged)
     {
         if (undo)
         {
@@ -162,84 +161,63 @@ public class Card : PhotonCompatible
         {
             stepCounter++;
             if (stepCounter < activationSteps.Count)
-                StringParameters(activationSteps[stepCounter], new object[3]
-                { Manager.inst.playersInOrder[playerPosition], dataFile, logged });
+                StringParameters(activationSteps[stepCounter], new object[2]
+                { Manager.inst.playersInOrder[playerPosition], logged });
         }
-    }
-
-    [PunRPC]
-    protected void ChangeSideCount(bool undo, int change)
-    {
-        if (undo)
-        {
-            sideCounter = Mathf.Max(0, sideCounter - change);
-            //Debug.Log($"unchange side counter: {sideCounter}");
-        }
-        else
-        {
-            sideCounter = Mathf.Max(0, sideCounter + change);
-            //Debug.Log($"change side counter: {sideCounter}");
-        }
-    }
-
-    [PunRPC]
-    protected void SetSideCount(bool undo, int newNumber)
-    {
-        ChangeSideCount(undo, newNumber - sideCounter);
     }
 
     #endregion
 
     #region +/- Resources
 
-    protected (bool, int) DrawCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) DrawCard(Player player, int logged)
     {
         if (logged >= 0)
         {
-            player.DrawCardRPC(dataFile.cardAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            player.DrawCardRPC(GetFile().cardAmount, logged);
+            NextStepRPC(player, logged);
         }
-        return (true, dataFile.cardAmount * 3);
+        return (true, GetFile().cardAmount * 3);
     }
 
-    protected (bool, int) AddCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddCoin(Player player, int logged)
     {
         if (logged >= 0)
         {
-            player.ResourceRPC(Resource.Coin, dataFile.coinAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            player.ResourceRPC(Resource.Coin, GetFile().coinAmount, logged);
+            NextStepRPC(player, logged);
         }
-        return (true, dataFile.coinAmount);
+        return (true, GetFile().coinAmount);
     }
 
-    protected (bool, int) LoseCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseCoin(Player player, int logged)
     {
         if (logged >= 0)
         {
-            player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            player.ResourceRPC(Resource.Coin, -1 * GetFile().coinAmount, logged);
+            NextStepRPC(player, logged);
         }
-        return (true, -1 * dataFile.coinAmount);
+        return (true, -1 * GetFile().coinAmount);
     }
 
-    protected (bool, int) AddAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddAction(Player player, int logged)
     {
         if (logged >= 0)
         {
-            player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            player.ResourceRPC(Resource.Action, GetFile().actionAmount, logged);
+            NextStepRPC(player, logged);
         }
-        return (true, dataFile.actionAmount * 3);
+        return (true, GetFile().actionAmount * 3);
     }
 
-    protected (bool, int) LoseAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseAction(Player player, int logged)
     {
         if (logged >= 0)
         {
-            player.ResourceRPC(Resource.Action, -1 * dataFile.actionAmount, logged);
-            NextStepRPC(player, dataFile, logged);
+            player.ResourceRPC(Resource.Action, -1 * GetFile().actionAmount, logged);
+            NextStepRPC(player, logged);
         }
-        return (true, dataFile.actionAmount * -3);
+        return (true, GetFile().actionAmount * -3);
     }
 
     #endregion
@@ -258,83 +236,89 @@ public class Card : PhotonCompatible
         dataFile.troopAmount = calculated;
 
         if (logged >= 0)
-            NextStepRPC(player, dataFile, logged);
-        return (true, calculated);
+        {
+            NextStepRPC(player, logged);
+            return (true, 0);
+        }
+        else
+        {
+            return (true, 0);
+        }
     }
 
-    protected (bool, int) SetToHand(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToHand(Player player, int logged)
     {
-        return SetAllStats(player, dataFile, player.cardsInHand.Count, logged);
+        return SetAllStats(player, GetFile(), player.cardsInHand.Count, logged);
     }
 
-    protected (bool, int) SetToCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToCoin(Player player, int logged)
     {
-        return SetAllStats(player, dataFile, player.resourceDict[Resource.Coin], logged);
+        return SetAllStats(player, GetFile(), player.resourceDict[Resource.Coin], logged);
     }
 
-    protected (bool, int) SetToAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToAction(Player player, int logged)
     {
-        return SetAllStats(player, dataFile, player.resourceDict[Resource.Action], logged);
+        return SetAllStats(player, GetFile(), player.resourceDict[Resource.Action], logged);
     }
 
-    protected (bool, int) SetToControl(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToControl(Player player, int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
-        return SetAllStats(player, dataFile, areasControlled, logged);
+        return SetAllStats(player, GetFile(), areasControlled, logged);
     }
 
-    protected (bool, int) SetToNotControl(Player player, CardData dataFile, int logged)
+    protected (bool, int) SetToNotControl(Player player, int logged)
     {
         int areasNotControlled = player.areasControlled.Count(control => !control);
-        return SetAllStats(player, dataFile, areasNotControlled, logged);
+        return SetAllStats(player, GetFile(), areasNotControlled, logged);
     }
 
     #endregion
 
     #region Booleans
 
-    protected (bool, int) ResolveBoolean(Player player, CardData dataFile, bool answer, int logged)
+    protected (bool, int) ResolveBoolean(Player player, bool answer, int logged)
     {
         if (logged >= 0 && answer)
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         return (answer, 0);
     }
 
-    protected (bool, int) HandOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) HandOrMore(Player player, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.cardsInHand.Count >= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, player.cardsInHand.Count >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) HandOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) HandOrLess(Player player, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.cardsInHand.Count <= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, player.cardsInHand.Count <= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) CoinOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) CoinOrMore(Player player, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] >= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, player.resourceDict[Resource.Coin] >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) CoinOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) CoinOrLess(Player player, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Coin] <= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, player.resourceDict[Resource.Coin] <= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) ActionOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) ActionOrMore(Player player, int logged)
     {
-        return ResolveBoolean(player, dataFile, player.resourceDict[Resource.Action] >= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, player.resourceDict[Resource.Action] >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) ControlOrMore(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlOrMore(Player player, int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
-        return ResolveBoolean(player, dataFile, areasControlled >= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, areasControlled >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) ControlOrLess(Player player, CardData dataFile, int logged)
+    protected (bool, int) ControlOrLess(Player player, int logged)
     {
         int areasControlled = player.areasControlled.Count(control => control);
-        return ResolveBoolean(player, dataFile, areasControlled <= dataFile.miscAmount, logged);
+        return ResolveBoolean(player, areasControlled <= GetFile().miscAmount, logged);
     }
 
     #endregion
@@ -358,15 +342,15 @@ public class Card : PhotonCompatible
         return sortedCards;
     }
 
-    protected (bool, int) PlayCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) PlayCard(Player player, int logged)
     {
         List<int> sortedCards = SimulatePlay(player);
         if (logged >= 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, dataFile, sortedCards, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, sortedCards, logged));
         return (true, sortedCards.Count == 0 ? 0 : sortedCards.Max() - 6);
     }
 
-    void ChoosePlay(Player player, CardData dataFile, List<int> sortedCards, int logged)
+    void ChoosePlay(Player player, List<int> sortedCards, int logged)
     {
         List<string> actions = new() { $"Don't Play" };
         if (player.myType == PlayerType.Bot)
@@ -385,18 +369,18 @@ public class Card : PhotonCompatible
             if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
             {
                 PlayerCard toPlay = (PlayerCard)player.cardsInHand[convertedChoice];
-                PostPlay(player, toPlay, dataFile, logged);
+                PostPlay(player, toPlay, logged);
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
-                PostPlay(player, null, dataFile, logged);
+                PostPlay(player, null, logged);
             }
-            NextStepRPC(player, dataFile, logged);
+            NextStepRPC(player, logged);
         }
     }
 
-    protected virtual void PostPlay(Player player, PlayerCard cardToPlay, CardData dataFile, int logged)
+    protected virtual void PostPlay(Player player, PlayerCard cardToPlay, int logged)
     {
         if (cardToPlay != null)
         {
@@ -436,46 +420,42 @@ public class Card : PhotonCompatible
         }
     }
 
-    protected (bool, int) DiscardCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) DiscardCard(Player player, int logged)
     {
-        Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
         List<(int, int)> sortedCards = SortToDiscard(player, logged);
         if (logged >= 0)
         {
-            if (player.cardsInHand.Count <= dataFile.cardAmount)
-                DiscardAll(player, dataFile, logged);
-            else if (dataFile.cardAmount > 0)
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, false, logged));
+            if (player.cardsInHand.Count <= GetFile().cardAmount)
+                DiscardAll(player, logged);
+            else if (GetFile().cardAmount > 0)
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, sortedCards, false, 1, logged));
         }
-        return (true, -3 * Mathf.Min(dataFile.cardAmount, sortedCards.Count));
+        return (true, -3 * Mathf.Min(GetFile().cardAmount, sortedCards.Count));
     }
 
-    protected (bool, int) AskDiscardCard(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskDiscardCard(Player player, int logged)
     {
         mayStopEarly = true;
         List<(int, int)> sortedCards = SortToDiscard(player, logged);
-        bool answer = sortedCards.Count >= dataFile.cardAmount;
+        bool answer = sortedCards.Count >= GetFile().cardAmount;
 
-        if (answer && logged >= 0 && dataFile.cardAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sortedCards, true, logged));
-        }
-        return (answer, -3*dataFile.cardAmount);
+        if (answer && logged >= 0 && GetFile().cardAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, sortedCards, true, 1, logged));
+        return (answer, -3 * GetFile().cardAmount);
     }
 
-    void DiscardAll(Player player, CardData dataFile, int logged)
+    void DiscardAll(Player player, int logged)
     {
         int toDiscard = player.cardsInHand.Count;
         for (int i = 0; i < toDiscard; i++)
             player.DiscardPlayerCard(player.cardsInHand[0], logged);
-        PostDiscard(player, true, dataFile, logged);
-        NextStepRPC(player, dataFile, logged);
+        PostDiscard(player, true, logged);
+        NextStepRPC(player, logged);
     }
 
-    void ChooseDiscard(Player player, CardData dataFile, List<(int, int)> sorted, bool optional, int logged)
+    void ChooseDiscard(Player player, List<(int, int)> sorted, bool optional, int counter, int logged)
     {
-        string parathentical = (dataFile.cardAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.cardAmount})";
+        string parathentical = (GetFile().cardAmount == 1) ? "" : $" ({counter}/{GetFile().cardAmount})";
         List<string> actions = new();
         if (optional) actions.Add("Don't Discard");
 
@@ -487,12 +467,12 @@ public class Card : PhotonCompatible
         {
             if (optional)
             {
-                player.ChooseButton(actions, new(0, 250), $"Discard a card to {this.name}{parathentical}.", Next);
+                player.ChooseButton(actions, new(0, 250), $"Discard a Card to {this.name}{parathentical}.", Next);
                 player.ChooseCardOnScreen(player.cardsInHand, "", null);
             }
             else
             {
-                player.ChooseCardOnScreen(player.cardsInHand, $"Discard a card to {this.name}{parathentical}.", Next);
+                player.ChooseCardOnScreen(player.cardsInHand, $"Discard a Card to {this.name}{parathentical}.", Next);
             }
         }
 
@@ -503,27 +483,27 @@ public class Card : PhotonCompatible
             {
                 Card toDiscard = player.cardsInHand[convertedChoice];
                 player.DiscardPlayerCard(toDiscard, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
-                PostDiscard(player, true, dataFile, logged);
+                PostDiscard(player, true, logged);
 
                 List<(int, int)> sortedCards = SortToDiscard(player, logged);
-                if (sideCounter == dataFile.cardAmount)
-                    NextStepRPC(player, dataFile, logged);
+                int newCounter = counter + 1;
+                if (newCounter > GetFile().cardAmount)
+                    NextStepRPC(player, logged);
                 else
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, dataFile, sorted, false, logged));
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, sorted, false, newCounter, logged));
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't discard to {this.name}.", LogAdd.Personal, logged);
-                PostDiscard(player, false, dataFile, logged);
+                PostDiscard(player, false, logged);
 
                 if (!mayStopEarly)
-                    NextStepRPC(player, dataFile, logged);
+                    NextStepRPC(player, logged);
             }
         }
     }
 
-    protected virtual void PostDiscard(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostDiscard(Player player, bool success, int logged)
     {
     }
 
@@ -547,36 +527,28 @@ public class Card : PhotonCompatible
         return (total, canAdvance);
     }
 
-    protected (bool, int) AdvanceTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) AdvanceTroop(Player player, int logged)
     {
         (int total, List<int> canAdvance) = CanAdvance(player);
-        int maxAdvance = Mathf.Min(dataFile.troopAmount, total);
-
-        if (logged >= 0 && dataFile.troopAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
-        }
-        return (true, maxAdvance);
+        if (logged >= 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, 1, logged));
+        return (true, 4 * Mathf.Min(GetFile().troopAmount, total));
     }
 
-    protected (bool, int) AskAdvanceTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskAdvanceTroop(Player player, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canAdvance) = CanAdvance(player);
-        bool answer = total >= dataFile.troopAmount;
+        bool answer = total >= GetFile().troopAmount;
 
-        if (answer && logged >= 0 && dataFile.troopAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, true, logged));
-        }
-        return (answer, 4 * dataFile.troopAmount);
+        if (answer && logged >= 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, true, 1, logged));
+        return (answer, 4 * GetFile().troopAmount);
     }
 
-    void ChooseAdvanceOne(Player player, CardData dataFile, List<int> canAdvance, bool optional, int logged)
+    void ChooseAdvanceOne(Player player, List<int> canAdvance, bool optional, int counter, int logged)
     {
-        string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.troopAmount})";
+        string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
         List<string> actions = new();
         if (optional)
         {
@@ -607,20 +579,20 @@ public class Card : PhotonCompatible
             if (convertedChoice >= 0)
             {
                 Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, dataFile, convertedChoice, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, convertedChoice, counter, logged));
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't advance any Troop with {this.name}.", LogAdd.Personal, logged);
-                PostAdvance(player, false, dataFile, logged);
+                PostAdvance(player, false, logged);
 
                 if (!mayStopEarly)
-                    NextStepRPC(player, dataFile, logged);
+                    NextStepRPC(player, logged);
             }
         }
     }
 
-    void ChooseAdvanceTwo(Player player, CardData dataFile, int chosenArea, int logged)
+    void ChooseAdvanceTwo(Player player, int chosenArea, int counter, int logged)
     {
         List<int> newPositions = new();
         if (chosenArea == 0)
@@ -643,22 +615,22 @@ public class Card : PhotonCompatible
             int convertedChoice = player.choice - 100;
             if (convertedChoice >= 0)
                 player.MoveTroopRPC(chosenArea, convertedChoice, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
 
-            if (sideCounter == dataFile.troopAmount)
+            int newCounter = counter + 1;
+            if (newCounter > GetFile().troopAmount)
             {
-                PostAdvance(player, true, dataFile, logged);
-                NextStepRPC(player, dataFile, logged);
+                PostAdvance(player, true, logged);
+                NextStepRPC(player, logged);
             }
             else
             {
                 (int total, List<int> canAdvance) = CanAdvance(player);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, dataFile, canAdvance, false, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, newCounter, logged));
             }
         }
     }
 
-    protected virtual void PostAdvance(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostAdvance(Player player, bool success, int logged)
     {
     }
 
@@ -682,36 +654,30 @@ public class Card : PhotonCompatible
         return (total, canRetreat);
     }
 
-    protected (bool, int) RetreatTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) RetreatTroop(Player player, int logged)
     {
         (int total, List<int> canRetreat) = CanRetreat(player);
-        int maxRetreat = Mathf.Min(dataFile.troopAmount, total);
+        int maxRetreat = Mathf.Min(GetFile().troopAmount, total);
 
-        if (logged >= 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
-        }
-        return (true, maxRetreat);
+        if (logged >= 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, 1, logged));
+        return (true, -4 * Mathf.Min(GetFile().troopAmount, total));
     }
 
-    protected (bool, int) AskRetreatTroop(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskRetreatTroop(Player player, int logged)
     {
         mayStopEarly = true;
         (int total, List<int> canRetreat) = CanRetreat(player);
-        bool answer = total >= dataFile.troopAmount;
+        bool answer = total >= GetFile().troopAmount;
 
-        if (answer && logged >= 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, true, logged));
-        }
-        return (answer, -4 * dataFile.troopAmount);
+        if (answer && logged >= 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, true, 1, logged));
+        return (answer, -4 * GetFile().troopAmount);
     }
 
-    void ChooseRetreatOne(Player player, CardData dataFile, List<int> canRetreat, bool optional, int logged)
+    void ChooseRetreatOne(Player player, List<int> canRetreat, bool optional, int counter, int logged)
     {
-        string parathentical = (dataFile.troopAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.troopAmount})";
+        string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
         List<string> actions = new();
         if (optional)
         {
@@ -727,12 +693,12 @@ public class Card : PhotonCompatible
         {
             if (optional)
             {
-                player.ChooseButton(actions, new(0, 250), $"Retreat a troop with {this.name}{parathentical}.", Next);
+                player.ChooseButton(actions, new(0, 250), $"Retreat a Troop with {this.name}{parathentical}.", Next);
                 player.ChooseTroopDisplay(canRetreat, "", null);
             }
             else
             {
-                player.ChooseTroopDisplay(canRetreat, $"Retreat a troop with {this.name}{parathentical}.", Next);
+                player.ChooseTroopDisplay(canRetreat, $"Retreat a Troop with {this.name}{parathentical}.", Next);
             }
         }
 
@@ -742,20 +708,20 @@ public class Card : PhotonCompatible
             if (convertedChoice >= 0)
             {
                 Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, dataFile, convertedChoice, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, convertedChoice, counter, logged));
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't retreat any Troop with {this.name}.", LogAdd.Personal, logged);
-                PostRetreat(player, false, dataFile, logged);
+                PostRetreat(player, false, logged);
 
                 if (!mayStopEarly)
-                    NextStepRPC(player, dataFile, logged);
+                    NextStepRPC(player, logged);
             }
         }
     }
 
-    void ChooseRetreatTwo(Player player, CardData dataFile, int chosenTroop, int logged)
+    void ChooseRetreatTwo(Player player, int chosenTroop, int counter, int logged)
     {
         List<int> newPositions = new();
         if (chosenTroop == 3)
@@ -780,22 +746,22 @@ public class Card : PhotonCompatible
         void Resolve()
         {
             player.MoveTroopRPC(chosenTroop, player.choice, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+            int newCounter = counter + 1;
 
-            if (sideCounter == dataFile.troopAmount)
+            if (newCounter > GetFile().troopAmount)
             {
-                PostRetreat(player, true, dataFile, logged);
-                NextStepRPC(player, dataFile, logged);
+                PostRetreat(player, true, logged);
+                NextStepRPC(player, logged);
             }
             else
             {
                 (int total, List<int> canRetreat) = CanRetreat(player);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, dataFile, canRetreat, false, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, newCounter, logged));
             }
         }
     }
 
-    protected virtual void PostRetreat(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostRetreat(Player player, bool success, int logged)
     {
     }
 
@@ -808,20 +774,17 @@ public class Card : PhotonCompatible
         return new() { 0, 1, 2, 3 };
     }
 
-    protected (bool, int) AddScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) AddScout(Player player, int logged)
     {
         List<int> canAdd = CanAdd(player);
-        if (logged >= 0 && dataFile.scoutAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
-        }
-        return (true, 2 * dataFile.scoutAmount);
+        if (logged >= 0 && GetFile().scoutAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, canAdd, 1, logged));
+        return (true, 2 * GetFile().scoutAmount);
     }
 
-    void ChooseAddScout(Player player, CardData dataFile, List<int> canAdd, int logged)
+    void ChooseAddScout(Player player, List<int> canAdd, int counter, int logged)
     {
-        string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
+        string parathentical = (GetFile().scoutAmount == 1) ? "" : $" ({counter}/{GetFile().scoutAmount})";
 
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
@@ -833,22 +796,22 @@ public class Card : PhotonCompatible
             int convertedChoice = player.choice - 100;
             if (convertedChoice >= 0)
                 player.ChangeScoutRPC(convertedChoice, 1, logged);
-            Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
 
-            if (sideCounter == dataFile.scoutAmount)
+            int newCounter = counter + 1;
+            if (newCounter > GetFile().scoutAmount)
             {
-                PostAddScout(player, dataFile, logged);
-                NextStepRPC(player, dataFile, logged);
+                PostAddScout(player, logged);
+                NextStepRPC(player, logged);
             }
             else
             {
                 List<int> canAdd = CanAdd(player);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, dataFile, canAdd, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAddScout(player, canAdd, newCounter, logged));
             }
         }
     }
 
-    protected virtual void PostAddScout(Player player, CardData dataFile, int logged)
+    protected virtual void PostAddScout(Player player, int logged)
     {
     }
 
@@ -856,50 +819,51 @@ public class Card : PhotonCompatible
 
     #region -Scout
 
-    protected virtual (int, List<int>) CanLose(Player player)
+    protected virtual (int, List<int>) CanLose(Player player, bool anywhere)
     {
-        int total = 0;
-        List<int> canLose = new();
-        for (int i = 0; i < 4; i++)
+        if (anywhere)
         {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (scout > 0)
+            return (0, new() { 0, 1, 2, 3 });
+        }
+        else
+        {
+            int total = 0;
+            List<int> canLose = new();
+            for (int i = 0; i < 4; i++)
             {
-                total += scout;
-                canLose.Add(i);
+                (int troop, int scout) = player.CalcTroopScout(i);
+                if (scout > 0)
+                {
+                    total += scout;
+                    canLose.Add(i);
+                }
             }
+            return (total, canLose);
         }
-        return (total, canLose);
     }
 
-    protected (bool, int) LoseScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) LoseScout(Player player, int logged)
     {
-        (int total, List<int> canLose) = CanLose(player);
-        if (logged >= 0 && dataFile.scoutAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
-        }
-        return (true, -2 * Mathf.Min(total, dataFile.scoutAmount));
+        (int total, List<int> canLose) = CanLose(player, true);
+        if (logged >= 0 && GetFile().scoutAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, true, 1, logged));
+        return (true, -2 * Mathf.Min(total, GetFile().scoutAmount));
     }
 
-    protected (bool, int) AskLoseScout(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseScout(Player player, int logged)
     {
         mayStopEarly = true;
-        (int total, List<int> canLose) = CanLose(player);
-        bool answer = total >= dataFile.scoutAmount;
+        (int total, List<int> canLose) = CanLose(player, false);
+        bool answer = total >= GetFile().scoutAmount;
 
-        if (answer && logged >= 0 && dataFile.scoutAmount > 0)
-        {
-            Log.inst.RememberStep(this, StepType.Revert, () => SetSideCount(false, 0));
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, true, logged));
-        }
-        return (answer, -2 * dataFile.scoutAmount);
+        if (answer && logged >= 0 && GetFile().scoutAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, true, false, 1, logged));
+        return (answer, -2 * GetFile().scoutAmount);
     }
 
-    void ChooseLoseScout(Player player, CardData dataFile, List<int> canLose, bool optional, int logged)
+    void ChooseLoseScout(Player player, List<int> canLose, bool optional, bool anywhere, int counter, int logged)
     {
-        string parathentical = (dataFile.scoutAmount == 1) ? "" : $" ({sideCounter + 1}/{dataFile.scoutAmount})";
+        string parathentical = (GetFile().scoutAmount == 1) ? "" : $" ({counter}/{GetFile().scoutAmount})";
         List<string> actions = new();
         if (optional)
         {
@@ -932,31 +896,31 @@ public class Card : PhotonCompatible
             if (convertedChoice >= 0)
             {
                 player.ChangeScoutRPC(convertedChoice, -1, logged);
-                Log.inst.RememberStep(this, StepType.Revert, () => ChangeSideCount(false, 1));
+                int newCounter = counter + 1;
 
-                if (sideCounter == dataFile.scoutAmount)
+                if (newCounter > GetFile().scoutAmount)
                 {
-                    PostLoseScout(player, true, dataFile, logged);
-                    NextStepRPC(player, dataFile, logged);
+                    PostLoseScout(player, true, logged);
+                    NextStepRPC(player, logged);
                 }
                 else
                 {
-                    (int total, List<int> canLose) = CanLose(player);
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, dataFile, canLose, false, logged));
+                    (int total, List<int> canLose) = CanLose(player, anywhere);
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, anywhere, newCounter, logged));
                 }
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't lose any Scout with {this.name}.", LogAdd.Personal, logged);
-                PostLoseScout(player, false, dataFile, logged);
+                PostLoseScout(player, false, logged);
 
                 if (!mayStopEarly)
-                    NextStepRPC(player, dataFile, logged);
+                    NextStepRPC(player, logged);
             }
         }
     }
 
-    protected virtual void PostLoseScout(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostLoseScout(Player player, bool success, int logged)
     {
     }
 
@@ -964,31 +928,31 @@ public class Card : PhotonCompatible
 
     #region Ask Pay
 
-    protected (bool, int) AskLoseCoin(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseCoin(Player player, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Coin] >= dataFile.coinAmount;
+        bool answer = player.resourceDict[Resource.Coin] >= GetFile().coinAmount;
         if (logged >= 0 && answer)
         {
-            Action action = () => LoseCoin(player, dataFile, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.coinAmount} Coin to {this.name}?", dataFile, logged));
+            Action action = () => LoseCoin(player, logged);
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {GetFile().coinAmount} Coin to {this.name}?", logged));
         }
-        return (answer, dataFile.coinAmount * -1);
+        return (answer, GetFile().coinAmount * -1);
     }
 
-    protected (bool, int) AskLoseAction(Player player, CardData dataFile, int logged)
+    protected (bool, int) AskLoseAction(Player player, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Action] >= dataFile.actionAmount;
+        bool answer = player.resourceDict[Resource.Action] >= GetFile().actionAmount;
         if (logged >= 0 && answer)
         {
-            Action action = () => LoseAction(player, dataFile, logged);
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {dataFile.actionAmount} Action to {this.name}?", dataFile, logged));
+            Action action = () => LoseAction(player, logged);
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {GetFile().actionAmount} Action to {this.name}?", logged));
         }
-        return (answer, dataFile.actionAmount * -3);
+        return (answer, GetFile().actionAmount * -3);
     }
 
-    protected void ChoosePay(Player player, Action ifDone, string text, CardData dataFile, int logged)
+    protected void ChoosePay(Player player, Action ifDone, string text, int logged)
     {
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, new List<int> { 0, 1 });
@@ -1000,17 +964,17 @@ public class Card : PhotonCompatible
             if (player.choice == 0)
             {
                 ifDone();
-                PostPayment(player, true, dataFile, logged);
+                PostPayment(player, true, logged);
             }
             else
             {
                 Log.inst.AddTextRPC(player, $"{player.name} doesn't use {this.name}.", LogAdd.Personal, logged);
-                PostPayment(player, false, dataFile, logged);
+                PostPayment(player, false, logged);
             }
         }
     }
 
-    protected virtual void PostPayment(Player player, bool success, CardData dataFile, int logged)
+    protected virtual void PostPayment(Player player, bool success, int logged)
     {
     }
 

@@ -29,10 +29,10 @@ public class Choosie : PlayerCard
                     player.ResourceRPC(Resource.Coin, dataFile.coinAmount, logged);
                     break;
                 case 1:
-                    AddScout(player, GetFile(), logged);
+                    AddScout(player, logged);
                     break;
                 case 2:
-                    AdvanceTroop(player, GetFile(), logged);
+                    AdvanceTroop(player, logged);
                     break;
             }
         }

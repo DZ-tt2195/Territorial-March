@@ -15,7 +15,7 @@ public class Road : AreaCard
         Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
     }
 
-    protected override void PostAdvance(Player player, bool success, CardData dataFile, int logged)
+    protected override void PostAdvance(Player player, bool success, int logged)
     {
         if (success)
         {
@@ -27,6 +27,6 @@ public class Road : AreaCard
     void Loop(Player player, int logged)
     {
         if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-            AskAdvanceTroop(player, GetFile(), logged);
+            AskAdvanceTroop(player, logged);
     }
 }

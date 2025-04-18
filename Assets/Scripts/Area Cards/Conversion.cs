@@ -13,7 +13,7 @@ public class Conversion : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        AddScoutHere(player, GetFile(), logged);
+        AddScoutHere(player, logged);
         Log.inst.RememberStep(this, StepType.UndoPoint, () => RemoveScouts(player, logged));
     }
 

@@ -12,7 +12,7 @@ public class Progress : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        AdvanceTroop(player, GetFile(), logged);
+        AdvanceTroop(player, logged);
     }
 
     protected override (int, List<int>) CanAdvance(Player player)

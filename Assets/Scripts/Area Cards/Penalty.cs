@@ -16,13 +16,13 @@ public class Penalty : AreaCard
         if (amount > 0)
         {
             if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-                AskRetreatTroop(player, GetFile(), logged);
+                AskRetreatTroop(player, logged);
             else
-                RetreatTroop(player, dataFile, logged);
+                RetreatTroop(player, logged);
         }
     }
 
-    protected override void PostRetreat(Player player, bool success, CardData dataFile, int logged)
+    protected override void PostRetreat(Player player, bool success, int logged)
     {
         if (!success)
             player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);

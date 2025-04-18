@@ -31,7 +31,7 @@ public class PlayerCard : Card
         if (dataFile.useSheets)
         {
             stepCounter = -1;
-            NextStepRPC(player, GetFile(), logged);
+            NextStepRPC(player, logged);
         }
     }
 
@@ -49,7 +49,7 @@ public class PlayerCard : Card
                 MethodInfo method = FindMethod(next);
                 if (method.ReturnType == typeof((bool, int)))
                 {
-                    (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[3] { player, GetFile(), -1 });
+                    (bool success, int effect) = (ValueTuple<bool, int>)method.Invoke(this, new object[2] { player, -1 });
                     if (success)
                         mathResult += effect;
                     else

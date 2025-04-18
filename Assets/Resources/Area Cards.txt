@@ -131,7 +131,7 @@
     ],
     [
       "Conversion",
-      "\"+1 Scout here. Then remove any amount of your Scout here for +2 Coin each.\"",
+      "\"+1 Scout here. Then for each Scout you have here, you may remove it for +2 Coin.\"",
       "FALSE",
       "AddScoutHere/AskLoseScoutHere/SetToScout/AddCoin",
       "",
