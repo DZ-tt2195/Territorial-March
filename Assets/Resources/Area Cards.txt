@@ -170,11 +170,11 @@
     ],
     [
       "7",
-      "If you have 2 Action or more, +4 Coin.",
+      "If you have 2 Action or more, +3 Coin.",
       "TRUE",
       "ActionOrMore/AddCoin",
       "",
-      "4",
+      "3",
       "",
       "",
       "",
@@ -205,6 +205,19 @@
       "",
       "2",
       "",
+      "X"
+    ],
+    [
+      "10",
+      "\"If you have 3 Troop or less here, -1 Scout (you can go below 0 Scout in an Area).\"",
+      "TRUE",
+      "TroopHereOrLess/LoseScout",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "3",
       "X"
     ],
     [

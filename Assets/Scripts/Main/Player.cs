@@ -902,6 +902,15 @@ public class Player : PhotonCompatible
         myButton.image.color = (done) ? Color.yellow : new(0.7f, 0.7f, 0.7f);
     }
 
+    public int AwayFromWinning()
+    {
+        int answer = 0;
+        answer += 2 * troopArray[0];
+        answer += 1 * troopArray[1];
+        answer += 1 * troopArray[2];
+        return answer;
+    }
+
     #endregion
 
 }

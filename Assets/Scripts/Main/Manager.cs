@@ -34,6 +34,7 @@ public class Manager : PhotonCompatible
 
     [Foldout("UI and Animation", true)]
     [SerializeField] TMP_Text instructions;
+    [SerializeField] Transform arrowParent;
     public float opacity { get; private set; }
     bool decrease = true;
     public Canvas canvas { get; private set; }
@@ -77,6 +78,7 @@ public class Manager : PhotonCompatible
 
     private void Start()
     {
+        arrowParent.gameObject.SetActive(false);
         if (PhotonNetwork.CurrentRoom.MaxPlayers == 1 && CarryVariables.inst.playWithBot)
             MakeObject(CarryVariables.inst.playerPrefab.gameObject);
         MakeObject(CarryVariables.inst.playerPrefab.gameObject);
@@ -226,6 +228,7 @@ public class Manager : PhotonCompatible
 
         nextObject.name = data.cardName;
         nextObject.transform.SetParent(canvas.transform);
+        arrowParent.gameObject.SetActive(true);
 
         switch (areaNumber)
         {
@@ -349,6 +352,14 @@ public class Manager : PhotonCompatible
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
             DoFunction(() => UpdateControl(0));
 
+            foreach (Player player in playersInOrder)
+            {
+                if (player.AwayFromWinning() == 0)
+                {
+                    DoFunction(() => DisplayEnding(-1));
+                    return;
+                }
+            }
             if (playersInOrder != null)
                 waitingOnPlayers = playersInOrder.Count;
             else if (PhotonNetwork.IsConnected)
@@ -419,28 +430,27 @@ public class Manager : PhotonCompatible
         foreach (Popup popup in allPopups)
             Destroy(popup.gameObject);
 
-        /*
-        List<Player> playerLifeInOrder = playersInOrder.OrderByDescending(player => player.myBase.myHealth).ToList();
+        List<Player> playerScoreInOrder = playersInOrder.OrderByDescending(player => player.AwayFromWinning()).ToList();
         int nextPlacement = 1;
 
-        Log.inst.AddTextRPC("", LogAdd.Personal);
-        Log.inst.AddTextRPC("The game has ended.", LogAdd.Personal);
+        Log.inst.AddTextRPC(null, "", LogAdd.Personal);
+        Log.inst.AddTextRPC(null, "The game has ended.", LogAdd.Personal);
         Instructions("The game has ended.");
 
         Player resignPlayer = null;
         if (resignPosition >= 0)
         {
             resignPlayer = playersInOrder[resignPosition];
-            Log.inst.AddTextRPC($"{resignPlayer.name} has resigned.", LogAdd.Personal);
+            Log.inst.AddTextRPC(null, $"{resignPlayer.name} has resigned.", LogAdd.Personal);
         }
 
-        for (int i = 0; i < playerLifeInOrder.Count; i++)
+        for (int i = 0; i < playerScoreInOrder.Count; i++)
         {
-            Player player = playerLifeInOrder[i];
+            Player player = playerScoreInOrder[i];
             if (player != resignPlayer)
             {
                 EndstatePlayer(player, false);
-                if (i == 0 || playerLifeInOrder[i - 1].myBase.myHealth != player.myBase.myHealth)
+                if (i < playerScoreInOrder.Count-1 || playerScoreInOrder[i + 1].AwayFromWinning() != player.AwayFromWinning())
                     nextPlacement++;
             }
         }
@@ -451,12 +461,11 @@ public class Manager : PhotonCompatible
 
         endScreen.gameObject.SetActive(true);
         quitGame.onClick.AddListener(Leave);
-*/
     }
 
     void EndstatePlayer(Player player, bool resigned)
     {
-        //scoreText.text += $"\n\n{player.name} - {player.myBase.myHealth} Health {(resigned ? $"[Resigned]" : "")}";
+        scoreText.text += $"\n\n{player.name} - {player.AwayFromWinning()} Troop advances left {(resigned ? $"[Resigned]" : "")}";
         scoreText.text += "\n";
     }
 
@@ -487,7 +496,7 @@ public class Manager : PhotonCompatible
         return null;
     }
 
-    public (Player, int) CalculateControl(int area)
+    (Player, int) CalculateControl(int area)
     {
         Player mostInArea = null;
         int highestValue = int.MinValue;
