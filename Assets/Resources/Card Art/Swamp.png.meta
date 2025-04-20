@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cb1b941c06ede4809904f95609dbaacb
+guid: 64e7a0c04099048739331b8cf17aba12
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6802500561530761227
-    second: Explore_0
+      213: 1307102781619078554
+    second: Swamp_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Explore_0
+      name: Swamp_0
       rect:
         serializedVersion: 2
         x: 0
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b00bf623836576e50800000000000000
-      internalID: 6802500561530761227
+      spriteID: a958457fd03c32210800000000000000
+      internalID: 1307102781619078554
       vertices: []
       indices: 
       edges: []
@@ -172,7 +172,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Explore_0: 6802500561530761227
+      Swamp_0: 1307102781619078554
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

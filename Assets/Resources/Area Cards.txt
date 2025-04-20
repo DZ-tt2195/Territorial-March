@@ -14,7 +14,7 @@
     ],
     [
       "Camp",
-      "\"+2 Card, +2 Action. Then, repeat as desired: Spend 1 Action to play 1 Card.\"",
+      "\"+2 Card, +2 Action. Then, repeat as desired: Pay 1 Action to play 1 Card.\"",
       "FALSE",
       "DrawCard/AddAction",
       "2",
@@ -52,7 +52,7 @@
       "X"
     ],
     [
-      "1",
+      "University",
       "\"If you have 0 or 1 Card in hand, +2 Card.\"",
       "TRUE",
       "HandOrLess/DrawCard",
@@ -62,7 +62,7 @@
       "",
       "",
       "1",
-      "X"
+      "Marcel-André Casasola Merkle|Dominion: Alchemy|(University)"
     ],
     [
       "2",
@@ -79,7 +79,7 @@
     ],
     [
       "3",
-      "\"You may spend 1 Action for +1 Troop.\"",
+      "\"You may pay 1 Action for +1 Troop.\"",
       "TRUE",
       "AskLoseAction/AdvanceTroop",
       "",
@@ -104,7 +104,7 @@
       "X"
     ],
     [
-      "5",
+      "Barracks",
       "\"+1 Scout per Area you control.\"",
       "TRUE",
       "SetToControl/AddScout",
@@ -114,7 +114,7 @@
       "",
       "",
       "1",
-      "X"
+      "Martin Hoffmann|Dominion: Renaissance|(Barracks)"
     ],
     [
       "Progress",
@@ -130,7 +130,7 @@
       "X"
     ],
     [
-      "Conversion",
+      "Pasture",
       "\"+1 Scout here. Then for each Scout you have here, you may remove it for +2 Coin.\"",
       "FALSE",
       "AddScoutHere/AskLoseScoutHere/SetToScout/AddCoin",
@@ -140,10 +140,10 @@
       "",
       "1",
       "",
-      "X"
+      "Claus Stephan|Dominion: Nocturne|(Pasture)"
     ],
     [
-      "Another",
+      "Crossroads",
       "\"+1 Coin per Troop you have in Area 2 or 3, whichever has less.\"",
       "FALSE",
       "SetToTroop/AddCoin",
@@ -153,7 +153,7 @@
       "",
       "",
       "",
-      "X"
+      "Matthias Catrein|Dominion: Hinterlands|(Crossroads)"
     ],
     [
       "6",
@@ -169,7 +169,7 @@
       "X"
     ],
     [
-      "7",
+      "Bank",
       "If you have 2 Action or more, +3 Coin.",
       "TRUE",
       "ActionOrMore/AddCoin",
@@ -179,7 +179,7 @@
       "",
       "",
       "2",
-      "X"
+      "Jason Snair|Dominion: Prosperity|(Bank)"
     ],
     [
       "8",
@@ -258,6 +258,19 @@
       "",
       "",
       "X"
+    ],
+    [
+      "Swamp",
+      "\"-1 Card per Troop you have in Area 4.\"",
+      "FALSE",
+      "SetToTroop/DiscardCard",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
     ]
   ]
 }

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cb1b941c06ede4809904f95609dbaacb
+guid: 9a16e966921184ca98874bc256551d72
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6802500561530761227
-    second: Explore_0
+      213: -1782201688980012496
+    second: Pasture_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Explore_0
+      name: Pasture_0
       rect:
         serializedVersion: 2
         x: 0
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b00bf623836576e50800000000000000
-      internalID: 6802500561530761227
+      spriteID: 032ce32a1095447e0800000000000000
+      internalID: -1782201688980012496
       vertices: []
       indices: 
       edges: []
@@ -172,7 +172,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Explore_0: 6802500561530761227
+      Pasture_0: -1782201688980012496
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

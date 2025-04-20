@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Conversion : AreaCard
+public class Pasture : AreaCard
 {
     protected override void Awake()
     {

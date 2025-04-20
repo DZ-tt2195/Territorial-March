@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Another : AreaCard
+public class Crossroads : AreaCard
 {
     protected override void Awake()
     {
