@@ -14,7 +14,7 @@
     ],
     [
       "Camp",
-      "\"+2 Card, +2 Action. Then, repeat as desired: Pay 1 Action to play 1 Card.\"",
+      "\"+2 Card and +2 Action. Then while you have any Action: You may pay 1 Action to play 1 Card.\"",
       "FALSE",
       "DrawCard/AddAction",
       "2",
@@ -27,7 +27,7 @@
     ],
     [
       "Road",
-      "\"Repeat as desired: Pay 4 Coin for +1 Troop.\"",
+      "\"Repeat while you have 4 Coin or more: You may pay 4 Coin for +1 Troop.\"",
       "FALSE",
       "AskLoseCoin/AdvanceTroop",
       "",
@@ -63,32 +63,6 @@
       "",
       "1",
       "Marcel-André Casasola Merkle|Dominion: Alchemy|(University)"
-    ],
-    [
-      "2",
-      "\"If you don't control this, -1 Action (you can go below 0 Action).\"",
-      "TRUE",
-      "ControlNot/LoseAction",
-      "",
-      "",
-      "1",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "3",
-      "\"You may pay 1 Action for +1 Troop.\"",
-      "TRUE",
-      "AskLoseAction/AdvanceTroop",
-      "",
-      "",
-      "1",
-      "1",
-      "",
-      "",
-      "X"
     ],
     [
       "4",
@@ -133,7 +107,7 @@
       "Pasture",
       "\"+1 Scout here. Then for each Scout you have here, you may remove it for +2 Coin.\"",
       "FALSE",
-      "AddScoutHere/AskLoseScoutHere/SetToScout/AddCoin",
+      "AddScoutHere/AskLoseScoutHere/AddCoin",
       "",
       "2",
       "",
@@ -182,36 +156,10 @@
       "Jason Snair|Dominion: Prosperity|(Bank)"
     ],
     [
-      "8",
-      "\"+4 Coin, -1 Card.\"",
-      "TRUE",
-      "AddCoin/DiscardCard",
-      "1",
-      "4",
-      "",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "9",
-      "You may pay 2 Coin for +2 Scout.",
-      "TRUE",
-      "AskLoseCoin/AddScout",
-      "",
-      "2",
-      "",
-      "",
-      "2",
-      "",
-      "X"
-    ],
-    [
       "10",
-      "\"If you have 3 Troop or less here, -1 Scout (you can go below 0 Scout in an Area).\"",
+      "\"If you have 3 Troop or less here, -1 Card.\"",
       "TRUE",
-      "TroopHereOrLess/LoseScout",
+      "TroopHereOrLess/DiscardCard",
       "",
       "",
       "",
@@ -248,28 +196,28 @@
     ],
     [
       "Penalty",
-      "Retreat 1 Troop unless you pay 2 Coin.",
+      "You may lose 1 Scout. If you don't, -1 Action (it can go negative).",
       "FALSE",
-      "AskLoseCoin/AskRetreatTroop",
+      "LoseScout/LoseAction",
       "",
-      "2",
       "",
       "1",
       "",
+      "1",
       "",
       "X"
     ],
     [
       "Swamp",
-      "\"-1 Card per Troop you have in Area 4.\"",
+      "\"-1 Coin per 2 Troop you have in Area 4 (round down).\"",
       "FALSE",
-      "SetToTroop/DiscardCard",
+      "SetToTroop/LoseCoin",
       "",
       "",
       "",
       "",
       "",
-      "1",
+      "2",
       "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
     ]
   ]

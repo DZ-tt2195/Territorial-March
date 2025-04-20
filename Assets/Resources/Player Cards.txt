@@ -29,10 +29,10 @@
     ],
     [
       "B",
-      "You may pay 3 Coin for +3 Card.",
+      "\"+3 Card, -3 Coin (it can go negative).\"",
       "0",
       "TRUE",
-      "AskLoseCoin/DrawCard",
+      "DrawCard/LoseCoin",
       "3",
       "3",
       "",
@@ -57,10 +57,10 @@
     ],
     [
       "Fortune",
-      "\"You may pay 1 Action for +1 Coin per Coin you gained this turn.\"",
+      "\"-1 Action (it can go negative). +1 Coin per Coin you gained this turn.\"",
       "0",
       "FALSE",
-      "AskLoseAction/AddCoin",
+      "LoseAction/AddCoin",
       "",
       "",
       "1",
@@ -210,6 +210,20 @@
       "X"
     ],
     [
+      "L",
+      "\"You may remove 2 Scout for +2 Action.\"",
+      "5",
+      "TRUE",
+      "AskLoseScout/AddAction",
+      "",
+      "",
+      "2",
+      "",
+      "2",
+      "",
+      "X"
+    ],
+    [
       "K",
       "You may retreat 1 Troop for +2 Card.",
       "5",
@@ -220,20 +234,6 @@
       "",
       "1",
       "",
-      "",
-      "X"
-    ],
-    [
-      "L",
-      "You may remove 2 Scout for +2 Action.",
-      "5",
-      "TRUE",
-      "AskLoseScout/AddAction",
-      "",
-      "",
-      "2",
-      "",
-      "2",
       "",
       "X"
     ],
@@ -281,7 +281,7 @@
     ],
     [
       "N",
-      "\"+1 Scout, -1 Scout (you can go below 0 Scout in an Area).\"",
+      "\"+1 Scout, -1 Scout.\"",
       "6",
       "TRUE",
       "AddScout/LoseScout",
@@ -290,20 +290,6 @@
       "",
       "",
       "1",
-      "",
-      "X"
-    ],
-    [
-      "J",
-      "You may pay 1 Action for +1 Card.",
-      "6",
-      "TRUE",
-      "AskLoseAction/Drawcard",
-      "1",
-      "",
-      "1",
-      "",
-      "",
       "",
       "X"
     ],
@@ -323,7 +309,7 @@
     ],
     [
       "P",
-      "If you control 0 or 1 Areas, -1 Action (you can go below 0 Action).",
+      "If you control 0 or 1 Areas, -1 Action (it can go negative).",
       "8",
       "TRUE",
       "ControlOrLess/LoseAction",

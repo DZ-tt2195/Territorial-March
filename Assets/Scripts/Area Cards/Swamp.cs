@@ -13,7 +13,7 @@ public class Swamp : AreaCard
     {
         base.AreaInstructions(player, logged);
         (int troop, int scout) = player.CalcTroopScout(3);
-        SetAllStats(player, dataFile, troop, logged);
-        DiscardCard(player, logged);
+        SetAllStats(player, GetFile(), troop, logged);
+        LoseCoin(player, logged);
     }
 }

@@ -819,49 +819,42 @@ public class Card : PhotonCompatible
 
     #region -Scout
 
-    protected virtual (int, List<int>) CanLose(Player player, bool anywhere)
+    protected virtual (int, List<int>) CanLose(Player player)
     {
-        if (anywhere)
+        int total = 0;
+        List<int> canLose = new();
+        for (int i = 0; i < 4; i++)
         {
-            return (0, new() { 0, 1, 2, 3 });
-        }
-        else
-        {
-            int total = 0;
-            List<int> canLose = new();
-            for (int i = 0; i < 4; i++)
+            (int troop, int scout) = player.CalcTroopScout(i);
+            if (scout > 0)
             {
-                (int troop, int scout) = player.CalcTroopScout(i);
-                if (scout > 0)
-                {
-                    total += scout;
-                    canLose.Add(i);
-                }
+                total += scout;
+                canLose.Add(i);
             }
-            return (total, canLose);
         }
-    }
+        return (total, canLose);
+    }    
 
     protected (bool, int) LoseScout(Player player, int logged)
     {
-        (int total, List<int> canLose) = CanLose(player, true);
+        (int total, List<int> canLose) = CanLose(player);
         if (logged >= 0 && GetFile().scoutAmount > 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, true, 1, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, 1, logged));
         return (true, -2 * Mathf.Min(total, GetFile().scoutAmount));
     }
 
     protected (bool, int) AskLoseScout(Player player, int logged)
     {
         mayStopEarly = true;
-        (int total, List<int> canLose) = CanLose(player, false);
+        (int total, List<int> canLose) = CanLose(player);
         bool answer = total >= GetFile().scoutAmount;
 
         if (answer && logged >= 0 && GetFile().scoutAmount > 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, true, false, 1, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, true, 1, logged));
         return (answer, -2 * GetFile().scoutAmount);
     }
 
-    void ChooseLoseScout(Player player, List<int> canLose, bool optional, bool anywhere, int counter, int logged)
+    void ChooseLoseScout(Player player, List<int> canLose, bool optional, int counter, int logged)
     {
         string parathentical = (GetFile().scoutAmount == 1) ? "" : $" ({counter}/{GetFile().scoutAmount})";
         List<string> actions = new();
@@ -905,8 +898,8 @@ public class Card : PhotonCompatible
                 }
                 else
                 {
-                    (int total, List<int> canLose) = CanLose(player, anywhere);
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, anywhere, newCounter, logged));
+                    (int total, List<int> canLose) = CanLose(player);
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, newCounter, logged));
                 }
             }
             else

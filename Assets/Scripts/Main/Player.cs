@@ -289,9 +289,9 @@ public class Player : PhotonCompatible
 
     public void ChangeScoutRPC(int area, int amount, int logged, string source = "")
     {
-        int actualAmount = amount;/*
+        int actualAmount = amount;
         if (scoutArray[area] + amount < 0)
-            actualAmount = -1 * scoutArray[area];*/
+            actualAmount = -1 * scoutArray[area];
         Log.inst.RememberStep(this, StepType.Revert, () => ChangeScout(false, area, actualAmount, logged, source));
     }
 
@@ -412,8 +412,8 @@ public class Player : PhotonCompatible
         foreach (TroopDisplay display in myDisplays)
         {
             (int troop, int scout) = CalcTroopScout(display.areaPosition);
-            string text = (scout > 0) ? $"{this.name}: {troop} Troop + {scout} Scout" : $"{this.name}: {troop} Troop - {Mathf.Abs(scout)} Scout";
-            display.UpdateText(text, areasControlled[display.areaPosition] ? Color.yellow : new(0.7f, 0.7f, 0.7f));
+            display.UpdateText($"{this.name}: {troop} Troop + {scout} Scout",
+                areasControlled[display.areaPosition] ? Color.yellow : new(0.7f, 0.7f, 0.7f));
         }
     }
 

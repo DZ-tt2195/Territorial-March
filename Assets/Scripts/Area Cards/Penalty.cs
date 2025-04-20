@@ -12,17 +12,10 @@ public class Penalty : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        (int amount, List<int> list) = CanRetreat(player);
-        if (amount > 0)
-        {
-            if (player.resourceDict[Resource.Coin] >= dataFile.coinAmount)
-                AskRetreatTroop(player, logged);
-            else
-                RetreatTroop(player, logged);
-        }
+        AskLoseScout(player, logged);
     }
 
-    protected override void PostRetreat(Player player, bool success, int logged)
+    protected override void PostLoseScout(Player player, bool success, int logged)
     {
         if (!success)
             player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
