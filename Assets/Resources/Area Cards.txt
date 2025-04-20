@@ -16,7 +16,7 @@
       "Camp",
       "\"+2 Card and +2 Action. Then while you have any Action: You may pay 1 Action to play 1 Card.\"",
       "FALSE",
-      "DrawCard/AddAction",
+      "DrawCard/AddAction/LoseAction",
       "2",
       "",
       "2",
@@ -65,7 +65,7 @@
       "Marcel-André Casasola Merkle|Dominion: Alchemy|(University)"
     ],
     [
-      "4",
+      "1",
       "\"If you control this, +1 Action per 2 Card in your hand (round down).\"",
       "TRUE",
       "ControlThis/SetToHand/AddAction",
@@ -130,7 +130,7 @@
       "Matthias Catrein|Dominion: Hinterlands|(Crossroads)"
     ],
     [
-      "6",
+      "2",
       "\"+1 Action. If you don't control this, -1 Troop.\"",
       "TRUE",
       "AddAction/ControlNot/RetreatTroop",
@@ -156,7 +156,7 @@
       "Jason Snair|Dominion: Prosperity|(Bank)"
     ],
     [
-      "10",
+      "3",
       "\"If you have 3 Troop or less here, -1 Card.\"",
       "TRUE",
       "TroopHereOrLess/DiscardCard",
@@ -198,7 +198,7 @@
       "Penalty",
       "You may lose 1 Scout. If you don't, -1 Action (it can go negative).",
       "FALSE",
-      "LoseScout/LoseAction",
+      "AskLoseScout/LoseAction",
       "",
       "",
       "1",
@@ -209,7 +209,7 @@
     ],
     [
       "Swamp",
-      "\"-1 Coin per 2 Troop you have in Area 4 (round down).\"",
+      "\"-1 Coin per 2 Troop you have in Area 4 (round down; Coin can go negative).\"",
       "FALSE",
       "SetToTroop/LoseCoin",
       "",
@@ -219,6 +219,45 @@
       "",
       "2",
       "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
+    ],
+    [
+      "4",
+      "You may retreat 1 Troop for +3 Scout.",
+      "TRUE",
+      "AskRetreatTroop/AddScout",
+      "",
+      "",
+      "",
+      "1",
+      "3",
+      "",
+      "X"
+    ],
+    [
+      "5",
+      "If you control this, you may discard 1 Card for +6 Coin.",
+      "TRUE",
+      "ControlThis/AskDiscardCard/AddCoin",
+      "1",
+      "6",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "Duo",
+      "You may pay 6 Coin (it can go negative), for +1 Troop from Area 2 and +1 Troop from Area 3.",
+      "FALSE",
+      "AskLoseCoin/AdvanceTroop",
+      "",
+      "6",
+      "",
+      "1",
+      "",
+      "",
+      "X"
     ]
   ]
 }

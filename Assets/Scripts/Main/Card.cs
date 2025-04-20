@@ -517,7 +517,7 @@ public class Card : PhotonCompatible
         List<int> canAdvance = new();
         for (int i = 0; i < 3; i++)
         {
-            (int troop, int scout) = player.CalcTroopScout(i);
+            int troop = player.CalcTroopScout(i).Item1;
             if (troop > 0)
             {
                 total += troop;
@@ -644,7 +644,7 @@ public class Card : PhotonCompatible
         List<int> canRetreat = new();
         for (int i = 1; i < 4; i++)
         {
-            (int troop, int scout) = player.CalcTroopScout(i);
+            int troop = player.CalcTroopScout(i).Item1;
             if (troop > 0)
             {
                 total += troop;
@@ -825,7 +825,7 @@ public class Card : PhotonCompatible
         List<int> canLose = new();
         for (int i = 0; i < 4; i++)
         {
-            (int troop, int scout) = player.CalcTroopScout(i);
+            int scout = player.CalcTroopScout(i).Item2;
             if (scout > 0)
             {
                 total += scout;
@@ -840,7 +840,7 @@ public class Card : PhotonCompatible
         (int total, List<int> canLose) = CanLose(player);
         if (logged >= 0 && GetFile().scoutAmount > 0)
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseLoseScout(player, canLose, false, 1, logged));
-        return (true, -2 * Mathf.Min(total, GetFile().scoutAmount));
+        return (true, -2 * Mathf.Min(GetFile().scoutAmount, total));
     }
 
     protected (bool, int) AskLoseScout(Player player, int logged)
@@ -924,25 +924,23 @@ public class Card : PhotonCompatible
     protected (bool, int) AskLoseCoin(Player player, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Coin] >= GetFile().coinAmount;
-        if (logged >= 0 && answer)
+        if (logged >= 0)
         {
             Action action = () => LoseCoin(player, logged);
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {GetFile().coinAmount} Coin to {this.name}?", logged));
         }
-        return (answer, GetFile().coinAmount * -1);
+        return (true, GetFile().coinAmount * -1);
     }
 
     protected (bool, int) AskLoseAction(Player player, int logged)
     {
         mayStopEarly = true;
-        bool answer = player.resourceDict[Resource.Action] >= GetFile().actionAmount;
-        if (logged >= 0 && answer)
+        if (logged >= 0)
         {
             Action action = () => LoseAction(player, logged);
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePay(player, action, $"Pay {GetFile().actionAmount} Action to {this.name}?", logged));
         }
-        return (answer, GetFile().actionAmount * -3);
+        return (true, GetFile().actionAmount * -3);
     }
 
     protected void ChoosePay(Player player, Action ifDone, string text, int logged)

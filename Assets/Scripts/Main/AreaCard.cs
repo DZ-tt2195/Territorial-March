@@ -94,8 +94,7 @@ public class AreaCard : Card
     protected (bool, int) AskLoseScoutHere(Player player, int logged)
     {
         mayStopEarly = true;
-        (int troop, int scout) = player.CalcTroopScout(this.areaNumber);
-        bool answer = scout >= dataFile.scoutAmount;
+        bool answer = player.CalcTroopScout(this.areaNumber).Item2 >= dataFile.scoutAmount;
 
         if (logged >= 0 && answer)
         {
@@ -107,38 +106,32 @@ public class AreaCard : Card
 
     protected (bool, int) SetToTroopHere(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return SetAllStats(player, dataFile, troop, logged);
+        return SetAllStats(player, dataFile, player.CalcTroopScout(areaNumber).Item1, logged);
     }
 
     protected (bool, int) SetToScoutHere(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return SetAllStats(player, dataFile, scout, logged);
+        return SetAllStats(player, dataFile, player.CalcTroopScout(areaNumber).Item2, logged);
     }
 
     protected (bool, int) TroopHereOrMore(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return ResolveBoolean(player, troop >= GetFile().miscAmount, logged);
+        return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item1 >= GetFile().miscAmount, logged);
     }
 
     protected (bool, int) TroopHereOrLess(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return ResolveBoolean(player, troop <= GetFile().miscAmount, logged);
+        return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item1 <= GetFile().miscAmount, logged);
     }
 
     protected (bool, int) ScoutHereOrMore(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return ResolveBoolean(player, scout >= GetFile().miscAmount, logged);
+        return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item2 >= GetFile().miscAmount, logged);
     }
 
     protected (bool, int) ScoutHereOrLess(Player player, int logged)
     {
-        (int troop, int scout) = player.CalcTroopScout(areaNumber);
-        return ResolveBoolean(player, scout <= GetFile().miscAmount, logged);
+        return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item2 <= GetFile().miscAmount, logged);
     }
 
     #endregion

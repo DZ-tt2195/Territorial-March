@@ -13,8 +13,7 @@ public class Placeholder : AreaCard
         base.AreaInstructions(player, logged);
         for (int i = 0; i<4; i++)
         {
-            (int troop, int scout) = player.CalcTroopScout(i);
-            if (troop >= dataFile.troopAmount)
+            if (player.CalcTroopScout(i).Item1 >= dataFile.troopAmount)
                 player.DrawCardRPC(dataFile.cardAmount, logged);
         }
     }

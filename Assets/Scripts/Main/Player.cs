@@ -539,7 +539,7 @@ public class Player : PhotonCompatible
             {
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
-                if (nextArea is Camp)
+                if (nextArea is Camp && troopArray[3] == 12)
                     FinishChain();
                 else
                     nextArea.AreaInstructions(this, 0);

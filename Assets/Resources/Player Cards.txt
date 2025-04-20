@@ -210,7 +210,7 @@
       "X"
     ],
     [
-      "L",
+      "J",
       "\"You may remove 2 Scout for +2 Action.\"",
       "5",
       "TRUE",
@@ -238,7 +238,7 @@
       "X"
     ],
     [
-      "M",
+      "L",
       "You may discard 2 Card for +2 Troop.",
       "5",
       "TRUE",
@@ -280,7 +280,7 @@
       "X"
     ],
     [
-      "N",
+      "M",
       "\"+1 Scout, -1 Scout.\"",
       "6",
       "TRUE",
@@ -294,7 +294,21 @@
       "X"
     ],
     [
-      "O",
+      "P",
+      "\"+2 Card, -2 Action (it can go negative).\"",
+      "6",
+      "TRUE",
+      "DrawCard/LoseAction",
+      "2",
+      "",
+      "2",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "N",
       "\"-1 Card\"",
       "8",
       "TRUE",
@@ -308,7 +322,7 @@
       "X"
     ],
     [
-      "P",
+      "O",
       "If you control 0 or 1 Areas, -1 Action (it can go negative).",
       "8",
       "TRUE",
