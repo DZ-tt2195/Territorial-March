@@ -19,7 +19,7 @@ public class Secure : PlayerCard
     void ChooseArea(Player player, List<int> canAdd, int logged)
     {
         if (player.myType == PlayerType.Bot)
-            player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
+            player.AIDecision(Next, player.ConvertToHundred(canAdd));
         else
             player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area you control.", Next);
 

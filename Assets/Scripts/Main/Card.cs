@@ -461,7 +461,10 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, new() { sorted[0].Item2 });
+            List<int> possibilities = new();
+            if (optional) possibilities.Add(-1);
+            possibilities.Add(sorted[0].Item2);
+            player.AIDecision(Next, possibilities);
         }
         else
         {
@@ -546,6 +549,30 @@ public class Card : PhotonCompatible
         return (answer, 4 * GetFile().troopAmount);
     }
 
+    protected (bool, int) AdvanceTroopOne(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(0).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, 0, 1, logged));
+        return (true, 4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
+    protected (bool, int) AdvanceTroopTwo(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(1).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            player.MoveTroopRPC(1, 3, logged);
+        return (true, 4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
+    protected (bool, int) AdvanceTroopThree(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(2).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            player.MoveTroopRPC(2, 3, logged);
+        return (true, 4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
     void ChooseAdvanceOne(Player player, List<int> canAdvance, bool optional, int counter, int logged)
     {
         string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
@@ -558,7 +585,7 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(canAdvance, optional));
+            player.AIDecision(Next, player.ConvertToHundred(canAdvance));
         }
         else
         {
@@ -606,7 +633,7 @@ public class Card : PhotonCompatible
         }
 
         if (player.myType == PlayerType.Bot)
-            player.AIDecision(Resolve, player.ConvertToHundred(newPositions, false));
+            player.AIDecision(Resolve, player.ConvertToHundred(newPositions));
         else
             player.ChooseTroopDisplay(newPositions, $"Advance troop from Area {chosenArea + 1} to where?", Resolve);
 
@@ -675,6 +702,30 @@ public class Card : PhotonCompatible
         return (answer, -4 * GetFile().troopAmount);
     }
 
+    protected (bool, int) RetreatTroopTwo(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(1).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            player.MoveTroopRPC(1, 0, logged);
+        return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
+    protected (bool, int) RetreatTroopThree(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(2).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            player.MoveTroopRPC(2, 0, logged);
+        return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
+    protected (bool, int) RetreatTroopFour(Player player, int logged)
+    {
+        int troopInArea = player.CalcTroopScout(3).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, 3, 1, logged));
+        return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
     void ChooseRetreatOne(Player player, List<int> canRetreat, bool optional, int counter, int logged)
     {
         string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
@@ -687,7 +738,7 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(canRetreat, optional));
+            player.AIDecision(Next, player.ConvertToHundred(canRetreat));
         }
         else
         {
@@ -787,7 +838,7 @@ public class Card : PhotonCompatible
         string parathentical = (GetFile().scoutAmount == 1) ? "" : $" ({counter}/{GetFile().scoutAmount})";
 
         if (player.myType == PlayerType.Bot)
-            player.AIDecision(Next, player.ConvertToHundred(canAdd, false));
+            player.AIDecision(Next, player.ConvertToHundred(canAdd));
         else
             player.ChooseTroopDisplay(canAdd, "Add a Scout to an Area.", Next);
 
@@ -866,7 +917,7 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Next, player.ConvertToHundred(canLose, optional));
+            player.AIDecision(Next, player.ConvertToHundred(canLose));
         }
         else
         {

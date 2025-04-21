@@ -358,7 +358,7 @@ public class Log : PhotonCompatible
         List<NextStep> hasStepName = new();
         foreach (NextStep step in historyStack)
         {
-            if(step.actionName == name)
+            if(step.actionName.Equals(name))
                 hasStepName.Add(step);
         }
         return hasStepName;

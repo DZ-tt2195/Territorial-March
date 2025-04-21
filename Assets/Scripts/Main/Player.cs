@@ -509,12 +509,9 @@ public class Player : PhotonCompatible
         }
     }
 
-    public List<int> ConvertToHundred(List<int> listOfInts, bool optional)
+    public List<int> ConvertToHundred(List<int> listOfInts)
     {
         List<int> newList = new();
-        if (optional)
-            newList.Add(-1);
-
         for (int i = 0; i < listOfInts.Count; i++)
         {
             if (listOfInts[i] >= 0)

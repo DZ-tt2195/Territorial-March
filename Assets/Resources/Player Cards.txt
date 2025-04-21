@@ -126,6 +126,20 @@
       "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
+      "PlayLot",
+      "If you've lost 3 Action or more this turn (including when playing this), +1 Card and +3 Action.",
+      "2",
+      "FALSE",
+      "DrawCard/AddAction",
+      "1",
+      "",
+      "1",
+      "",
+      "",
+      "3",
+      "X"
+    ],
+    [
       "E",
       "\"+1 Card per Area you control.\"",
       "3",

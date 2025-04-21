@@ -13,27 +13,27 @@ public class Fortune : PlayerCard
     {
         base.ResolveCard(player, logged);
         player.ResourceRPC(Resource.Action, -1*dataFile.actionAmount, logged);
-        player.ResourceRPC(Resource.Coin, mathResult, logged);
+        player.ResourceRPC(Resource.Coin, CalculateCoinsGained(player), logged);
     }
 
     public override void DoMath(Player player)
     {
         if (recalculate)
-        {
-            mathResult = 0;
-            mathResult = -3;
-            List<NextStep> listOfSteps = Log.inst.SearchHistory("ChangeResource");
-
-            foreach (NextStep step in listOfSteps)
-            {
-                (string instruction, object[] stepParameters) = step.source.TranslateFunction(step.action);
-                if ((int)stepParameters[1] == (int)Resource.Coin)
-                {
-                    if ((int)stepParameters[2] > 0)
-                        mathResult += (int)stepParameters[2];
-                }
-            }
-        }
+            mathResult = -3 + CalculateCoinsGained(player);
         recalculate = false;
+    }
+
+    int CalculateCoinsGained(Player player)
+    {
+        int coinGained = 0;
+        List<NextStep> listOfSteps = Log.inst.SearchHistory("ChangeResource");
+
+        foreach (NextStep step in listOfSteps)
+        {
+            (string instruction, object[] stepParameters) = step.source.TranslateFunction(step.action);
+            if ((int)stepParameters[1] == (int)Resource.Coin && (int)stepParameters[2] > 0)
+                coinGained += (int)stepParameters[2];
+        }
+        return coinGained;
     }
 }
