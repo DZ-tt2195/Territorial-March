@@ -21,8 +21,7 @@ public class Explore : PlayerCard
         if (recalculate)
         {
             mathResult = this.dataFile.startingCoin;
-            foreach (int area in ToAddScout(player))
-                mathResult += dataFile.scoutAmount * 2;
+            mathResult += dataFile.scoutAmount * 2 * ToAddScout(player).Count;
         }
         recalculate = false;
     }

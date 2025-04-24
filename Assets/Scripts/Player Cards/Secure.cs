@@ -13,7 +13,8 @@ public class Secure : PlayerCard
     {
         base.ResolveCard(player, logged);
         List<int> canAdd = CanAdd(player);
-        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseArea(player, canAdd, logged));
+        if (canAdd.Count >= 1)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseArea(player, canAdd, logged));
     }
 
     void ChooseArea(Player player, List<int> canAdd, int logged)

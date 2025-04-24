@@ -84,18 +84,18 @@
       "X"
     ],
     [
-      "Choosie",
-      "Choose one: +4 Coin; +2 Scout; +1 Troop.",
-      "2",
-      "FALSE",
-      "AddCoin/AddScout/AdvanceTroop",
-      "",
-      "4",
-      "",
+      "Explore",
+      "\"+1 Scout in each Area you have 0 Troop in.\"",
       "1",
-      "2",
+      "FALSE",
+      "AddScout",
       "",
-      "X"
+      "",
+      "",
+      "0",
+      "1",
+      "",
+      "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
       "D",
@@ -112,20 +112,6 @@
       "X"
     ],
     [
-      "Explore",
-      "\"+1 Scout in each Area you have 0 Troop in.\"",
-      "2",
-      "FALSE",
-      "AddScout",
-      "",
-      "",
-      "",
-      "0",
-      "1",
-      "",
-      "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
-    ],
-    [
       "PlayLot",
       "If you've lost 3 Action or more this turn (including when playing this), +1 Card and +1 Action.",
       "2",
@@ -140,9 +126,37 @@
       "X"
     ],
     [
+      "CheckScout",
+      "\"Choose an Area. +1 Scout there, then +1 Coin per Scout you have there.\"",
+      "2",
+      "FALSE",
+      "AddScout/SetToScout/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "X"
+    ],
+    [
+      "Secure",
+      "\"+2 Scout in one Area that you control.\"",
+      "2",
+      "FALSE",
+      "AddScout",
+      "",
+      "",
+      "",
+      "",
+      "2",
+      "",
+      "X"
+    ],
+    [
       "E",
       "\"+1 Coin per Card in your hand.\"",
-      "2",
+      "3",
       "TRUE",
       "SetToHand/AddCoin",
       "",
@@ -168,20 +182,6 @@
       "X"
     ],
     [
-      "X",
-      "\"+3 Coin per Area you control.\"",
-      "3",
-      "TRUE",
-      "SetToControl/AddCoin",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "3",
-      "X"
-    ],
-    [
       "G",
       "\"+1 Action per Area you control.\"",
       "3",
@@ -193,20 +193,6 @@
       "",
       "",
       "1",
-      "X"
-    ],
-    [
-      "Secure",
-      "\"+2 Scout in one Area that you control.\"",
-      "3",
-      "FALSE",
-      "AddScout",
-      "",
-      "",
-      "",
-      "",
-      "2",
-      "",
       "X"
     ],
     [
@@ -249,6 +235,20 @@
       "",
       "",
       "4",
+      "X"
+    ],
+    [
+      "X",
+      "\"+2 Coin per Area you control.\"",
+      "4",
+      "TRUE",
+      "SetToControl/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "2",
       "X"
     ],
     [

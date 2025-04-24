@@ -660,7 +660,7 @@ public class Player : PhotonCompatible
         if (listOfCards.Count == 0 && action != null)
         {
             Log.inst.undoToThis = null;
-            PopStack();
+            DecisionMade(-1);
         }
         else if (listOfCards.Count == 1 && action != null)
         {
@@ -722,7 +722,7 @@ public class Player : PhotonCompatible
         if (possibleChoices.Count == 0 && action != null)
         {
             Log.inst.undoToThis = null;
-            PopStack();
+            DecisionMade(-1);
         }
         else if (possibleChoices.Count == 1 && action != null)
         {
