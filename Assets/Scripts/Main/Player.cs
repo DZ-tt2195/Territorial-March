@@ -151,7 +151,7 @@ public class Player : PhotonCompatible
         myButton.transform.SetParent(Manager.inst.canvas.transform);
         myButton.transform.localScale = Vector3.one;
         myButton.transform.localPosition = new(-1125, 225 - (playerPosition * 125));
-        myButton.onClick.AddListener(MoveScreen);
+        //myButton.onClick.AddListener(MoveScreen);
         resourceText = myButton.transform.GetChild(0).GetComponent<TMP_Text>();
 
         resourceDict = new()
@@ -536,7 +536,7 @@ public class Player : PhotonCompatible
             {
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
-                if (nextArea is Camp && troopArray[3] == 12)
+                if (nextArea is Camp || troopArray[3] == 12)
                     FinishChain();
                 else
                     nextArea.AreaInstructions(this, 0);
