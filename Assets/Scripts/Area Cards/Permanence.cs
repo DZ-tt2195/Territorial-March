@@ -11,8 +11,7 @@ public class Permanence : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        (int troop, int scout) = player.CalcTroopScout(this.areaNumber);
-        if (scout > troop)
-            AdvanceTroop(player, logged);
+        if (player.CalcTroopScout(this.areaNumber).Item2 > player.cardsInHand.Count)
+            DrawCard(player, logged);
     }
 }

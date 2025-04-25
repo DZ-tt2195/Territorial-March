@@ -183,7 +183,7 @@
     ],
     [
       "Penalty",
-      "You may lose 1 Scout. If you don't, -1 Action (it can go negative).",
+      "You may remove 1 Scout. If you don't, -1 Action (it can go negative).",
       "FALSE",
       "AskLoseScout/LoseAction",
       "",
@@ -274,13 +274,13 @@
     ],
     [
       "Permanence",
-      "If you have more Scout here than Troop, +1 Troop.",
+      "If you have more Scout here than Card in your hand, +2 Card.",
       "FALSE",
-      "AdvanceTroop",
+      "ScoutHereOrMore/HandOrLess/DrawCard",
+      "2",
       "",
       "",
       "",
-      "1",
       "",
       "",
       "X"

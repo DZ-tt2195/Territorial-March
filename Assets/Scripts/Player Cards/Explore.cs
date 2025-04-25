@@ -31,7 +31,7 @@ public class Explore : PlayerCard
         List<int> canAdd = new();
         for (int i = 0; i < 4; i++)
         {
-            if (player.CalcTroopScout(i).Item1 == dataFile.troopAmount)
+            if (player.CalcTroopScout(i).Item1 == dataFile.miscAmount)
                 canAdd.Add(i);
         }
         return canAdd;
