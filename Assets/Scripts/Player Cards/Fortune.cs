@@ -12,8 +12,13 @@ public class Fortune : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        player.ResourceRPC(Resource.Action, -1*dataFile.actionAmount, logged);
-        player.ResourceRPC(Resource.Coin, CalculateCoinsGained(player), logged);
+        AskDiscardCard(player, logged);
+    }
+
+    protected override void PostDiscard(Player player, bool success, int logged)
+    {
+        if (success)
+            player.ResourceRPC(Resource.Coin, CalculateCoinsGained(player), logged);
     }
 
     public override void DoMath(Player player)

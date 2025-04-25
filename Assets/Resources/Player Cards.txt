@@ -57,13 +57,13 @@
     ],
     [
       "Fortune",
-      "\"-1 Action (it can go negative). +1 Coin per Coin you gained this turn.\"",
+      "\"You may discard 1 Card, for +1 Coin per Coin you gained this turn.\"",
       "0",
       "FALSE",
-      "LoseAction/AddCoin",
-      "",
-      "",
+      "AskDiscardCard/AddCoin",
       "1",
+      "",
+      "",
       "",
       "",
       "",
@@ -141,7 +141,7 @@
     ],
     [
       "Secure",
-      "\"+2 Scout in one Area that you control.\"",
+      "\"+2 Scout, both in one Area that you control.\"",
       "2",
       "FALSE",
       "AddScout",
@@ -196,20 +196,6 @@
       "X"
     ],
     [
-      "O",
-      "\"+3 Scout, -1 Action (it can go negative).\"",
-      "3",
-      "TRUE",
-      "AddScout/LoseAction",
-      "",
-      "",
-      "1",
-      "",
-      "3",
-      "",
-      "X"
-    ],
-    [
       "H",
       "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
       "3",
@@ -221,20 +207,6 @@
       "1",
       "",
       "10",
-      "X"
-    ],
-    [
-      "U",
-      "You may discard 1 Card for +5 Coin.",
-      "4",
-      "TRUE",
-      "AskDiscardCard/AddCoin",
-      "1",
-      "5",
-      "",
-      "",
-      "",
-      "",
       "X"
     ],
     [
@@ -280,6 +252,20 @@
       "X"
     ],
     [
+      "SpreadScout",
+      "If you have 2 Scout or more on both Camp and Road, +1 Troop.",
+      "4",
+      "FALSE",
+      "ScoutHereOrMore/AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "2",
+      "X"
+    ],
+    [
       "L",
       "\"You may remove 2 Scout for +2 Card.\"",
       "5",
@@ -318,6 +304,20 @@
       "3",
       "2",
       "",
+      "",
+      "X"
+    ],
+    [
+      "O",
+      "\"+2 Scout, -1 Action (it can go negative).\"",
+      "5",
+      "TRUE",
+      "AddScout/LoseAction",
+      "",
+      "",
+      "1",
+      "",
+      "2",
       "",
       "X"
     ],
@@ -388,20 +388,6 @@
       "",
       "",
       "1",
-      "",
-      "X"
-    ],
-    [
-      "S",
-      "\"-1 Card\"",
-      "8",
-      "TRUE",
-      "DiscardCard",
-      "1",
-      "",
-      "",
-      "",
-      "",
       "",
       "X"
     ],

@@ -53,10 +53,10 @@
     ],
     [
       "University",
-      "\"If you have 0 or 1 Card in hand, +1 Card.\"",
+      "\"If you have 0 or 1 Card in hand, +2 Card.\"",
       "TRUE",
       "HandOrLess/DrawCard",
-      "1",
+      "2",
       "",
       "",
       "",
@@ -144,7 +144,7 @@
     ],
     [
       "3",
-      "\"If you have 4 Troop or less here, -1 Card.\"",
+      "\"If you have 3 Troop or less here, -1 Card.\"",
       "TRUE",
       "TroopHereOrLess/DiscardCard",
       "1",
@@ -152,7 +152,7 @@
       "",
       "",
       "",
-      "4",
+      "3",
       "X"
     ],
     [
@@ -261,25 +261,12 @@
     ],
     [
       "7",
-      "You may pay 3 Coin (it can go negative) for +1 Action.",
+      "You may pay 4 Coin (it can go negative) for +2 Action.",
       "TRUE",
       "AskLoseCoin/AddAction",
       "",
-      "3",
-      "1",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "Permanence",
-      "If you have more Scout here than Card in your hand, +2 Card.",
-      "FALSE",
-      "ScoutHereOrMore/HandOrLess/DrawCard",
+      "4",
       "2",
-      "",
-      "",
       "",
       "",
       "",
