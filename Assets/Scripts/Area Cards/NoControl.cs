@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
-public class Secure : PlayerCard
+public class NoControl : AreaCard
 {
     protected override void Awake()
     {
@@ -10,11 +9,18 @@ public class Secure : PlayerCard
         this.bottomType = this.GetType();
     }
 
-    public override void ResolveCard(Player player, int logged)
+    public override void AreaInstructions(Player player, int logged)
     {
-        base.ResolveCard(player, logged);
+        base.AreaInstructions(player, logged);
         List<int> canAdd = CanAdd(player);
         if (canAdd.Count >= 1)
+            AskDiscardCard(player, logged);
+    }
+
+    protected override void PostDiscard(Player player, bool success, int logged)
+    {
+        List<int> canAdd = CanAdd(player);
+        if (success)
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseArea(player, canAdd, logged));
     }
 
@@ -23,7 +29,7 @@ public class Secure : PlayerCard
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, player.ConvertToHundred(canAdd));
         else
-            player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area you control.", Next);
+            player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area you don't control.", Next);
 
         void Next()
         {
@@ -36,12 +42,5 @@ public class Secure : PlayerCard
     protected override List<int> CanAdd(Player player)
     {
         return Enumerable.Range(0, 4).Where(i => player.areasControlled[i]).ToList();
-    }
-
-    public override void DoMath(Player player)
-    {
-        if (recalculate)
-            mathResult = this.dataFile.startingCoin + ((CanAdd(player).Count >= 1) ? dataFile.scoutAmount * 2 : 0);
-        recalculate = false;
     }
 }
