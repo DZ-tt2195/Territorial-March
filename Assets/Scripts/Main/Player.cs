@@ -359,10 +359,11 @@ public class Player : PhotonCompatible
 
     public void UpdateAreaControl(int area, bool control, int logged)
     {
-        if (this.areasControlled[area] != control)
+        bool newStatus = control || BoolFromAbilities(true, nameof(ControlArea), ControlArea.CheckParameters(area), logged);
+        if (this.areasControlled[area] != newStatus)
         {
-            this.areasControlled[area] = control || BoolFromAbilities(true, nameof(ControlArea), ControlArea.CheckParameters(area), logged);
-            if (control)
+            this.areasControlled[area] = newStatus;
+            if (newStatus)
                 Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
                 Log.inst.AddTextRPC(this, $"{this.name} loses control over Area {area + 1}.", LogAdd.Personal, logged);
@@ -561,8 +562,7 @@ public class Player : PhotonCompatible
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
-            Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
-                (cardList.ToArray(), this.playerPosition, 15 - this.privateDeck.childCount));
+            Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard(cardList.ToArray(), this.playerPosition, 15 - this.privateDeck.childCount));
 
             AreaCard nextArea = Manager.inst.listOfAreas[(areaToResolve == 3) ? 0 : areaToResolve + 1];
             if (nextArea is Camp)

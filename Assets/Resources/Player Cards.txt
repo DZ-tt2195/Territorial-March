@@ -281,7 +281,7 @@
     ],
     [
       "Seize",
-      "Choose an Area. Until the next Camp, you control it.",
+      "Choose an Area. Until the next Camp, you control it (in addition to whoever else controls it).",
       "4",
       "FALSE",
       "",

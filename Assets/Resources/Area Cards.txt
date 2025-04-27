@@ -130,7 +130,7 @@
       "X"
     ],
     [
-      "Bank",
+      "8",
       "If you have 2 Action or more, +1 Card.",
       "TRUE",
       "ActionOrMore/DrawCard",
@@ -140,7 +140,7 @@
       "",
       "",
       "2",
-      "Jason Snair|Dominion: Prosperity|(Bank)"
+      "X"
     ],
     [
       "3",
@@ -204,7 +204,7 @@
       "",
       "",
       "",
-      "2",
+      "-2",
       "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
     ],
     [
@@ -256,6 +256,32 @@
       "2",
       "",
       "",
+      "",
+      "X"
+    ],
+    [
+      "Bank",
+      "\"If you have 4 Coin or more, +1 Coin per 4 Coin you have (round down).",
+      "FALSE",
+      "SetToCoin/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "4",
+      "Jason Snair|Dominion: Prosperity|(Bank)"
+    ],
+    [
+      "LoseAdvance",
+      "You may remove 1 Scout, to advance 1 Troop from that Area.",
+      "FALSE",
+      "AskLoseScout/AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "1",
       "",
       "X"
     ]

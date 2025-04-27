@@ -573,7 +573,7 @@ public class Card : PhotonCompatible
         return (true, 4 * Mathf.Min(GetFile().troopAmount, troopInArea));
     }
 
-    void ChooseAdvanceOne(Player player, List<int> canAdvance, bool optional, int counter, int logged)
+    protected void ChooseAdvanceOne(Player player, List<int> canAdvance, bool optional, int counter, int logged)
     {
         string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
         List<string> actions = new();
@@ -619,7 +619,7 @@ public class Card : PhotonCompatible
         }
     }
 
-    void ChooseAdvanceTwo(Player player, int chosenArea, int counter, int logged)
+    protected void ChooseAdvanceTwo(Player player, int chosenArea, int counter, int logged)
     {
         List<int> newPositions = new();
         if (chosenArea == 0)
@@ -726,7 +726,7 @@ public class Card : PhotonCompatible
         return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
     }
 
-    void ChooseRetreatOne(Player player, List<int> canRetreat, bool optional, int counter, int logged)
+    protected void ChooseRetreatOne(Player player, List<int> canRetreat, bool optional, int counter, int logged)
     {
         string parathentical = (GetFile().troopAmount == 1) ? "" : $" ({counter}/{GetFile().troopAmount})";
         List<string> actions = new();
@@ -772,7 +772,7 @@ public class Card : PhotonCompatible
         }
     }
 
-    void ChooseRetreatTwo(Player player, int chosenTroop, int counter, int logged)
+    protected void ChooseRetreatTwo(Player player, int chosenTroop, int counter, int logged)
     {
         List<int> newPositions = new();
         if (chosenTroop == 3)
