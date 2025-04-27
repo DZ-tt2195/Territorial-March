@@ -78,6 +78,7 @@ MonoBehaviour:
   cardsInHand: []
   privateDeck: {fileID: 1788577225800641295}
   privateDiscard: {fileID: 6166565596222799526}
+  allAbilities: []
 --- !u!1 &1262142806565398546
 GameObject:
   m_ObjectHideFlags: 0

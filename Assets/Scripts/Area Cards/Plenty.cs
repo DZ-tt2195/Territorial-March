@@ -12,7 +12,10 @@ public class Plenty : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        if (player.resourceDict[Resource.Action] > player.cardsInHand.Count)
-            AdvanceTroop(player, logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+        {
+            if (player.resourceDict[Resource.Action] > player.cardsInHand.Count)
+                AdvanceTroop(player, logged);
+        }
     }
 }

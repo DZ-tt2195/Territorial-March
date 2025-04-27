@@ -12,7 +12,10 @@ public class Swamp : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        SetAllStats(player, GetFile(), player.CalcTroopScout(3).Item1, logged);
-        LoseCoin(player, logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+        {
+            SetAllStats(player, GetFile(), player.CalcTroopScout(3).Item1, logged);
+            LoseCoin(player, logged);
+        }
     }
 }

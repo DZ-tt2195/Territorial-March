@@ -48,7 +48,7 @@ public class AreaCard : Card
     public virtual void AreaInstructions(Player player, int logged)
     {
         Log.inst.RememberStep(player, StepType.UndoPoint, () => player.EndTurn());
-        if (dataFile.useSheets)
+        if (dataFile.useSheets && !player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
         {
             stepCounter = -1;
             NextStepRPC(player, logged);

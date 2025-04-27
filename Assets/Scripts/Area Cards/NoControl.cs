@@ -12,9 +12,12 @@ public class NoControl : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        List<int> canAdd = CanAdd(player);
-        if (canAdd.Count >= 1)
-            AskDiscardCard(player, logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+        {
+            List<int> canAdd = CanAdd(player);
+            if (canAdd.Count >= 1)
+                AskDiscardCard(player, logged);
+        }
     }
 
     protected override void PostDiscard(Player player, bool success, int logged)

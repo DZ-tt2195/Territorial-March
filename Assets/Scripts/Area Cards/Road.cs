@@ -12,7 +12,8 @@ public class Road : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+            Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
     }
 
     protected override void PostAdvance(Player player, bool success, int logged)

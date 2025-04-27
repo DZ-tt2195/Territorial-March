@@ -15,20 +15,6 @@
     ],
     [
       "A",
-      "You may discard 1 Card for +3 Action.",
-      "0",
-      "TRUE",
-      "AskDiscardCard/AddAction",
-      "1",
-      "",
-      "3",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "B",
       "\"+3 Card, -3 Coin (it can go negative).\"",
       "0",
       "TRUE",
@@ -42,7 +28,7 @@
       "X"
     ],
     [
-      "C",
+      "B",
       "\"+1 Troop, +1 Scout.\"",
       "0",
       "TRUE",
@@ -98,7 +84,7 @@
       "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
-      "D",
+      "C",
       "\"+1 Troop per Area you control.\"",
       "2",
       "TRUE",
@@ -154,6 +140,20 @@
       "X"
     ],
     [
+      "D",
+      "You may discard 1 Card for +2 Action.",
+      "3",
+      "TRUE",
+      "AskDiscardCard/AddAction",
+      "1",
+      "",
+      "2",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
       "E",
       "\"+1 Coin per Card in your hand.\"",
       "3",
@@ -197,7 +197,7 @@
     ],
     [
       "H",
-      "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
+      "If you have 15 Coin or more (after getting 3 Coin from this), +1 Troop.",
       "3",
       "TRUE",
       "CoinOrMore/AdvanceTroop",
@@ -206,7 +206,7 @@
       "",
       "1",
       "",
-      "10",
+      "15",
       "X"
     ],
     [
@@ -267,6 +267,34 @@
     ],
     [
       "L",
+      "\"+1 Card, -1 Scout.\"",
+      "4",
+      "TRUE",
+      "DrawCard/LoseScout",
+      "1",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "X"
+    ],
+    [
+      "Seize",
+      "Choose an Area. Until the next Camp, you control it.",
+      "4",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "M",
       "\"You may remove 2 Scout for +2 Action.\"",
       "5",
       "TRUE",
@@ -280,7 +308,7 @@
       "X"
     ],
     [
-      "M",
+      "N",
       "You may discard 2 Card for +2 Troop.",
       "5",
       "TRUE",
@@ -294,7 +322,7 @@
       "X"
     ],
     [
-      "N",
+      "O",
       "You may retreat 2 Troop for +3 Card.",
       "5",
       "TRUE",
@@ -308,7 +336,7 @@
       "X"
     ],
     [
-      "O",
+      "P",
       "\"+2 Scout, -1 Action (it can go negative).\"",
       "5",
       "TRUE",
@@ -350,7 +378,7 @@
       "X"
     ],
     [
-      "P",
+      "Q",
       "\"+1 Scout, -1 Scout.\"",
       "6",
       "TRUE",
@@ -364,7 +392,7 @@
       "X"
     ],
     [
-      "Q",
+      "R",
       "\"+1 Card, -1 Action (it can go negative).\"",
       "6",
       "TRUE",
@@ -378,7 +406,7 @@
       "X"
     ],
     [
-      "R",
+      "S",
       "\"-1 Scout\"",
       "7",
       "TRUE",
@@ -403,6 +431,20 @@
       "",
       "",
       "1",
+      "X"
+    ],
+    [
+      "Ignore",
+      "Until the next Camp, ignore all other Areas.",
+      "8",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
       "X"
     ]
   ]

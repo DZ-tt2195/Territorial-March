@@ -12,9 +12,12 @@ public class Balance : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        if (player.areasControlled[1])
-            player.DrawCardRPC(GetFile().cardAmount, logged);
-        if (player.areasControlled[2])
-            player.DrawCardRPC(GetFile().actionAmount, logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+        {
+            if (player.areasControlled[1])
+                player.DrawCardRPC(GetFile().cardAmount, logged);
+            if (player.areasControlled[2])
+                player.DrawCardRPC(GetFile().actionAmount, logged);
+        }
     }
 }

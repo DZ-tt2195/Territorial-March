@@ -11,7 +11,7 @@ public class Crossroads : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        player.ResourceRPC(Resource.Coin, dataFile.coinAmount *
-            Mathf.Min(player.CalcTroopScout(1).Item1, player.CalcTroopScout(2).Item2), logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+            player.ResourceRPC(Resource.Coin, dataFile.coinAmount * Mathf.Min(player.CalcTroopScout(1).Item1, player.CalcTroopScout(2).Item2), logged);
     }
 }

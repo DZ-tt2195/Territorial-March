@@ -337,8 +337,13 @@ public class Log : PhotonCompatible
         DisplayUndoBar(false);
     }
 
+    public void DecisionCompleteRPC(int stepNumber)
+    {
+        RememberStep(this, StepType.Revert, () => DecisionComplete(false, stepNumber));
+    }
+
     [PunRPC]
-    internal void DecisionComplete(bool undo, int stepNumber)
+    void DecisionComplete(bool undo, int stepNumber)
     {
         NextStep step = historyStack[stepNumber];
         if (undo)

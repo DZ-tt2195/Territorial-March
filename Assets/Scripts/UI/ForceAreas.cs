@@ -31,6 +31,8 @@ public class ForceAreas : MonoBehaviour
     internal void ChooseFromImages(CardSelect clicked)
     {
         mostRecentClick = clicked;
+        foreach (Button button in blankImages)
+            button.gameObject.SetActive(true);
     }
 
     void SendName(CardData data)
@@ -58,13 +60,13 @@ public class ForceAreas : MonoBehaviour
                     CardData data = CarryVariables.inst.areaCardFiles[i + 2];
                     blankImages.Add(nextButton);
 
+                    nextButton.interactable = true;
                     nextButton.GetComponent<CardLayout>().FillInCards(data, 1);
                     nextButton.onClick.RemoveAllListeners();
                     nextButton.onClick.AddListener(() => SendName(data));
                 }
                 catch
                 {
-
                 }
                 nextButton.gameObject.SetActive(false);
             }

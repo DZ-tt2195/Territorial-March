@@ -74,6 +74,8 @@ public class Player : PhotonCompatible
     public List<Action> inReaction = new();
     public NextStep currentStep { get; private set; }
     Action firstAction;
+    int areaToResolve;
+    public List<TriggeredAbility> allAbilities = new();
 
     [Foldout("AI", true)]
     private bool _simulating;
@@ -359,7 +361,7 @@ public class Player : PhotonCompatible
     {
         if (this.areasControlled[area] != control)
         {
-            this.areasControlled[area] = control;
+            this.areasControlled[area] = control || BoolFromAbilities(true, nameof(ControlArea), ControlArea.CheckParameters(area), logged);
             if (control)
                 Log.inst.AddTextRPC(this, $"{this.name} gains control over Area {area + 1}.", LogAdd.Personal, logged);
             else
@@ -429,6 +431,7 @@ public class Player : PhotonCompatible
 
         this.DoFunction(() => this.ChangeButtonColor(false));
         firstAction = action;
+        areaToResolve = currentArea;
 
         if (myType == PlayerType.Bot)
         {
@@ -560,6 +563,17 @@ public class Player : PhotonCompatible
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
             Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard
                 (cardList.ToArray(), this.playerPosition, 15 - this.privateDeck.childCount));
+
+            AreaCard nextArea = Manager.inst.listOfAreas[(areaToResolve == 3) ? 0 : areaToResolve + 1];
+            if (nextArea is Camp)
+            {
+                for (int i = allAbilities.Count - 1; i >= 0; i--)
+                {
+                    TriggeredAbility ability = allAbilities[i];
+                    if (ability.deletion == WhenDelete.UntilCamp)
+                        ability.source.RemoveAbilityRPC(this);
+                }
+            }
 
             DoFunction(() => ChangeButtonColor(true));
             Manager.inst.Instructions("Waiting on other players...");
@@ -794,12 +808,19 @@ public class Player : PhotonCompatible
                 {
                     needUndo = true;
                 }
+                else if (Mathf.Abs(currentChain.decisions.Count - newChain.decisions.Count) >= 2)
+                {
+                    needUndo = true;
+                }
                 else
                 {
                     for (int j = 0; j < currentChain.decisions.Count; j++)
                     {
                         if (currentChain.decisions[j] != newChain.decisions[j])
+                        {
                             needUndo = true;
+                            break;
+                        }
                     }
                 }
 
@@ -826,7 +847,7 @@ public class Player : PhotonCompatible
                 if (currentStep.stepType == StepType.Holding)
                     Log.inst.historyStack.RemoveAt(i);
                 else
-                    Log.inst.RememberStep(Log.inst, StepType.Revert, () => Log.inst.DecisionComplete(false, i));
+                    Log.inst.DecisionCompleteRPC(i);
                 break;
             }
         }
@@ -875,6 +896,45 @@ public class Player : PhotonCompatible
     }
 
     #endregion
+
+#region Abilities
+
+    public int NumberFromAbilities(string condition, object[] array, int logged)
+    {
+        int number = 0;
+        foreach (TriggeredAbility ability in ReturnAbilities(condition, array))
+        {
+            int calc = (int)ability.NumberAbility(logged, array);
+            number += calc;
+        }
+        return number;
+    }
+
+    public bool BoolFromAbilities(bool targetBool, string condition, object[] array, int logged)
+    {
+        foreach (TriggeredAbility ability in ReturnAbilities(condition, array))
+        {
+            if ((bool)ability.BoolAbility(logged, array) == targetBool)
+                return true;
+        }
+        return false;
+    }
+
+    List<TriggeredAbility> ReturnAbilities(string condition, object[] array)
+    {
+        List<TriggeredAbility> validAbilities = new();
+        this.allAbilities.RemoveAll(ability => ability == null);
+
+        for (int i = allAbilities.Count - 1; i >= 0; i--)
+        {
+            TriggeredAbility ability = allAbilities[i];
+            if (ability.CheckAbility(condition, array))
+                validAbilities.Add(ability);
+        }
+        return validAbilities;
+    }
+
+#endregion
 
 #region Helpers
 

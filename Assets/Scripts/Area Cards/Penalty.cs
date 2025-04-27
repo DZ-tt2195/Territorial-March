@@ -12,7 +12,8 @@ public class Penalty : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
-        AskLoseScout(player, logged);
+        if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+            AskLoseScout(player, logged);
     }
 
     protected override void PostLoseScout(Player player, bool success, int logged)

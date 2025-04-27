@@ -9,14 +9,22 @@ using System.Linq.Expressions;
 [RequireComponent(typeof(PhotonView))]
 public class PhotonCompatible : MonoBehaviour
 {
+
+#region Setup
+
     Dictionary<string, MethodInfo> methodDictionary = new();
     public PhotonView pv { get; private set; }
     protected Type bottomType;
+    protected TriggeredAbility ability;
 
     protected virtual void Awake()
     {
         pv = GetComponent<PhotonView>();
     }
+
+    #endregion
+
+#region Functions
 
     public void StringParameters(string methodName, object[] parameters)
     {
@@ -110,5 +118,51 @@ public class PhotonCompatible : MonoBehaviour
         }
         return method;
     }
+
+    #endregion
+
+#region Abilities
+
+    public void AddAbilityRPC(Player player)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => AddAbility(false, player.playerPosition));
+    }
+
+    [PunRPC]
+    void AddAbility(bool undo, int playerPosition)
+    {
+        Player player = Manager.inst.playersInOrder[playerPosition];
+        if (undo)
+        {
+            player.allAbilities.Remove(ability);
+        }
+        else
+        {
+            ability = SetupAbility(player);
+            player.allAbilities.Add(ability);
+        }
+    }
+
+    protected virtual TriggeredAbility SetupAbility(Player player)
+    {
+        return null;
+    }
+
+    public void RemoveAbilityRPC(Player player)
+    {
+        Log.inst.RememberStep(this, StepType.Revert, () => RemoveAbility(false, player.playerPosition));
+    }
+
+    [PunRPC]
+    void RemoveAbility(bool undo, int playerPosition)
+    {
+        Player player = Manager.inst.playersInOrder[playerPosition];
+        if (undo)
+            player.allAbilities.Add(ability);
+        else
+            player.allAbilities.Remove(ability);
+    }
+
+    #endregion
 
 }
