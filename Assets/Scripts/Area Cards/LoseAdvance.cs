@@ -38,7 +38,7 @@ public class LoseAdvance : AreaCard
         {
             int convertedChoice = player.choice - 100;
             if (convertedChoice < 3)
-                ChooseAdvanceTwo(player, convertedChoice, 1, logged);
+                ChooseAdvanceTwo(player, convertedChoice, false, 1, logged);
         }
     }
 }

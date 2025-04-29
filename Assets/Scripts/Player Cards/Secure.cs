@@ -23,7 +23,7 @@ public class Secure : PlayerCard
         if (player.myType == PlayerType.Bot)
             player.AIDecision(Next, player.ConvertToHundred(canAdd));
         else
-            player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area you control.", Next);
+            player.ChooseTroopDisplay(canAdd, $"Add {dataFile.scoutAmount} Scout to an Area with {this.name}.", Next);
 
         void Next()
         {
@@ -35,7 +35,17 @@ public class Secure : PlayerCard
 
     protected override List<int> CanAdd(Player player)
     {
-        return Enumerable.Range(0, 4).Where(i => player.areasControlled[i]).ToList();
+        List<int> canAdd = new();
+        for (int i = 0; i<4; i++)
+        {
+            if (player.areasControlled[i])
+            {
+                (int troop, int scout) = player.CalcTroopScout(i);
+                if (troop == dataFile.miscAmount || scout == dataFile.miscAmount)
+                    canAdd.Add(i);
+            }
+        }
+        return canAdd;
     }
 
     public override void DoMath(Player player)

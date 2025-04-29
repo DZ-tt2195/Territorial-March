@@ -323,75 +323,6 @@ public class Card : PhotonCompatible
 
     #endregion
 
-    #region Play
-
-    virtual protected List<int> SimulatePlay(Player player)
-    {
-        List<int> sortedCards = new() { -1 };
-        for (int i = 0; i < player.cardsInHand.Count; i++)
-            player.cardsInHand[i].recalculate = true;
-
-        for (int i = 0; i < player.cardsInHand.Count; i++)
-        {
-            Card card = player.cardsInHand[i];
-            card.DoMath(player);
-            if (card.mathResult >= 6)
-                sortedCards.Add(i + 100);
-        }
-
-        return sortedCards;
-    }
-
-    protected (bool, int) PlayCard(Player player, int logged)
-    {
-        List<int> sortedCards = SimulatePlay(player);
-        if (logged >= 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChoosePlay(player, sortedCards, logged));
-        return (true, sortedCards.Count == 0 ? 0 : sortedCards.Max() - 6);
-    }
-
-    void ChoosePlay(Player player, List<int> sortedCards, int logged)
-    {
-        List<string> actions = new() { $"Don't Play" };
-        if (player.myType == PlayerType.Bot)
-        {
-            player.AIDecision(Next, sortedCards);
-        }
-        else
-        {
-            player.ChooseButton(actions, Vector3.zero, "What to play?", Next);
-            player.ChooseCardOnScreen(player.cardsInHand, "What to play?", null);
-        }
-
-        void Next()
-        {
-            int convertedChoice = player.choice - 100;
-            if (convertedChoice < player.cardsInHand.Count && convertedChoice >= 0)
-            {
-                PlayerCard toPlay = (PlayerCard)player.cardsInHand[convertedChoice];
-                PostPlay(player, toPlay, logged);
-            }
-            else
-            {
-                Log.inst.AddTextRPC(player, $"{player.name} doesn't play a card.", LogAdd.Personal, logged);
-                PostPlay(player, null, logged);
-            }
-            NextStepRPC(player, logged);
-        }
-    }
-
-    protected virtual void PostPlay(Player player, PlayerCard cardToPlay, int logged)
-    {
-        if (cardToPlay != null)
-        {
-            Log.inst.AddTextRPC(player, $"{player.name} plays {cardToPlay.name}.", LogAdd.Remember, logged);
-            player.DiscardPlayerCard(cardToPlay, -1);
-            cardToPlay.ResolveCard(player, logged + 1);
-        }
-    }
-
-    #endregion
-
     #region Discard
 
     List<(int, int)> SortToDiscard(Player player, int logged)
@@ -553,7 +484,7 @@ public class Card : PhotonCompatible
     {
         int troopInArea = player.CalcTroopScout(0).Item1;
         if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, 0, 1, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, 0, false, 1, logged));
         return (true, 4 * Mathf.Min(GetFile().troopAmount, troopInArea));
     }
 
@@ -606,7 +537,7 @@ public class Card : PhotonCompatible
             if (convertedChoice >= 0)
             {
                 Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, convertedChoice, counter, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, convertedChoice, false, counter, logged));
             }
             else
             {
@@ -619,10 +550,16 @@ public class Card : PhotonCompatible
         }
     }
 
-    protected void ChooseAdvanceTwo(Player player, int chosenArea, int counter, int logged)
+    protected void ChooseAdvanceTwo(Player player, int chosenTroop, bool optional, int counter, int logged)
     {
         List<int> newPositions = new();
-        if (chosenArea == 0)
+        List<string> actions = new();
+        if (optional)
+        {
+            actions.Add("Don't Retreat");
+            newPositions.Insert(0, -1);
+        }
+        if (chosenTroop == 0)
         {
             newPositions.Add(1);
             newPositions.Add(2);
@@ -633,26 +570,40 @@ public class Card : PhotonCompatible
         }
 
         if (player.myType == PlayerType.Bot)
+        {
             player.AIDecision(Resolve, player.ConvertToHundred(newPositions));
+        }
         else
-            player.ChooseTroopDisplay(newPositions, $"Advance troop from Area {chosenArea + 1} to where?", Resolve);
+        {
+            if (optional)
+            {
+                player.ChooseButton(actions, new(0, 250), $"Where to advance Troop from Area {chosenTroop + 1}?", Resolve);
+                player.ChooseTroopDisplay(newPositions, "", null);
+            }
+            else
+            {
+                player.ChooseTroopDisplay(newPositions, $"Where to advance Troop from Area {chosenTroop + 1}?", Resolve);
+            }
+        }
 
         void Resolve()
         {
             int convertedChoice = player.choice - 100;
             if (convertedChoice >= 0)
-                player.MoveTroopRPC(chosenArea, convertedChoice, logged);
+            {
+                player.MoveTroopRPC(chosenTroop, convertedChoice, logged);
 
-            int newCounter = counter + 1;
-            if (newCounter > GetFile().troopAmount)
-            {
-                PostAdvance(player, true, logged);
-                NextStepRPC(player, logged);
-            }
-            else
-            {
-                (int total, List<int> canAdvance) = CanAdvance(player);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, newCounter, logged));
+                int newCounter = counter + 1;
+                if (newCounter > GetFile().troopAmount)
+                {
+                    PostAdvance(player, true, logged);
+                    NextStepRPC(player, logged);
+                }
+                else
+                {
+                    (int total, List<int> canAdvance) = CanAdvance(player);
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, newCounter, logged));
+                }
             }
         }
     }
@@ -722,7 +673,16 @@ public class Card : PhotonCompatible
     {
         int troopInArea = player.CalcTroopScout(3).Item1;
         if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
-            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, 3, 1, logged));
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, 3, false, 1, logged));
+        return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
+    }
+
+    protected (bool, int) AskRetreatTroopFour(Player player, int logged)
+    {
+        mayStopEarly = true;
+        int troopInArea = player.CalcTroopScout(3).Item1;
+        if (logged >= 0 && troopInArea > 0 && GetFile().troopAmount > 0)
+            Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, 3, true, 1, logged));
         return (true, -4 * Mathf.Min(GetFile().troopAmount, troopInArea));
     }
 
@@ -759,7 +719,7 @@ public class Card : PhotonCompatible
             if (convertedChoice >= 0)
             {
                 Log.inst.AddTextRPC(player, $"{player.name} chooses Troop in Area {convertedChoice + 1}.", LogAdd.Personal, logged);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, convertedChoice, counter, logged));
+                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatTwo(player, convertedChoice, false, counter, logged));
             }
             else
             {
@@ -772,9 +732,15 @@ public class Card : PhotonCompatible
         }
     }
 
-    protected void ChooseRetreatTwo(Player player, int chosenTroop, int counter, int logged)
+    protected void ChooseRetreatTwo(Player player, int chosenTroop, bool optional, int counter, int logged)
     {
         List<int> newPositions = new();
+        List<string> actions = new();
+        if (optional)
+        {
+            actions.Add("Don't Retreat");
+            newPositions.Insert(0, -1);
+        }
         if (chosenTroop == 3)
         {
             newPositions.Add(1);
@@ -787,27 +753,39 @@ public class Card : PhotonCompatible
 
         if (player.myType == PlayerType.Bot)
         {
-            player.AIDecision(Resolve, newPositions);
+            player.AIDecision(Next, newPositions);
         }
         else
         {
-            player.ChooseTroopDisplay(newPositions, "Where to retreat this troop?", Resolve);
-        }
-
-        void Resolve()
-        {
-            player.MoveTroopRPC(chosenTroop, player.choice, logged);
-            int newCounter = counter + 1;
-
-            if (newCounter > GetFile().troopAmount)
+            if (optional)
             {
-                PostRetreat(player, true, logged);
-                NextStepRPC(player, logged);
+                player.ChooseButton(actions, new(0, 250), $"Where to retreat Troop from Area {chosenTroop+1}?", Next);
+                player.ChooseTroopDisplay(newPositions, "", null);
             }
             else
             {
-                (int total, List<int> canRetreat) = CanRetreat(player);
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, newCounter, logged));
+                player.ChooseTroopDisplay(newPositions, $"Where to retreat Troop from Area {chosenTroop + 1}?", Next);
+            }
+        }
+
+        void Next()
+        {
+            int convertedChoice = player.choice - 100;
+            if (convertedChoice >= 0)
+            {
+                player.MoveTroopRPC(chosenTroop, convertedChoice, logged);
+
+                int newCounter = counter + 1;
+                if (newCounter > GetFile().troopAmount)
+                {
+                    PostRetreat(player, true, logged);
+                    NextStepRPC(player, logged);
+                }
+                else
+                {
+                    (int total, List<int> canRetreat) = CanRetreat(player);
+                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, newCounter, logged));
+                }
             }
         }
     }

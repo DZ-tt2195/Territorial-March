@@ -28,20 +28,6 @@
       "X"
     ],
     [
-      "B",
-      "\"+1 Troop, +1 Scout.\"",
-      "0",
-      "TRUE",
-      "AdvanceTroop/AddScout",
-      "",
-      "",
-      "",
-      "1",
-      "1",
-      "",
-      "X"
-    ],
-    [
       "Fortune",
       "\"You may discard 1 Card, for +1 Coin per Coin you gained this turn.\"",
       "0",
@@ -67,6 +53,20 @@
       "",
       "",
       "2",
+      "X"
+    ],
+    [
+      "V",
+      "\"+2 Troop from Area 1. -2 Coin (it can go negative).\"",
+      "0",
+      "TRUE",
+      "AdvanceTroopOne/AdvanceTroopOne/LoseCoin",
+      "",
+      "2",
+      "",
+      "1",
+      "",
+      "",
       "X"
     ],
     [
@@ -99,16 +99,16 @@
     ],
     [
       "PlayLot",
-      "If you've lost 3 Action or more this turn (including when playing this), +1 Card and +1 Action.",
+      "\"+2 Coin per Action you lost this turn (including Action spent to play cards).\"",
       "2",
       "FALSE",
-      "DrawCard/AddAction",
-      "1",
+      "AddCoin",
       "",
-      "1",
+      "2",
       "",
       "",
-      "3",
+      "",
+      "",
       "X"
     ],
     [
@@ -126,9 +126,23 @@
       "X"
     ],
     [
-      "Secure",
-      "\"+2 Scout, both in one Area that you control.\"",
+      "U",
+      "You may retreat 1 Troop from Area 4. If you do, +1 Card, +1 Action, and +1 Scout.",
       "2",
+      "TRUE",
+      "AskRetreatTroopFour/DrawCard/AddAction/AddScout",
+      "1",
+      "1",
+      "",
+      "1",
+      "1",
+      "",
+      "X"
+    ],
+    [
+      "Secure",
+      "\"If you control an Area while having 0 Troop and/or Scout in it, +2 Scout in it.\"",
+      "3",
       "FALSE",
       "AddScout",
       "",
@@ -136,7 +150,7 @@
       "",
       "",
       "2",
-      "",
+      "0",
       "X"
     ],
     [
@@ -197,7 +211,7 @@
     ],
     [
       "H",
-      "If you have 15 Coin or more (after getting 3 Coin from this), +1 Troop.",
+      "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
       "3",
       "TRUE",
       "CoinOrMore/AdvanceTroop",
@@ -206,13 +220,13 @@
       "",
       "1",
       "",
-      "15",
+      "10",
       "X"
     ],
     [
       "I",
       "\"+1 Scout per Action you have.\"",
-      "4",
+      "3",
       "TRUE",
       "SetToAction/AddScout",
       "",
@@ -225,7 +239,7 @@
     ],
     [
       "J",
-      "If you have 4 Card or more in hand, +1 Action.",
+      "If you have 5 Card or more in hand, +1 Action.",
       "4",
       "TRUE",
       "HandOrMore/AddAction",
@@ -234,7 +248,7 @@
       "1",
       "",
       "",
-      "4",
+      "5",
       "X"
     ],
     [

@@ -12,11 +12,7 @@ public class PlayLot : PlayerCard
     public override void ResolveCard(Player player, int logged)
     {
         base.ResolveCard(player, logged);
-        if (CalculateActionsLost(player) >= dataFile.miscAmount)
-        {
-            DrawCard(player, logged);
-            AddAction(player, logged);
-        }
+        player.ResourceRPC(Resource.Coin, CalculateActionsLost(player) * dataFile.coinAmount, logged);
     }
 
     public override void DoMath(Player player)
@@ -24,8 +20,7 @@ public class PlayLot : PlayerCard
         if (recalculate)
         {
             mathResult = dataFile.startingCoin;
-            if (CalculateActionsLost(player) + 1 >= dataFile.miscAmount)
-                mathResult += 3 * dataFile.cardAmount + 3 * dataFile.actionAmount;
+            mathResult += (CalculateActionsLost(player) + 1) * dataFile.coinAmount;
         }
         recalculate = false;
     }
@@ -39,7 +34,7 @@ public class PlayLot : PlayerCard
         {
             (string instruction, object[] stepParameters) = step.source.TranslateFunction(step.action);
             if ((int)stepParameters[1] == (int)Resource.Action && (int)stepParameters[2] < 0)
-                actionsLost -= (int)stepParameters[2];
+                actionsLost += Mathf.Abs((int)stepParameters[2]);
         }
         return actionsLost;
     }

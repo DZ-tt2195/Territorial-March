@@ -14,7 +14,7 @@
     ],
     [
       "Camp",
-      "\"+2 Card and +2 Action. Then while you have any Action: You may pay 1 Action to play 1 Card.\"",
+      "\"+2 Card and +2 Action. Then while you have any Action: You may spend 1 Action to play 1 Card.\"",
       "FALSE",
       "DrawCard/AddAction/LoseAction",
       "2",
@@ -262,19 +262,19 @@
     [
       "Bank",
       "\"If you have 4 Coin or more, +1 Coin per 4 Coin you have (round down).",
-      "FALSE",
+      "TRUE",
       "SetToCoin/AddCoin",
       "",
       "",
       "",
       "",
       "",
-      "4",
+      "-4",
       "Jason Snair|Dominion: Prosperity|(Bank)"
     ],
     [
       "LoseAdvance",
-      "You may remove 1 Scout, to advance 1 Troop from that Area.",
+      "You may remove 1 Scout, to advance 1 Troop from its Area.",
       "FALSE",
       "AskLoseScout/AdvanceTroop",
       "",
