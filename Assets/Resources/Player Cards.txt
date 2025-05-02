@@ -15,7 +15,7 @@
     ],
     [
       "A",
-      "\"+3 Card, -3 Coin (it can go negative).\"",
+      "\"+3 Card. -3 Coin (it can go negative).\"",
       "0",
       "TRUE",
       "DrawCard/LoseCoin",
@@ -56,7 +56,7 @@
       "X"
     ],
     [
-      "V",
+      "B",
       "\"+2 Troop from Area 1. -2 Coin (it can go negative).\"",
       "0",
       "TRUE",
@@ -126,7 +126,7 @@
       "X"
     ],
     [
-      "U",
+      "D",
       "You may retreat 1 Troop from Area 4. If you do, +1 Card, +1 Action, and +1 Scout.",
       "2",
       "TRUE",
@@ -154,7 +154,7 @@
       "X"
     ],
     [
-      "D",
+      "E",
       "You may discard 1 Card for +2 Action.",
       "3",
       "TRUE",
@@ -168,7 +168,7 @@
       "X"
     ],
     [
-      "E",
+      "F",
       "\"+1 Coin per Card in your hand.\"",
       "3",
       "TRUE",
@@ -182,7 +182,7 @@
       "X"
     ],
     [
-      "F",
+      "G",
       "\"+1 Card per Area you control.\"",
       "3",
       "TRUE",
@@ -196,7 +196,7 @@
       "X"
     ],
     [
-      "G",
+      "H",
       "\"+1 Action per Area you control.\"",
       "3",
       "TRUE",
@@ -210,7 +210,7 @@
       "X"
     ],
     [
-      "H",
+      "I",
       "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
       "3",
       "TRUE",
@@ -224,7 +224,7 @@
       "X"
     ],
     [
-      "I",
+      "J",
       "\"+1 Scout per Action you have.\"",
       "3",
       "TRUE",
@@ -238,7 +238,7 @@
       "X"
     ],
     [
-      "J",
+      "K",
       "If you have 5 Card or more in hand, +1 Action.",
       "4",
       "TRUE",
@@ -252,7 +252,7 @@
       "X"
     ],
     [
-      "K",
+      "L",
       "\"+2 Coin per Area you control.\"",
       "4",
       "TRUE",
@@ -280,7 +280,7 @@
       "X"
     ],
     [
-      "L",
+      "M",
       "\"+1 Card, -1 Scout.\"",
       "4",
       "TRUE",
@@ -308,7 +308,7 @@
       "X"
     ],
     [
-      "M",
+      "N",
       "\"You may remove 2 Scout for +2 Action.\"",
       "5",
       "TRUE",
@@ -322,7 +322,7 @@
       "X"
     ],
     [
-      "N",
+      "O",
       "You may discard 2 Card for +2 Troop.",
       "5",
       "TRUE",
@@ -336,7 +336,7 @@
       "X"
     ],
     [
-      "O",
+      "P",
       "You may retreat 2 Troop for +3 Card.",
       "5",
       "TRUE",
@@ -350,7 +350,7 @@
       "X"
     ],
     [
-      "P",
+      "Q",
       "\"+2 Scout, -1 Action (it can go negative).\"",
       "5",
       "TRUE",
@@ -392,7 +392,7 @@
       "X"
     ],
     [
-      "Q",
+      "R",
       "\"+1 Scout, -1 Scout.\"",
       "6",
       "TRUE",
@@ -406,7 +406,7 @@
       "X"
     ],
     [
-      "R",
+      "S",
       "\"+1 Card, -1 Action (it can go negative).\"",
       "6",
       "TRUE",
@@ -420,7 +420,7 @@
       "X"
     ],
     [
-      "S",
+      "T",
       "\"-1 Scout\"",
       "7",
       "TRUE",
@@ -434,7 +434,7 @@
       "X"
     ],
     [
-      "T",
+      "U",
       "If you control 0 or 1 Areas, -1 Action (it can go negative).",
       "8",
       "TRUE",

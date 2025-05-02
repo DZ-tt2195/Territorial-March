@@ -85,9 +85,9 @@ public class Manager : PhotonCompatible
 
         if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
         {
-            while (masterDeck.childCount < 60)
+            for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
             {
-                for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
+                for (int j = 0; j < 2; j++)
                 {
                     GameObject next = MakeObject(CarryVariables.inst.playerCardPrefab.gameObject);
                     DoFunction(() => AddPlayerCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
@@ -460,6 +460,8 @@ public class Manager : PhotonCompatible
         scoreText.text = KeywordTooltip.instance.EditText(scoreText.text);
 
         endScreen.gameObject.SetActive(true);
+        endScreen.transform.SetAsLastSibling();
+        Log.inst.transform.SetAsLastSibling();
         quitGame.onClick.AddListener(Leave);
     }
 

@@ -92,7 +92,7 @@
     ],
     [
       "Pasture",
-      "\"+1 Scout here. Then for each Scout you have here, you may remove it for +2 Coin.\"",
+      "\"+1 Scout here. Then remove any amount of your Scout here for +2 Coin each.\"",
       "FALSE",
       "AddScoutHere/AskLoseScoutHere/AddCoin",
       "",
@@ -283,6 +283,32 @@
       "1",
       "1",
       "",
+      "X"
+    ],
+    [
+      "MultiRetreat",
+      "Retreat your Troop from Area 2 or 3, whichever Area has more, until both have the same number.",
+      "FALSE",
+      "SetToTroopHere/RetreatTroop",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "8",
+      "If you control this and have 1 Action or more, +2 Coin per Action you have.",
+      "TRUE",
+      "ControlThis/SetToAction/AddCoin",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "2",
       "X"
     ]
   ]
