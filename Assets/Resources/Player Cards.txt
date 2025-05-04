@@ -308,6 +308,20 @@
       "X"
     ],
     [
+      "V",
+      "\"+1 Action per 2 Action you have (round down).\"",
+      "4",
+      "TRUE",
+      "SetToAction/AddAction",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "-2",
+      "X"
+    ],
+    [
       "N",
       "\"You may remove 2 Scout for +2 Action.\"",
       "5",
@@ -323,14 +337,14 @@
     ],
     [
       "O",
-      "You may discard 2 Card for +2 Troop.",
+      "You may discard 2 Card, for +1 Troop from Area 2 and +1 Troop from Area 3.",
       "5",
       "TRUE",
-      "AskDiscardCard/AdvanceTroop",
+      "AskDiscardCard/AdvanceTroopTwo/AdvanceTroopThree",
       "2",
       "",
       "",
-      "2",
+      "1",
       "",
       "",
       "X"

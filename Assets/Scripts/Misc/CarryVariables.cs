@@ -115,13 +115,13 @@ public class CarryVariables : MonoBehaviour
         else
             rightClickLandscape.FillInCards(data, alpha);
 
-        if (alpha == 0)
+        if (alpha == 0 || data.artCredit.IsNullOrEmpty() || data.artCredit.Equals("X"))
         {
             artistText.transform.parent.gameObject.SetActive(false);
         }
         else
         {
-            artistText.transform.parent.gameObject.SetActive(!data.artCredit.IsNullOrEmpty());
+            artistText.transform.parent.gameObject.SetActive(true);
             artistText.text = data.artCredit.Replace("|", "\n");
         }
     }

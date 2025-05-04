@@ -247,19 +247,6 @@
       "X"
     ],
     [
-      "7",
-      "If you control this, +2 Action and -3 Coin (it can go negative).",
-      "TRUE",
-      "ControlThis/AskLoseCoin/AddAction",
-      "",
-      "3",
-      "2",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
       "Bank",
       "\"If you have 4 Coin or more, +1 Coin per 4 Coin you have (round down).",
       "TRUE",
@@ -274,7 +261,7 @@
     ],
     [
       "LoseAdvance",
-      "You may remove 1 Scout, to advance 1 Troop from its Area.",
+      "You may remove 1 Scout to advance 1 Troop from the same Area.",
       "FALSE",
       "AskLoseScout/AdvanceTroop",
       "",
@@ -309,6 +296,19 @@
       "",
       "",
       "2",
+      "X"
+    ],
+    [
+      "MultiAdvance",
+      "If you have 3 Troop or more in Area 4, +1 Troop from Area 1.",
+      "FALSE",
+      "TroopHereOrMore/AdvanceTroopOne",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "3",
       "X"
     ]
   ]

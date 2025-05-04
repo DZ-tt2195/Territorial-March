@@ -19,12 +19,8 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
         cardName = cg.transform.Find("Card Name").GetComponent<TMP_Text>();
         description = cg.transform.Find("Card Description").GetComponent<TMP_Text>();
 
-        try
-        {
-            GameObject findCoin = cg.transform.Find("Starting Coin").gameObject;
-            startingCoin = findCoin.GetComponent<TMP_Text>();
-        } catch { }
-        artBox = cg.transform.Find("Art Box").GetComponent<Image>();
+        try { startingCoin = cg.transform.Find("Starting Coin").GetComponent<TMP_Text>(); } catch { }
+        try { artBox = cg.transform.Find("Art Box").GetComponent<Image>(); } catch { }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -45,7 +41,7 @@ public class CardLayout : MonoBehaviour, IPointerClickHandler
         if (data == null)
             return;
 
-        try {artBox.sprite = Resources.Load<Sprite>($"Card Art/{data.cardName}");} catch { Debug.LogError($"no art for {data.cardName}"); }
+        try {artBox.sprite = Resources.Load<Sprite>($"Card Art/{data.cardName}");} catch { }
         description.text = KeywordTooltip.instance.EditText(data.textBox);
         cardName.text = data.cardName;
 
