@@ -53,8 +53,7 @@ public class Player : PhotonCompatible
 
     [Foldout("Resources", true)]
     public Dictionary<Resource, int> resourceDict = new();
-    int[] troopArray = new int[4];
-    int[] scoutArray = new int[4];
+    (int, int)[] troopScoutArray = new (int, int)[4];
     public bool[] areasControlled = new bool[4];
 
     [Foldout("Cards", true)]
@@ -110,7 +109,7 @@ public class Player : PhotonCompatible
 
     private void Start()
     {
-        troopArray[0] = 12;
+        troopScoutArray[0] = (12, 0);
         if (PhotonNetwork.IsConnected && pv.AmOwner)
         {
             if (CarryVariables.inst.playWithBot && PhotonNetwork.CurrentRoom.MaxPlayers == 1 && Manager.inst.storePlayers.childCount == 0)
@@ -292,8 +291,8 @@ public class Player : PhotonCompatible
     public void ChangeScoutRPC(int area, int amount, int logged, string source = "")
     {
         int actualAmount = amount;
-        if (scoutArray[area] + amount < 0)
-            actualAmount = -1 * scoutArray[area];
+        if (troopScoutArray[area].Item2 + amount < 0)
+            actualAmount = -1 * troopScoutArray[area].Item2;
         Log.inst.RememberStep(this, StepType.Revert, () => ChangeScout(false, area, actualAmount, logged, source));
     }
 
@@ -303,11 +302,11 @@ public class Player : PhotonCompatible
         string parathentical = source == "" ? "" : $" ({source})";
         if (undo)
         {
-            scoutArray[area] -= amount;
+            troopScoutArray[area].Item2 -= amount;
         }
         else
         {
-            scoutArray[area] += amount;
+            troopScoutArray[area].Item2 += amount;
             if (amount > 0)
                 Log.inst.AddTextRPC(this, $"{this.name} adds {Mathf.Abs(amount)} Scout to Area {(area + 1)}{parathentical}.", LogAdd.Personal, logged);
             else if (amount < 0)
@@ -318,7 +317,7 @@ public class Player : PhotonCompatible
 
     public void MoveTroopRPC(int oldArea, int newArea, int logged, string source = "")
     {
-        if (troopArray[oldArea] == 0)
+        if (troopScoutArray[oldArea].Item1 == 0)
         {
             Debug.LogError($"can't advance troops from area {oldArea} (no troops there)");
             return;
@@ -337,13 +336,13 @@ public class Player : PhotonCompatible
         string parathentical = source == "" ? "" : $" ({source})";
         if (undo)
         {
-            troopArray[oldArea]++;
-            troopArray[newArea]--;
+            troopScoutArray[oldArea].Item1++;
+            troopScoutArray[newArea].Item1--;
         }
         else
         {
-            troopArray[oldArea]--;
-            troopArray[newArea]++;
+            troopScoutArray[oldArea].Item1--;
+            troopScoutArray[newArea].Item1++;
             if (oldArea < newArea)
                 Log.inst.AddTextRPC(this, $"{this.name} advances 1 Troop from Area {oldArea + 1} to Area {newArea + 1}{parathentical}.", LogAdd.Personal, logged);
             else
@@ -354,7 +353,7 @@ public class Player : PhotonCompatible
 
     public (int, int) CalcTroopScout(int area)
     {
-        return (troopArray[area], scoutArray[area]);
+        return troopScoutArray[area];
     }
 
     public void UpdateAreaControl(int area, bool control, int logged)
@@ -540,7 +539,7 @@ public class Player : PhotonCompatible
             {
                 currentChain.currentArea = (currentChain.currentArea == 3) ? 0 : currentChain.currentArea + 1;
                 AreaCard nextArea = Manager.inst.listOfAreas[currentChain.currentArea];
-                if (nextArea is Camp || troopArray[3] == 12)
+                if (nextArea is Camp || troopScoutArray[3].Item1 == 12)
                     FinishChain();
                 else
                     nextArea.AreaInstructions(this, 0);
@@ -606,7 +605,7 @@ public class Player : PhotonCompatible
 
     float PlayerScore()
     {
-        if (troopArray[3] == 12)
+        if (troopScoutArray[3].Item1 == 12)
         {
             return Mathf.Infinity;
         }
@@ -615,12 +614,12 @@ public class Player : PhotonCompatible
             int answer = cardsInHand.Count * 3 + resourceDict[Resource.Action] * 3 + resourceDict[Resource.Coin];
             for (int i = 0; i < 4; i++)
             {
-                answer += scoutArray[i] * 2;
+                answer += troopScoutArray[i].Item2 * 2;
 
                 if (i == 1 || i == 2)
-                    answer += troopArray[i] * i * 4;
+                    answer += troopScoutArray[i].Item1 * i * 4;
                 else if (i == 3)
-                    answer += troopArray[i] * i * 8;
+                    answer += troopScoutArray[i].Item1 * i * 8;
 
                 if (areasControlled[i])
                     answer += 2;
@@ -962,9 +961,9 @@ public class Player : PhotonCompatible
     public int AwayFromWinning()
     {
         int answer = 0;
-        answer += 2 * troopArray[0];
-        answer += 1 * troopArray[1];
-        answer += 1 * troopArray[2];
+        answer += 2 * troopScoutArray[0].Item1;
+        answer += 1 * troopScoutArray[1].Item1;
+        answer += 1 * troopScoutArray[2].Item1;
         return answer;
     }
 

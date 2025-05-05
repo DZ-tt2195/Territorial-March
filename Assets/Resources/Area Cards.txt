@@ -310,6 +310,19 @@
       "",
       "3",
       "X"
+    ],
+    [
+      "9",
+      "You may lose 4 Coin (it can go negative) for +2 Action.",
+      "TRUE",
+      "AskLoseCoin/AddAction",
+      "",
+      "4",
+      "2",
+      "",
+      "",
+      "",
+      "X"
     ]
   ]
 }

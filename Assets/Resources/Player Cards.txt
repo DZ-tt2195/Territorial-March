@@ -70,6 +70,20 @@
       "X"
     ],
     [
+      "AdvanceLots",
+      "\"+1 Troop. Then +1 Coin per Troop you advanced and/or retreated this turn.\"",
+      "1",
+      "FALSE",
+      "AdvanceTroop/AddCoin",
+      "",
+      "1",
+      "",
+      "1",
+      "",
+      "",
+      "X"
+    ],
+    [
       "Explore",
       "\"+1 Scout in each Area you have 0 Troop in.\"",
       "1",
@@ -98,20 +112,6 @@
       "X"
     ],
     [
-      "PlayLot",
-      "\"+2 Coin per Action you lost this turn (including Action spent to play cards).\"",
-      "2",
-      "FALSE",
-      "AddCoin",
-      "",
-      "2",
-      "",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
       "CheckScout",
       "\"Choose an Area. +1 Scout there, then +1 Coin per Scout you have there.\"",
       "2",
@@ -137,20 +137,6 @@
       "1",
       "1",
       "",
-      "X"
-    ],
-    [
-      "Secure",
-      "\"If you control an Area while having 0 Troop and/or Scout in it, +2 Scout in it.\"",
-      "3",
-      "FALSE",
-      "AddScout",
-      "",
-      "",
-      "",
-      "",
-      "2",
-      "0",
       "X"
     ],
     [
@@ -238,6 +224,34 @@
       "X"
     ],
     [
+      "PlayLot",
+      "\"+1 Coin per Action you lost this turn (including Action spent to play cards).\"",
+      "4",
+      "FALSE",
+      "AddCoin",
+      "",
+      "1",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "Secure",
+      "\"If you control an Area while having 0 Troop and/or 0 Scout in it, +2 Scout in it.\"",
+      "4",
+      "FALSE",
+      "AddScout",
+      "",
+      "",
+      "",
+      "",
+      "2",
+      "0",
+      "X"
+    ],
+    [
       "K",
       "If you have 5 Card or more in hand, +1 Action.",
       "4",
@@ -280,20 +294,6 @@
       "X"
     ],
     [
-      "M",
-      "\"+1 Card, -1 Scout.\"",
-      "4",
-      "TRUE",
-      "DrawCard/LoseScout",
-      "1",
-      "",
-      "",
-      "",
-      "1",
-      "",
-      "X"
-    ],
-    [
       "Seize",
       "Choose an Area. Until the next Camp, you control it (in addition to whoever else controls it).",
       "4",
@@ -305,20 +305,6 @@
       "",
       "",
       "",
-      "X"
-    ],
-    [
-      "V",
-      "\"+1 Action per 2 Action you have (round down).\"",
-      "4",
-      "TRUE",
-      "SetToAction/AddAction",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "-2",
       "X"
     ],
     [
