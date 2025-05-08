@@ -260,19 +260,6 @@
       "Jason Snair|Dominion: Prosperity|(Bank)"
     ],
     [
-      "LoseAdvance",
-      "You may remove 1 Scout to advance 1 Troop from the same Area.",
-      "FALSE",
-      "AskLoseScout/AdvanceTroop",
-      "",
-      "",
-      "",
-      "1",
-      "1",
-      "",
-      "X"
-    ],
-    [
       "MultiRetreat",
       "Retreat your Troop from Area 2 or 3, whichever Area has more, until both have the same number.",
       "FALSE",
@@ -321,6 +308,19 @@
       "2",
       "",
       "",
+      "",
+      "X"
+    ],
+    [
+      "ShareScout",
+      "If you control this, +1 Scout in each other Area; otherwise -1 Scout from each other Area.",
+      "FALSE",
+      "ControlThis/AddScout/LoseScout",
+      "",
+      "",
+      "",
+      "",
+      "1",
       "",
       "X"
     ]

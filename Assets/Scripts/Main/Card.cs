@@ -375,13 +375,18 @@ public class Card : PhotonCompatible
         return (answer, -3 * GetFile().cardAmount);
     }
 
-    void DiscardAll(Player player, int logged)
+    protected (bool, int) DiscardAll(Player player, int logged)
     {
         int toDiscard = player.cardsInHand.Count;
         for (int i = 0; i < toDiscard; i++)
             player.DiscardPlayerCard(player.cardsInHand[0], logged);
-        PostDiscard(player, true, logged);
-        NextStepRPC(player, logged);
+
+        if (logged >= 0)
+        {
+            PostDiscard(player, true, logged);
+            NextStepRPC(player, logged);
+        }
+        return (true, -3 * toDiscard);
     }
 
     void ChooseDiscard(Player player, List<(int, int)> sorted, bool optional, int counter, int logged)

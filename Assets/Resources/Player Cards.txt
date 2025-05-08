@@ -28,6 +28,20 @@
       "X"
     ],
     [
+      "B",
+      "\"+3 Action. -3 Coin (it can go negative).\"",
+      "0",
+      "TRUE",
+      "AddAction/LoseCoin",
+      "",
+      "3",
+      "3",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
       "Fortune",
       "\"You may discard 1 Card, for +1 Coin per Coin you gained this turn.\"",
       "0",
@@ -56,7 +70,7 @@
       "X"
     ],
     [
-      "B",
+      "C",
       "\"+2 Troop from Area 1. -2 Coin (it can go negative).\"",
       "0",
       "TRUE",
@@ -98,7 +112,21 @@
       "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
-      "C",
+      "D",
+      "Discard your hand. +3 Card.",
+      "1",
+      "TRUE",
+      "DiscardAll/DrawCard",
+      "3",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
+      "E",
       "\"+1 Troop per Area you control.\"",
       "2",
       "TRUE",
@@ -126,7 +154,7 @@
       "X"
     ],
     [
-      "D",
+      "F",
       "You may retreat 1 Troop from Area 4. If you do, +1 Card, +1 Action, and +1 Scout.",
       "2",
       "TRUE",
@@ -140,7 +168,7 @@
       "X"
     ],
     [
-      "E",
+      "G",
       "You may discard 1 Card for +2 Action.",
       "3",
       "TRUE",
@@ -154,7 +182,7 @@
       "X"
     ],
     [
-      "F",
+      "H",
       "\"+1 Coin per Card in your hand.\"",
       "3",
       "TRUE",
@@ -168,7 +196,7 @@
       "X"
     ],
     [
-      "G",
+      "I",
       "\"+1 Card per Area you control.\"",
       "3",
       "TRUE",
@@ -182,7 +210,7 @@
       "X"
     ],
     [
-      "H",
+      "K",
       "\"+1 Action per Area you control.\"",
       "3",
       "TRUE",
@@ -196,7 +224,7 @@
       "X"
     ],
     [
-      "I",
+      "L",
       "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
       "3",
       "TRUE",
@@ -210,7 +238,7 @@
       "X"
     ],
     [
-      "J",
+      "M",
       "\"+1 Scout per Action you have.\"",
       "3",
       "TRUE",
@@ -252,7 +280,7 @@
       "X"
     ],
     [
-      "K",
+      "N",
       "If you have 5 Card or more in hand, +1 Action.",
       "4",
       "TRUE",
@@ -266,7 +294,7 @@
       "X"
     ],
     [
-      "L",
+      "O",
       "\"+2 Coin per Area you control.\"",
       "4",
       "TRUE",
@@ -295,7 +323,7 @@
     ],
     [
       "Seize",
-      "Choose an Area. Until the next Camp, you control it (in addition to whoever else controls it).",
+      "Choose an Area. Until the next Camp, you control it (in addition to any other players).",
       "4",
       "FALSE",
       "",
@@ -308,7 +336,7 @@
       "X"
     ],
     [
-      "N",
+      "P",
       "\"You may remove 2 Scout for +2 Action.\"",
       "5",
       "TRUE",
@@ -322,7 +350,7 @@
       "X"
     ],
     [
-      "O",
+      "Q",
       "You may discard 2 Card, for +1 Troop from Area 2 and +1 Troop from Area 3.",
       "5",
       "TRUE",
@@ -336,7 +364,7 @@
       "X"
     ],
     [
-      "P",
+      "R",
       "You may retreat 2 Troop for +3 Card.",
       "5",
       "TRUE",
@@ -350,7 +378,7 @@
       "X"
     ],
     [
-      "Q",
+      "S",
       "\"+2 Scout, -1 Action (it can go negative).\"",
       "5",
       "TRUE",
@@ -392,7 +420,7 @@
       "X"
     ],
     [
-      "R",
+      "T",
       "\"+1 Scout, -1 Scout.\"",
       "6",
       "TRUE",
@@ -406,7 +434,7 @@
       "X"
     ],
     [
-      "S",
+      "U",
       "\"+1 Card, -1 Action (it can go negative).\"",
       "6",
       "TRUE",
@@ -420,7 +448,7 @@
       "X"
     ],
     [
-      "T",
+      "V",
       "\"-1 Scout\"",
       "7",
       "TRUE",
@@ -434,7 +462,7 @@
       "X"
     ],
     [
-      "U",
+      "W",
       "If you control 0 or 1 Areas, -1 Action (it can go negative).",
       "8",
       "TRUE",
