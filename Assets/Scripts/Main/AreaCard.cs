@@ -114,22 +114,22 @@ public class AreaCard : Card
         return SetAllStats(player, dataFile, player.CalcTroopScout(areaNumber).Item2, logged);
     }
 
-    protected (bool, int) TroopHereOrMore(Player player, int logged)
+    protected (bool, int) TroopOrMoreHere(Player player, int logged)
     {
         return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item1 >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) TroopHereOrLess(Player player, int logged)
+    protected (bool, int) TroopOrLessHere(Player player, int logged)
     {
         return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item1 <= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) ScoutHereOrMore(Player player, int logged)
+    protected (bool, int) ScoutOrMoreHere(Player player, int logged)
     {
         return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item2 >= GetFile().miscAmount, logged);
     }
 
-    protected (bool, int) ScoutHereOrLess(Player player, int logged)
+    protected (bool, int) ScoutOrLessHere(Player player, int logged)
     {
         return ResolveBoolean(player, player.CalcTroopScout(areaNumber).Item2 <= GetFile().miscAmount, logged);
     }

@@ -14,14 +14,14 @@ public class ShareScout : AreaCard
         base.AreaInstructions(player, logged);
         if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
         {
-            for (int i = 0; i<4; i++)
+            if (player.areasControlled[areaNumber])
             {
-                if (i != this.areaNumber)
+                for (int i = 0; i < 4; i++)
                 {
-                    if (player.areasControlled[areaNumber])
+                    if (i != this.areaNumber)
                         player.ChangeScoutRPC(i, dataFile.scoutAmount, logged);
                     else
-                        player.ChangeScoutRPC(i, -1*dataFile.scoutAmount, logged);
+                        player.ChangeScoutRPC(i, -1* dataFile.scoutAmount, logged);
                 }
             }
         }

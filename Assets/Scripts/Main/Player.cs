@@ -561,7 +561,7 @@ public class Player : PhotonCompatible
             List<int> cardList = new();
             foreach (Transform next in privateDiscard)
                 cardList.Add(next.GetComponent<PhotonView>().ViewID);
-            Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard(cardList.ToArray(), this.playerPosition, 15 - this.privateDeck.childCount));
+            Manager.inst.DoFunction(() => Manager.inst.ReceivePlayerDiscard(cardList.ToArray(), this.playerPosition, 12 - this.privateDeck.childCount));
 
             AreaCard nextArea = Manager.inst.listOfAreas[(areaToResolve == 3) ? 0 : areaToResolve + 1];
             if (nextArea is Camp)

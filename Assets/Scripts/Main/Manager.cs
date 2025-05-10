@@ -177,7 +177,7 @@ public class Manager : PhotonCompatible
 
         cardRequestArray = new int[storePlayers.childCount];
         for (int i = 0; i < storePlayers.childCount; i++)
-            cardRequestArray[i] = 15;
+            cardRequestArray[i] = 12;
 
         waitingOnPlayers = storePlayers.childCount;
         for (int i = 0; i < storePlayers.childCount; i++)

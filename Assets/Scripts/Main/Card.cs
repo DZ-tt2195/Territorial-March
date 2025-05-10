@@ -357,7 +357,7 @@ public class Card : PhotonCompatible
         if (logged >= 0)
         {
             if (player.cardsInHand.Count <= GetFile().cardAmount)
-                DiscardAll(player, logged);
+                DiscardCardAll(player, logged);
             else if (GetFile().cardAmount > 0)
                 Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseDiscard(player, sortedCards, false, 1, logged));
         }
@@ -375,7 +375,7 @@ public class Card : PhotonCompatible
         return (answer, -3 * GetFile().cardAmount);
     }
 
-    protected (bool, int) DiscardAll(Player player, int logged)
+    protected (bool, int) DiscardCardAll(Player player, int logged)
     {
         int toDiscard = player.cardsInHand.Count;
         for (int i = 0; i < toDiscard; i++)
