@@ -323,6 +323,19 @@
       "1",
       "",
       "X"
+    ],
+    [
+      "Hi",
+      "You may lose 1 Action (it can go negative), for +1 Coin per 2 Troop you have here (round down).",
+      "FALSE",
+      "AskLoseAction/SetToTroop/AddCoin",
+      "",
+      "1",
+      "1",
+      "",
+      "",
+      "2",
+      "X"
     ]
   ]
 }

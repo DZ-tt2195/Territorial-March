@@ -112,6 +112,20 @@
       "X"
     ],
     [
+      "ScoutAction",
+      "Choose an Area. +1 Action per Scout you have there.",
+      "1",
+      "FALSE",
+      "SetToScout/AddAction",
+      "",
+      "",
+      "1",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
       "E",
       "\"+1 Troop per Area you control.\"",
       "2",

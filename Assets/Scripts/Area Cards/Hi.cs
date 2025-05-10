@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-public class MultiAdvance : AreaCard
+public class Hi : AreaCard
 {
     protected override void Awake()
     {
@@ -13,9 +12,15 @@ public class MultiAdvance : AreaCard
     {
         base.AreaInstructions(player, logged);
         if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
+            AskLoseAction(player, logged);
+    }
+
+    protected override void PostPayment(Player player, bool success, int logged)
+    {
+        if (success)
         {
-            if (player.CalcTroopScout(3).Item1 >= dataFile.miscAmount)
-                Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceTwo(player, 0, false, 1, logged));
+            int amount = (int)(player.CalcTroopScout(this.areaNumber).Item1 / dataFile.miscAmount);
+            player.ResourceRPC(Resource.Coin, amount, logged);
         }
     }
 }
