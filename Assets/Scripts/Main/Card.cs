@@ -469,7 +469,7 @@ public class Card : PhotonCompatible
     protected (bool, int) AdvanceTroop(Player player, int logged)
     {
         (int total, List<int> canAdvance) = CanAdvance(player);
-        if (logged >= 0 && GetFile().troopAmount > 0)
+        if (logged >= 0 && GetFile().troopAmount > 0 && total > 0)
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, 1, logged));
         return (true, 4 * Mathf.Min(GetFile().troopAmount, total));
     }
@@ -607,7 +607,8 @@ public class Card : PhotonCompatible
                 else
                 {
                     (int total, List<int> canAdvance) = CanAdvance(player);
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, newCounter, logged));
+                    if (total > 0)
+                        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseAdvanceOne(player, canAdvance, false, newCounter, logged));
                 }
             }
         }
@@ -642,7 +643,7 @@ public class Card : PhotonCompatible
         (int total, List<int> canRetreat) = CanRetreat(player);
         int maxRetreat = Mathf.Min(GetFile().troopAmount, total);
 
-        if (logged >= 0 && GetFile().troopAmount > 0)
+        if (logged >= 0 && GetFile().troopAmount > 0 && total > 0)
             Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, 1, logged));
         return (true, -4 * Mathf.Min(GetFile().troopAmount, total));
     }
@@ -789,7 +790,8 @@ public class Card : PhotonCompatible
                 else
                 {
                     (int total, List<int> canRetreat) = CanRetreat(player);
-                    Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, newCounter, logged));
+                    if (total > 0)
+                        Log.inst.RememberStep(this, StepType.UndoPoint, () => ChooseRetreatOne(player, canRetreat, false, newCounter, logged));
                 }
             }
         }

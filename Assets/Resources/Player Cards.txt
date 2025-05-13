@@ -42,6 +42,20 @@
       "X"
     ],
     [
+      "C",
+      "You may remove 1 Scout for +2 Troop from Area 1.",
+      "0",
+      "TRUE",
+      "AskLoseScout/AdvanceTroopOne/AdvanceTroopOne",
+      "",
+      "",
+      "",
+      "1",
+      "1",
+      "",
+      "X"
+    ],
+    [
       "Fortune",
       "\"You may discard 1 Card, for +1 Coin per Coin you gained this turn.\"",
       "0",
@@ -51,20 +65,6 @@
       "",
       "",
       "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "C",
-      "\"+2 Troop from Area 1. -2 Coin (it can go negative).\"",
-      "0",
-      "TRUE",
-      "AdvanceTroopOne/AdvanceTroopOne/LoseCoin",
-      "",
-      "2",
-      "",
-      "1",
       "",
       "",
       "X"
@@ -284,7 +284,7 @@
       "\"If you control an Area while having 0 Troop and/or 0 Scout in it, +2 Scout in it.\"",
       "4",
       "FALSE",
-      "TroopOrMore/AddScout",
+      "TroopOrLess/ScoutOrLess/AddScout",
       "",
       "",
       "",
@@ -458,20 +458,6 @@
       "1",
       "",
       "",
-      "",
-      "X"
-    ],
-    [
-      "V",
-      "\"-1 Scout\"",
-      "7",
-      "TRUE",
-      "LoseScout",
-      "",
-      "",
-      "",
-      "",
-      "1",
       "",
       "X"
     ],

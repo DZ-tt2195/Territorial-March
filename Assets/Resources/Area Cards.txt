@@ -144,7 +144,7 @@
     ],
     [
       "3",
-      "\"If you have 3 Troop or less here, -1 Card.\"",
+      "\"If you have 4 Troop or less here, -1 Card.\"",
       "TRUE",
       "TroopOrLessHere/DiscardCard",
       "1",
@@ -152,7 +152,7 @@
       "",
       "",
       "",
-      "3",
+      "4",
       "X"
     ],
     [
@@ -335,6 +335,19 @@
       "",
       "",
       "2",
+      "X"
+    ],
+    [
+      "10",
+      "If you control this, +2 Troop and -1 Troop.",
+      "TRUE",
+      "ControlThis/AdvanceTroop/AdvanceTroop/RetreatTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "",
       "X"
     ]
   ]
