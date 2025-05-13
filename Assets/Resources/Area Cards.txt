@@ -117,7 +117,7 @@
       "Matthias Catrein|Dominion: Hinterlands|(Crossroads)"
     ],
     [
-      "2",
+      "Battlefield",
       "\"+1 Action. If you don't control this, -1 Troop.\"",
       "TRUE",
       "AddAction/ControlNot/RetreatTroop",
@@ -127,7 +127,7 @@
       "1",
       "",
       "",
-      "X"
+      "Harald Lieske|Dominion: Allies|(Territory)"
     ],
     [
       "8",

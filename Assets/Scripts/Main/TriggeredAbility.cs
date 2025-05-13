@@ -1,6 +1,6 @@
 using System;
 
-public enum WhenDelete { UntilCamp, Manually }
+public enum WhenDelete { OnceUsed, UntilCamp, Manually }
 
 [Serializable]
 public class TriggeredAbility
@@ -53,17 +53,17 @@ public class TriggeredAbility
         }
     }
 
-    public void ResolveAbility(int logged, object[] parameters = null)
+    public void ResolveAbility(int logged, object[] parameters)
     {
         WhenTriggered(logged, parameters);
     }
 
-    public bool BoolAbility(int logged, object[] parameters = null)
+    public bool BoolAbility(int logged, object[] parameters)
     {
         return GetBool(logged, parameters);
     }
 
-    public int NumberAbility(int logged, object[] parameters = null)
+    public int NumberAbility(int logged, object[] parameters)
     {
         return GetNumber(logged, parameters);
     }
@@ -97,5 +97,23 @@ public class IgnoreArea : TriggeredAbility
     public static object[] CheckParameters()
     {
         return new object[0];
+    }
+}
+
+public class StartCamp : TriggeredAbility
+{
+    public StartCamp(PhotonCompatible source, WhenDelete deletion, Action<int, object[]> voidAbility, Func<string, object[], bool> condition = null) : base(source, deletion, voidAbility, condition)
+    {
+        comparison = nameof(StartCamp);
+    }
+
+    public static object[] CheckParameters(Player player)
+    {
+        return new object[1] { player };
+    }
+
+    public static Player ConvertParameters(object[] array)
+    {
+        return ((Player)array[0]);
     }
 }

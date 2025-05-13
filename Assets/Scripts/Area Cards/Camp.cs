@@ -14,6 +14,18 @@ public class Camp : AreaCard
     public override void AreaInstructions(Player player, int logged)
     {
         base.AreaInstructions(player, logged);
+
+        for (int i = player.allAbilities.Count - 1; i >= 0; i--)
+        {
+            TriggeredAbility ability = player.allAbilities[i];
+            if (ability.CheckAbility(nameof(StartCamp), StartCamp.CheckParameters(player)))
+            {
+                ability.ResolveAbility(logged, StartCamp.CheckParameters(player));
+                if (ability.deletion == WhenDelete.OnceUsed)
+                    ability.source.RemoveAbilityRPC(player);
+            }
+        }
+
         player.DrawCardRPC(dataFile.cardAmount, logged);
         player.ResourceRPC(Resource.Action, dataFile.actionAmount, logged);
         Log.inst.RememberStep(this, StepType.Holding, () => Loop(player, logged));
