@@ -6,7 +6,6 @@ public enum WhenDelete { OnceUsed, UntilCamp, Manually }
 public class TriggeredAbility
 {
     public PhotonCompatible source { get; protected set; }
-    protected string comparison;
     protected Func<string, object[], bool> CanBeTriggered;
     public WhenDelete deletion { get; private set; }
 
@@ -43,9 +42,9 @@ public class TriggeredAbility
         try
         {
             if (CanBeTriggered != null)
-                return CanBeTriggered(condition, parameters) && comparison == condition;
+                return CanBeTriggered(condition, parameters) && this.GetType().Name == condition;
             else
-                return comparison == condition;
+                return this.GetType().Name == condition;
         }
         catch
         {
@@ -71,9 +70,10 @@ public class TriggeredAbility
 
 public class ControlArea : TriggeredAbility
 {
-    public ControlArea(PhotonCompatible source, WhenDelete deletion, Func<int, object[], bool> boolAbility, Func<string, object[], bool> condition = null) : base(source, deletion, boolAbility, condition)
+    public ControlArea(PhotonCompatible source, WhenDelete deletion,
+        Func<int, object[], bool> boolAbility, Func<string, object[], bool> condition = null)
+        : base(source, deletion, boolAbility, condition)
     {
-        comparison = nameof(ControlArea);
     }
 
     public static object[] CheckParameters(int area)
@@ -89,9 +89,10 @@ public class ControlArea : TriggeredAbility
 
 public class IgnoreArea : TriggeredAbility
 {
-    public IgnoreArea(PhotonCompatible source, WhenDelete deletion, Func<int, object[], bool> boolAbility, Func<string, object[], bool> condition = null) : base(source, deletion, boolAbility, condition)
+    public IgnoreArea(PhotonCompatible source, WhenDelete deletion,
+        Func<int, object[], bool> boolAbility, Func<string, object[], bool> condition = null)
+        : base(source, deletion, boolAbility, condition)
     {
-        comparison = nameof(IgnoreArea);
     }
 
     public static object[] CheckParameters()
@@ -102,9 +103,10 @@ public class IgnoreArea : TriggeredAbility
 
 public class StartCamp : TriggeredAbility
 {
-    public StartCamp(PhotonCompatible source, WhenDelete deletion, Action<int, object[]> voidAbility, Func<string, object[], bool> condition = null) : base(source, deletion, voidAbility, condition)
+    public StartCamp(PhotonCompatible source, WhenDelete deletion,
+        Action<int, object[]> voidAbility, Func<string, object[], bool> condition = null)
+        : base(source, deletion, voidAbility, condition)
     {
-        comparison = nameof(StartCamp);
     }
 
     public static object[] CheckParameters(Player player)

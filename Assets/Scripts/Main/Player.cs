@@ -919,6 +919,12 @@ public class Player : PhotonCompatible
         return false;
     }
 
+    public void ResolveAbilities(string condition, object[] array, int logged)
+    {
+        foreach (TriggeredAbility ability in ReturnAbilities(condition, array))
+            ability.ResolveAbility(logged, array);
+    }
+
     List<TriggeredAbility> ReturnAbilities(string condition, object[] array)
     {
         List<TriggeredAbility> validAbilities = new();
@@ -929,6 +935,8 @@ public class Player : PhotonCompatible
             TriggeredAbility ability = allAbilities[i];
             if (ability.CheckAbility(condition, array))
                 validAbilities.Add(ability);
+            if (ability.deletion == WhenDelete.OnceUsed)
+                ability.source.RemoveAbilityRPC(this);
         }
         return validAbilities;
     }
@@ -953,7 +961,7 @@ public class Player : PhotonCompatible
     }
 
     [PunRPC]
-    internal void ChangeButtonColor(bool done)
+    void ChangeButtonColor(bool done)
     {
         myButton.image.color = (done) ? Color.yellow : new(0.7f, 0.7f, 0.7f);
     }

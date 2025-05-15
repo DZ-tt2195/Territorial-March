@@ -99,7 +99,7 @@
     ],
     [
       "D",
-      "Discard your hand. +3 Card.",
+      "Discard all your Card, then +3 Card.",
       "1",
       "TRUE",
       "DiscardCardAll/DrawCard",

@@ -29,7 +29,7 @@ public class Debt : PlayerCard
     public override void DoMath(Player player)
     {
         if (recalculate)
-            mathResult = dataFile.startingCoin;
+            mathResult = dataFile.startingCoin - dataFile.coinAmount;
         recalculate = false;
     }
 }

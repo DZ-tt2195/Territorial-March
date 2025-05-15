@@ -261,13 +261,13 @@
     ],
     [
       "MultiRetreat",
-      "Retreat your Troop from Area 2 or 3, whichever Area has more, until both have the same number.",
+      "If you have a different amount of Troop in Area 2 and 3, -2 Troop.",
       "FALSE",
-      "SetToTroop/RetreatTroop",
+      "RetreatTroop",
       "",
       "",
       "",
-      "",
+      "2",
       "",
       "",
       "X"
