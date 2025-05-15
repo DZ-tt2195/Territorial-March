@@ -41,6 +41,11 @@ public class AreaCard : Card
         return dataFile;
     }
 
+    public virtual void AreaTurnEffect()
+    {
+
+    }
+
     #endregion
 
 #region Instructions

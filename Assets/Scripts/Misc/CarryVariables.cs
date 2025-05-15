@@ -46,6 +46,8 @@ public class CarryVariables : MonoBehaviour
     public CardLayout areaCardPrefab;
     public Popup textPopup;
     public Popup cardPopup;
+    public Button textButton;
+    public Button cardButton;
     public SliderChoice sliderPopup;
     public TroopDisplay troopDisplayPrefab;
     public Button playerButtonPrefab;

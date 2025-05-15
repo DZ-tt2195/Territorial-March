@@ -782,6 +782,8 @@ MonoBehaviour:
   areaCardPrefab: {fileID: 6784345906345850760, guid: f1101af7e727d4d36ae7fa01ff6de9dd, type: 3}
   textPopup: {fileID: 7594585533340515175, guid: 0ce383b7ea8ca488c810cadf3b089e7e, type: 3}
   cardPopup: {fileID: 3183939439193871304, guid: 293c9a8a887c64616a8e499c379c4cd7, type: 3}
+  textButton: {fileID: 2023335336927519802, guid: 2da18fd0a62e74b21b62a7b82a5d6619, type: 3}
+  cardButton: {fileID: 3795055142809615625, guid: c946ea5ea8a844cd4b5cb6bba78265a1, type: 3}
   sliderPopup: {fileID: 7815619922120165151, guid: 0ebd54c98e7064e6c9bda8ae56b32fd1, type: 3}
   troopDisplayPrefab: {fileID: 7671223618994159642, guid: f9c5161fffc7d47829a56e60c3042c5a, type: 3}
   playerButtonPrefab: {fileID: 7900756896774968150, guid: 1f4c147ef54444eb28d2f4e1d5b90184, type: 3}

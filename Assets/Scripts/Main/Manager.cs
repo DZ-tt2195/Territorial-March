@@ -30,6 +30,7 @@ public class Manager : PhotonCompatible
     [Foldout("Master deck", true)]
     [SerializeField] Transform masterDeck;
     [SerializeField] Transform masterDiscard;
+    Transform areaDeck;
     int[] cardRequestArray;
 
     [Foldout("UI and Animation", true)]
@@ -56,6 +57,7 @@ public class Manager : PhotonCompatible
         bottomType = this.GetType();
         canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
         storePlayers = GameObject.Find("Store Players").transform;
+        areaDeck = GameObject.Find("Area Deck").transform;
     }
 
     private void FixedUpdate()
@@ -83,22 +85,28 @@ public class Manager : PhotonCompatible
             MakeObject(CarryVariables.inst.playerPrefab.gameObject);
         MakeObject(CarryVariables.inst.playerPrefab.gameObject);
 
-        if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
+        if (AmMaster())
         {
             for (int i = 0; i < CarryVariables.inst.playerCardFiles.Count; i++)
             {
                 for (int j = 0; j < 2; j++)
                 {
                     GameObject next = MakeObject(CarryVariables.inst.playerCardPrefab.gameObject);
-                    DoFunction(() => AddPlayerCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
+                    DoFunction(() => CreatePlayerCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
                 }
+            }
+
+            for (int i = 0; i<CarryVariables.inst.areaCardFiles.Count; i++)
+            {
+                GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
+                DoFunction(() => CreateAreaCard(next.GetComponent<PhotonView>().ViewID, i), RpcTarget.AllBuffered);
             }
         }
         StartCoroutine(Waiting());
     }
 
     [PunRPC]
-    void AddPlayerCard(int ID, int fileNumber)
+    void CreatePlayerCard(int ID, int fileNumber)
     {
         GameObject nextObject = PhotonView.Find(ID).gameObject;
         PlayerCardData data = CarryVariables.inst.playerCardFiles[fileNumber];
@@ -114,6 +122,26 @@ public class Manager : PhotonCompatible
             nextObject.AddComponent(Type.GetType(nameof(PlayerCard)));
 
         PlayerCard card = nextObject.GetComponent<PlayerCard>();
+        card.AssignInfo(fileNumber);
+    }
+
+    [PunRPC]
+    void CreateAreaCard(int ID, int fileNumber)
+    {
+        GameObject nextObject = PhotonView.Find(ID).gameObject;
+        CardData data = CarryVariables.inst.areaCardFiles[fileNumber];
+
+        nextObject.name = data.cardName;
+        nextObject.transform.SetParent(areaDeck);
+        nextObject.transform.localPosition = new(250 * areaDeck.childCount, 10000);
+
+        Type type = Type.GetType(data.cardName.Replace(" ", ""));
+        if (type != null)
+            nextObject.AddComponent(type);
+        else
+            nextObject.AddComponent(Type.GetType(nameof(AreaCard)));
+
+        AreaCard card = nextObject.GetComponent<AreaCard>();
         card.AssignInfo(fileNumber);
     }
 
@@ -166,10 +194,7 @@ public class Manager : PhotonCompatible
         List<int> usedAreas = ChooseAreas(new List<int>() { 0, 1, PlayerPrefs.GetInt("Area 1"), PlayerPrefs.GetInt("Area 2") }, 4);
         usedAreas = usedAreas.Shuffle();
         for (int i = 0; i < usedAreas.Count; i++)
-        {
-            GameObject next = MakeObject(CarryVariables.inst.areaCardPrefab.gameObject);
-            DoFunction(() => AddAreaCard(next.GetComponent<PhotonView>().ViewID, usedAreas[i], i), RpcTarget.AllBuffered);
-        }
+            DoFunction(() => AddAreaCard(CarryVariables.inst.areaCardFiles[usedAreas[i]].cardName, i), RpcTarget.AllBuffered);
 
         storePlayers.Shuffle();
         masterDeck.Shuffle();
@@ -220,42 +245,32 @@ public class Manager : PhotonCompatible
     }
 
     [PunRPC]
-    void AddAreaCard(int ID, int fileNumber, int areaNumber)
+    void AddAreaCard(string cardName, int areaNumber)
     {
-        GameObject nextObject = PhotonView.Find(ID).gameObject;
-        CardData data = CarryVariables.inst.areaCardFiles[fileNumber];
-        Log.inst.AddTextRPC(null, $"Area {areaNumber + 1}: {data.cardName}", LogAdd.Personal, 0);
+        AreaCard nextCard = GameObject.Find(cardName).GetComponent<AreaCard>();
+        Log.inst.AddTextRPC(null, $"Area {areaNumber + 1}: {nextCard.name}", LogAdd.Personal, 0);
 
-        nextObject.name = data.cardName;
-        nextObject.transform.SetParent(canvas.transform);
+        nextCard.transform.SetParent(canvas.transform);
         arrowParent.gameObject.SetActive(true);
 
         switch (areaNumber)
         {
             case 0:
-                nextObject.transform.localPosition = new(-800, 500);
+                nextCard.transform.localPosition = new(-800, 500);
                 break;
             case 1:
-                nextObject.transform.localPosition = new(-400, 600);
+                nextCard.transform.localPosition = new(-400, 600);
                 break;
             case 2:
-                nextObject.transform.localPosition = new(0, 400);
+                nextCard.transform.localPosition = new(0, 400);
                 break;
             case 3:
-                nextObject.transform.localPosition = new(400, 500);
+                nextCard.transform.localPosition = new(400, 500);
                 break;
         }
 
-        Type type = Type.GetType(data.cardName.Replace(" ", ""));
-        if (type != null)
-            nextObject.AddComponent(type);
-        else
-            nextObject.AddComponent(Type.GetType(nameof(AreaCard)));
-
-        AreaCard card = nextObject.GetComponent<AreaCard>();
-        card.AssignInfo(fileNumber);
-        card.AssignAreaNum(areaNumber);
-        listOfAreas.Insert(areaNumber, card);
+        nextCard.AssignAreaNum(areaNumber);
+        listOfAreas.Insert(areaNumber, nextCard);
     }
 
     void FirstDraw()
@@ -320,7 +335,7 @@ public class Manager : PhotonCompatible
 
     void AddStep(Action action, int position = -1)
     {
-        if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
+        if (AmMaster())
         {
             if (position < 0 || currentStep < 0)
                 actionStack.Add(action);
@@ -335,10 +350,9 @@ public class Manager : PhotonCompatible
         instructions.text = KeywordTooltip.instance.EditText(text);
     }
 
-    [PunRPC]
-    public void Continue()
+    void Continue()
     {
-        if (!PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient)
+        if (AmMaster())
             Invoke(nameof(NextAction), 0.25f);
     }
 
@@ -347,6 +361,8 @@ public class Manager : PhotonCompatible
         if (currentStep < actionStack.Count - 1)
         {
             Log.inst.AddTextRPC(null, "", LogAdd.Public);
+            foreach (AreaCard area in listOfAreas)
+                area.AreaTurnEffect();
 
             SendOutCards();
             Log.inst.DoFunction(() => Log.inst.ResetHistory());
@@ -496,6 +512,11 @@ public class Manager : PhotonCompatible
                 return player;
         }
         return null;
+    }
+
+    public bool AmMaster()
+    {
+        return !PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient;
     }
 
     (Player, int) CalculateControl(int area)

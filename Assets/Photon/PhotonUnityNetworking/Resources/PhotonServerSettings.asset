@@ -119,6 +119,9 @@ MonoBehaviour:
   - UpdateControl
   - ControlThisArea
   - RemoveAbility
+  - CreateAreaCard
+  - CreatePlayerCard
+  - ChangeTopCard
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

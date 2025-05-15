@@ -13,8 +13,6 @@ public class Popup : MonoBehaviour
     RectTransform textWidth;
     RectTransform imageWidth;
 
-    [SerializeField] Button textButton;
-    [SerializeField] Button cardButton;
     public List<Button> buttonsInCollector { get; private set; }
     Player decidingPlayer;
 
@@ -36,7 +34,7 @@ public class Popup : MonoBehaviour
 
     internal void AddTextButton(string text)
     {
-        Button nextButton = Instantiate(textButton, this.transform.GetChild(1));
+        Button nextButton = Instantiate(CarryVariables.inst.textButton, this.transform.GetChild(1));
         nextButton.transform.GetChild(0).GetComponent<TMP_Text>().text = (text);
 
         nextButton.interactable = true;
@@ -54,7 +52,7 @@ public class Popup : MonoBehaviour
 
     internal void AddCardButton(Card card, float alpha)
     {
-        Button nextButton = Instantiate(cardButton, this.transform.GetChild(1));
+        Button nextButton = Instantiate(CarryVariables.inst.cardButton, this.transform.GetChild(1));
         CardLayout layout = nextButton.GetComponent<CardLayout>();
         layout.FillInCards(card.GetFile(), alpha);
 
