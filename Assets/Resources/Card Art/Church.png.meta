@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cb1b941c06ede4809904f95609dbaacb
+guid: f2008c3e684a94083bb60a8c223113c9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6802500561530761227
-    second: Explore_0
+      213: -6506036955920984320
+    second: Church_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Explore_0
+      name: Church_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1244
-        height: 1244
+        width: 1137
+        height: 1137
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b00bf623836576e50800000000000000
-      internalID: 6802500561530761227
+      spriteID: 00714caebd9e5b5a0800000000000000
+      internalID: -6506036955920984320
       vertices: []
       indices: 
       edges: []
@@ -172,7 +172,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Explore_0: 6802500561530761227
+      Church_0: -6506036955920984320
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

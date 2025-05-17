@@ -130,7 +130,7 @@
       "Harald Lieske|Dominion: Allies|(Territory)"
     ],
     [
-      "8",
+      "Laboratory",
       "If you have 2 Action or more, +1 Card.",
       "TRUE",
       "ActionOrMore/DrawCard",
@@ -140,7 +140,7 @@
       "",
       "",
       "2",
-      "X"
+      "John Stanko|MTG: Innistrad|(Rooftop Storm)"
     ],
     [
       "3",
@@ -289,7 +289,7 @@
       "MultiAdvance",
       "If you have 4 Troop or more in Area 4, +1 Troop from Area 1.",
       "FALSE",
-      "TroopOrMoreHere/AdvanceTroopOne",
+      "TroopOrMore/AdvanceTroopOne",
       "",
       "",
       "",
@@ -299,7 +299,7 @@
       "X"
     ],
     [
-      "9",
+      "Market",
       "You may lose 4 Coin (it can go negative) for +2 Action.",
       "TRUE",
       "AskLoseCoin/AddAction",
@@ -309,7 +309,7 @@
       "",
       "",
       "",
-      "X"
+      "Marcel-André Casasola Merkle|Dominion: Prosperity|(Grand Market)"
     ],
     [
       "ShareScout",
@@ -325,7 +325,7 @@
       "X"
     ],
     [
-      "Hi",
+      "Mine",
       "You may lose 1 Action (it can go negative), for +1 Coin per 2 Troop you have here (round down).",
       "FALSE",
       "AskLoseAction/SetToTroop/AddCoin",
@@ -335,7 +335,7 @@
       "",
       "",
       "2",
-      "X"
+      "Martin Hoffmann|Dominion: Rising Sun|(Gold Mine)"
     ],
     [
       "10",
@@ -352,7 +352,7 @@
     ],
     [
       "Magic",
-      "Keep the top Area card of the deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
+      "Keep the top card of the Area deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
       "FALSE",
       "",
       "",
