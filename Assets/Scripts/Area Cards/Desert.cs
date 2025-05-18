@@ -1,6 +1,7 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-public class Placeholder : AreaCard
+public class Desert : AreaCard
 {
     protected override void Awake()
     {
@@ -12,14 +13,12 @@ public class Placeholder : AreaCard
     {
         base.AreaInstructions(player, logged);
         if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
-        {
-            int total = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                if (player.CalcTroopScout(i).Item1 >= dataFile.troopAmount)
-                    total++;
-            }
-            player.DrawCardRPC(total * dataFile.cardAmount, logged);
-        }
+            AskLoseScout(player, logged);
+    }
+
+    protected override void PostLoseScout(Player player, bool success, int logged)
+    {
+        if (!success)
+            player.ResourceRPC(Resource.Coin, -1 * dataFile.coinAmount, logged);
     }
 }

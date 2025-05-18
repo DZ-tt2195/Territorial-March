@@ -39,7 +39,7 @@
       "Martin Hoffmann|Dominion: Hinterlands|(Silk Road)"
     ],
     [
-      "Placeholder",
+      "Castle",
       "\"+1 Card per Area you have 4 Troop or more in.\"",
       "FALSE",
       "SetToTroopHere/DrawCard",
@@ -49,7 +49,7 @@
       "4",
       "",
       "",
-      "X"
+      "Julien Delval|Dominion: Empires|(Opulent Castle)"
     ],
     [
       "University",
@@ -182,7 +182,7 @@
       "X"
     ],
     [
-      "Penalty",
+      "Desert",
       "You may remove 1 Scout. If you don't, -1 Action (it can go negative).",
       "FALSE",
       "AskLoseScout/LoseAction",
@@ -192,7 +192,7 @@
       "",
       "1",
       "",
-      "X"
+      "Jim Nelson|MTG: Planechase Planes|(Sea of Sand)"
     ],
     [
       "Swamp",
@@ -274,7 +274,7 @@
     ],
     [
       "8",
-      "If you control this and have 1 Action or more, +2 Coin per Action you have.",
+      "If you control this and have 1 Action or more, +1 Coin per Action you have.",
       "TRUE",
       "ControlThis/SetToAction/AddCoin",
       "",
@@ -282,7 +282,7 @@
       "",
       "",
       "",
-      "2",
+      "1",
       "X"
     ],
     [
