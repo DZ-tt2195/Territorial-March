@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScoutAction : PlayerCard
+public class Delegate : PlayerCard
 {
     protected override void Awake()
     {

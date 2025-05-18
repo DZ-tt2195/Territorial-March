@@ -65,7 +65,7 @@
       "Marcel-André Casasola Merkle|Dominion: Alchemy|(University)"
     ],
     [
-      "1",
+      "Village",
       "\"If you control this, +1 Action per 2 Card in your hand (round down).\"",
       "TRUE",
       "ControlThis/SetToHand/AddAction",
@@ -75,7 +75,7 @@
       "",
       "",
       "-2",
-      "X"
+      "Claus Stephan|Dominion|(Village)"
     ],
     [
       "Barracks",
@@ -208,7 +208,7 @@
       "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
     ],
     [
-      "NoControl",
+      "Upland",
       "You may discard 1 Card for +2 Scout, both in one Area that you don't control.",
       "FALSE",
       "AskDiscardCard/AddScout",
@@ -218,7 +218,7 @@
       "",
       "2",
       "",
-      "X"
+      "Alayna Danner|MTG: Jumpstart|(Thriving Heath)"
     ],
     [
       "Duo",
@@ -286,7 +286,7 @@
       "X"
     ],
     [
-      "MultiAdvance",
+      "Island",
       "If you have 4 Troop or more in Area 4, +1 Troop from Area 1.",
       "FALSE",
       "TroopOrMore/AdvanceTroopOne",
@@ -296,7 +296,7 @@
       "1",
       "",
       "4",
-      "X"
+      "Brian Brinlee|Dominion: Allies|(Island Folk)"
     ],
     [
       "Market",
@@ -313,7 +313,7 @@
     ],
     [
       "ShareScout",
-      "If you control this, -1 Scout here, and +1 Scout in each other Area.",
+      "If you control this, -1 Scout from here, and +1 Scout in each other Area.",
       "FALSE",
       "ControlThis/AddScout/LoseScoutHere",
       "",
@@ -338,8 +338,8 @@
       "Martin Hoffmann|Dominion: Rising Sun|(Gold Mine)"
     ],
     [
-      "10",
-      "If you control this, +2 Troop and -1 Troop.",
+      "Highway",
+      "If you control this, +2 Troop and then -1 Troop.",
       "TRUE",
       "ControlThis/AdvanceTroop/AdvanceTroop/RetreatTroop",
       "",
@@ -348,7 +348,7 @@
       "1",
       "",
       "",
-      "X"
+      "Eric J. Carter|Dominion: Hinterlands|(Highway)"
     ],
     [
       "Magic",

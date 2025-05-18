@@ -112,7 +112,7 @@
       "X"
     ],
     [
-      "ScoutAction",
+      "Delegate",
       "Choose an Area. +1 Action per Scout you have there.",
       "1",
       "FALSE",
@@ -406,7 +406,7 @@
       "X"
     ],
     [
-      "Switcheroo",
+      "Switch",
       "Switch your Troop and Scout in Areas 2 and 3.",
       "6",
       "FALSE",
@@ -476,7 +476,7 @@
       "X"
     ],
     [
-      "Ignore",
+      "Rest",
       "Until the next Camp, ignore all other Areas.",
       "8",
       "FALSE",

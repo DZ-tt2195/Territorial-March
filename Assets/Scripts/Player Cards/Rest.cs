@@ -3,7 +3,7 @@ using System.Linq;
 using Photon.Pun;
 using UnityEngine;
 
-public class Ignore : PlayerCard
+public class Rest : PlayerCard
 {
     protected override void Awake()
     {

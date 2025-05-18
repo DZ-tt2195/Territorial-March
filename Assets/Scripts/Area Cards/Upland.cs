@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class NoControl : AreaCard
+public class Upland : AreaCard
 {
     protected override void Awake()
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MultiAdvance : AreaCard
+public class Island : AreaCard
 {
     protected override void Awake()
     {

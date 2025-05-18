@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Switcheroo : PlayerCard
+public class Switch : PlayerCard
 {
     protected override void Awake()
     {
