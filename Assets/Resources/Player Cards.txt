@@ -42,7 +42,7 @@
       "X"
     ],
     [
-      "C",
+      "Recon",
       "You may remove 1 Scout for +2 Troop from Area 1.",
       "0",
       "TRUE",
@@ -98,7 +98,7 @@
       "Anthony Palumbo|MTG: Ixalan|(Seekers' Squire)"
     ],
     [
-      "D",
+      "Improvise",
       "Discard all your Card, then +3 Card.",
       "1",
       "TRUE",
@@ -350,7 +350,7 @@
       "X"
     ],
     [
-      "P",
+      "Report",
       "\"You may remove 2 Scout for +2 Card.\"",
       "5",
       "TRUE",
@@ -392,7 +392,7 @@
       "X"
     ],
     [
-      "S",
+      "Assignment",
       "\"+2 Scout, -1 Action (it can go negative).\"",
       "5",
       "TRUE",
@@ -448,7 +448,7 @@
       "X"
     ],
     [
-      "U",
+      "Research",
       "\"+1 Card, -1 Action (it can go negative).\"",
       "6",
       "TRUE",
@@ -490,7 +490,7 @@
       "X"
     ],
     [
-      "Debt",
+      "Repay",
       "At the start of the next Camp, -6 Coin (it can go negative).",
       "12",
       "FALSE",

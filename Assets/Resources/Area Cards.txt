@@ -195,7 +195,7 @@
       "John Stanko|MTG: Innistrad|(Rooftop Storm)"
     ],
     [
-      "Magic",
+      "Observatory",
       "Keep the top card of the Area deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
       "FALSE",
       "",
@@ -205,7 +205,7 @@
       "",
       "",
       "",
-      "X"
+      "Tommy Arnold|MTG: Core Set 2019|(Scholar of Stars)"
     ],
     [
       "Market",

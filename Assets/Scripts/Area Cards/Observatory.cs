@@ -3,7 +3,7 @@ using Photon.Pun;
 using UnityEngine.UI;
 using TMPro;
 
-public class Magic : AreaCard
+public class Observatory : AreaCard
 {
     Transform areaDeck;
     AreaCard topArea;

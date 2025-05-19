@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Debt : PlayerCard
+public class Repay : PlayerCard
 {
     protected override void Awake()
     {
