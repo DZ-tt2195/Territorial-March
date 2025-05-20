@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Balance : AreaCard
+public class Ports : AreaCard
 {
     protected override void Awake()
     {

@@ -143,6 +143,19 @@
       "Garret Dechellis|Dominion: Allies|(Garrison)"
     ],
     [
+      "Gate",
+      "If you have a different amount of Troop in Area 2 and 3, -2 Troop.",
+      "FALSE",
+      "RetreatTroop",
+      "",
+      "",
+      "",
+      "2",
+      "",
+      "",
+      "Harald Lieske|Dominion: Renaissance|(City Gate)"
+    ],
+    [
       "Hideout",
       "\"If you don't control this, +1 Scout and -2 Coin (it can go negative).\"",
       "TRUE",
@@ -221,19 +234,6 @@
       "Martin Hoffmann|Dominion: Rising Sun|(Gold Mine)"
     ],
     [
-      "MultiRetreat",
-      "If you have a different amount of Troop in Area 2 and 3, -2 Troop.",
-      "FALSE",
-      "RetreatTroop",
-      "",
-      "",
-      "",
-      "2",
-      "",
-      "",
-      "X"
-    ],
-    [
       "Observatory",
       "Keep the top card of the Area deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
       "FALSE",
@@ -247,6 +247,19 @@
       "Tommy Arnold|MTG: Core Set 2019|(Scholar of Stars)"
     ],
     [
+      "Paddock",
+      "If you have more Action than Card in hand, +1 Troop.",
+      "FALSE",
+      "AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "",
+      "Elisa Cella|Dominion: Menagerie|(Paddock)"
+    ],
+    [
       "Pasture",
       "\"+1 Scout here. Then remove any amount of your Scout here for +2 Coin each.\"",
       "FALSE",
@@ -258,19 +271,6 @@
       "1",
       "",
       "Claus Stephan|Dominion: Nocturne|(Pasture)"
-    ],
-    [
-      "Plenty",
-      "If you have more Action than Card in hand, +1 Troop.",
-      "FALSE",
-      "AdvanceTroop",
-      "",
-      "",
-      "",
-      "1",
-      "",
-      "",
-      "X"
     ],
     [
       "Ports",

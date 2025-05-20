@@ -793,7 +793,7 @@ MonoBehaviour:
   rightClickText: {fileID: 938853688}
   artistText: {fileID: 938853688}
   permanentCanvas: {fileID: 2019941104}
-  playWithBot: 0
+  playWithBot: 1
 --- !u!4 &631609476
 Transform:
   m_ObjectHideFlags: 0

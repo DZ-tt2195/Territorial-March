@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class MultiRetreat : AreaCard
+public class Paddock : AreaCard
 {
     protected override void Awake()
     {
@@ -13,8 +14,8 @@ public class MultiRetreat : AreaCard
         base.AreaInstructions(player, logged);
         if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
         {
-            if (player.CalcTroopScout(1).Item1 != player.CalcTroopScout(2).Item1)
-                RetreatTroop(player, logged);
+            if (player.resourceDict[Resource.Action] > player.cardsInHand.Count)
+                AdvanceTroop(player, logged);
         }
     }
 }

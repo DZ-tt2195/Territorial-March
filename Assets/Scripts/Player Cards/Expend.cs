@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayLot : PlayerCard
+public class Expend : PlayerCard
 {
     protected override void Awake()
     {

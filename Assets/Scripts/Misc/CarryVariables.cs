@@ -124,7 +124,7 @@ public class CarryVariables : MonoBehaviour
         else
         {
             artistText.transform.parent.gameObject.SetActive(true);
-            artistText.text = data.artCredit.Replace("|", "\n");
+            artistText.text = data.artCredit.Replace("|", "\n").Trim();
         }
     }
 

@@ -2922,7 +2922,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 1175, y: -50}
-  m_SizeDelta: {x: 1140, y: 1400}
+  m_SizeDelta: {x: 1140, y: 2200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1160430871
 MonoBehaviour:
@@ -3796,7 +3796,7 @@ GameObject:
   - component: {fileID: 1318813324}
   - component: {fileID: 1318813323}
   m_Layer: 5
-  m_Name: Scrollbar (1)
+  m_Name: Scrollbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3865,8 +3865,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 637698888}
   m_HandleRect: {fileID: 637698887}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 0.5
+  m_Size: 0.6545454
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

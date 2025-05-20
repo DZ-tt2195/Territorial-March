@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Plenty : AreaCard
+public class Gate : AreaCard
 {
     protected override void Awake()
     {
@@ -14,8 +13,8 @@ public class Plenty : AreaCard
         base.AreaInstructions(player, logged);
         if (!player.BoolFromAbilities(true, nameof(IgnoreArea), IgnoreArea.CheckParameters(), logged))
         {
-            if (player.resourceDict[Resource.Action] > player.cardsInHand.Count)
-                AdvanceTroop(player, logged);
+            if (player.CalcTroopScout(1).Item1 != player.CalcTroopScout(2).Item1)
+                RetreatTroop(player, logged);
         }
     }
 }

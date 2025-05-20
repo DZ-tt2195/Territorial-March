@@ -14,21 +14,7 @@
       "artCredit"
     ],
     [
-      "A",
-      "\"+3 Card. -3 Coin (it can go negative).\"",
-      "0",
-      "TRUE",
-      "DrawCard/LoseCoin",
-      "3",
-      "3",
-      "",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "B",
+      "Commision",
       "\"+3 Action. -3 Coin (it can go negative).\"",
       "0",
       "TRUE",
@@ -66,6 +52,20 @@
       "",
       "1",
       "1",
+      "",
+      "X"
+    ],
+    [
+      "Research",
+      "\"+3 Card. -3 Coin (it can go negative).\"",
+      "0",
+      "TRUE",
+      "DrawCard/LoseCoin",
+      "3",
+      "3",
+      "",
+      "",
+      "",
       "",
       "X"
     ],
@@ -182,34 +182,6 @@
       "X"
     ],
     [
-      "G",
-      "You may discard 1 Card for +2 Action.",
-      "3",
-      "TRUE",
-      "AskDiscardCard/AddAction",
-      "1",
-      "",
-      "2",
-      "",
-      "",
-      "",
-      "X"
-    ],
-    [
-      "L",
-      "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
-      "3",
-      "TRUE",
-      "CoinOrMore/AdvanceTroop",
-      "",
-      "",
-      "",
-      "1",
-      "",
-      "10",
-      "X"
-    ],
-    [
       "Plan",
       "\"+1 Card per Area you control.\"",
       "3",
@@ -235,6 +207,20 @@
       "",
       "",
       "1",
+      "X"
+    ],
+    [
+      "Scramble",
+      "You may discard 1 Card for +2 Action.",
+      "3",
+      "TRUE",
+      "AskDiscardCard/AddAction",
+      "1",
+      "",
+      "2",
+      "",
+      "",
+      "",
       "X"
     ],
     [
@@ -266,6 +252,34 @@
       "X"
     ],
     [
+      "Transport",
+      "If you have 10 Coin or more (after getting 3 Coin from this), +1 Troop.",
+      "3",
+      "TRUE",
+      "CoinOrMore/AdvanceTroop",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "10",
+      "X"
+    ],
+    [
+      "Expend",
+      "\"+1 Coin per Action you lost this turn (including Action spent to play cards).\"",
+      "4",
+      "FALSE",
+      "AddCoin",
+      "",
+      "1",
+      "",
+      "",
+      "",
+      "",
+      "X"
+    ],
+    [
       "Launch",
       "If you have 5 Card or more in hand, +1 Action.",
       "4",
@@ -291,20 +305,6 @@
       "",
       "",
       "2",
-      "X"
-    ],
-    [
-      "PlayLot",
-      "\"+1 Coin per Action you lost this turn (including Action spent to play cards).\"",
-      "4",
-      "FALSE",
-      "AddCoin",
-      "",
-      "1",
-      "",
-      "",
-      "",
-      "",
       "X"
     ],
     [
@@ -350,21 +350,7 @@
       "X"
     ],
     [
-      "Assignment",
-      "\"+2 Scout, -1 Action (it can go negative).\"",
-      "5",
-      "TRUE",
-      "AddScout/LoseAction",
-      "",
-      "",
-      "1",
-      "",
-      "2",
-      "",
-      "X"
-    ],
-    [
-      "March",
+      "Coordinate",
       "You may discard 2 Card, for +1 Troop from Area 2 and +1 Troop from Area 3.",
       "5",
       "TRUE",
@@ -374,6 +360,20 @@
       "",
       "1",
       "",
+      "",
+      "X"
+    ],
+    [
+      "Deploy",
+      "\"+2 Scout, -1 Action (it can go negative).\"",
+      "5",
+      "TRUE",
+      "AddScout/LoseAction",
+      "",
+      "",
+      "1",
+      "",
+      "2",
       "",
       "X"
     ],
@@ -420,7 +420,7 @@
       "X"
     ],
     [
-      "Research",
+      "Strategize",
       "\"+1 Card, -1 Action (it can go negative).\"",
       "6",
       "TRUE",
@@ -476,7 +476,7 @@
       "X"
     ],
     [
-      "W",
+      "Toil",
       "If you control 0 or 1 Areas, -1 Action (it can go negative).",
       "8",
       "TRUE",
