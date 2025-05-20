@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cantrip : PlayerCard
+public class Continue : PlayerCard
 {
     protected override void Awake()
     {

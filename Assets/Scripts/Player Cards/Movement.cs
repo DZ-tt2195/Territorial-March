@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AdvanceLots : PlayerCard
+public class Movement : PlayerCard
 {
     protected override void Awake()
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShareScout : AreaCard
+public class Garrison : AreaCard
 {
     protected override void Awake()
     {

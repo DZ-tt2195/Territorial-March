@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class CheckScout : PlayerCard
+public class Investigate : PlayerCard
 {
     protected override void Awake()
     {

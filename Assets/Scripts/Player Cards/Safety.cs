@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SpreadScout : PlayerCard
+public class Safety : PlayerCard
 {
     protected override void Awake()
     {

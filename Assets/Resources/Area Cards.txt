@@ -117,19 +117,6 @@
       "Jim Nelson|MTG: Planechase Planes|(Sea of Sand)"
     ],
     [
-      "Duo",
-      "You may lose 2 Action (it can go negative), for +1 Troop from Area 2 and +1 Troop from Area 3.",
-      "TRUE",
-      "AskLoseAction/AdvanceTroopTwo/AdvanceTroopThree",
-      "",
-      "",
-      "2",
-      "1",
-      "",
-      "",
-      "X"
-    ],
-    [
       "Farmland",
       "If you control this and have 1 Action or more, +1 Coin per Action you have.",
       "TRUE",
@@ -141,6 +128,19 @@
       "",
       "1",
       "Alayna Danner|Dominion: Cornucopia|(Harvest)"
+    ],
+    [
+      "Garrison",
+      "If you control this, -1 Scout from here, and +1 Scout in each other Area.",
+      "FALSE",
+      "ControlThis/AddScout/LoseScoutHere",
+      "",
+      "",
+      "",
+      "",
+      "1",
+      "",
+      "Garret Dechellis|Dominion: Allies|(Garrison)"
     ],
     [
       "Hideout",
@@ -195,19 +195,6 @@
       "John Stanko|MTG: Innistrad|(Rooftop Storm)"
     ],
     [
-      "Observatory",
-      "Keep the top card of the Area deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
-      "FALSE",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "Tommy Arnold|MTG: Core Set 2019|(Scholar of Stars)"
-    ],
-    [
       "Market",
       "You may lose 4 Coin (it can go negative) for +2 Action.",
       "TRUE",
@@ -245,6 +232,19 @@
       "",
       "",
       "X"
+    ],
+    [
+      "Observatory",
+      "Keep the top card of the Area deck revealed. This has the instructions of that card; put it on the bottom after resolving it.",
+      "FALSE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Tommy Arnold|MTG: Core Set 2019|(Scholar of Stars)"
     ],
     [
       "Pasture",
@@ -286,19 +286,6 @@
       "Mark Poole|Dominion: Adventures|(Port)"
     ],
     [
-      "ShareScout",
-      "If you control this, -1 Scout from here, and +1 Scout in each other Area.",
-      "FALSE",
-      "ControlThis/AddScout/LoseScoutHere",
-      "",
-      "",
-      "",
-      "",
-      "1",
-      "",
-      "X"
-    ],
-    [
       "Swamp",
       "\"-1 Coin per 2 Troop you have in Area 4 (round down; Coin can go negative).\"",
       "FALSE",
@@ -310,6 +297,19 @@
       "",
       "-2",
       "Julien Delval|Dominion: Nocturne|(The Swamp's Gift)"
+    ],
+    [
+      "Tunnel",
+      "You may lose 2 Action (it can go negative), for +1 Troop from Area 2 and +1 Troop from Area 3.",
+      "TRUE",
+      "AskLoseAction/AdvanceTroopTwo/AdvanceTroopThree",
+      "",
+      "",
+      "2",
+      "1",
+      "",
+      "",
+      "Brian Brinlee|Dominion: Hinterlands|(Tunnel)"
     ],
     [
       "University",

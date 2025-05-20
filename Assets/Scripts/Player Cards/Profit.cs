@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Fortune : PlayerCard
+public class Profit : PlayerCard
 {
     protected override void Awake()
     {
