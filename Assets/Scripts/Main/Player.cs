@@ -242,7 +242,6 @@ public class Player : PhotonCompatible
         for (int i = 0; i < cardsInHand.Count; i++)
         {
             Card nextCard = cardsInHand[i];
-
             nextCard.transform.SetParent(keepHand);
             nextCard.transform.SetSiblingIndex(i);
 
